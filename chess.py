@@ -27,10 +27,15 @@ _logger = logging.getLogger('gnuchess-activity')
 
 from sprites import Sprites, Sprite
 
-OPP_MOVE = 'My move is : '
+ROBOT_MOVE = 'My move is : '
 TOP = 3
 MID = 2
 BOT = 1
+ROBOT = 'robot'
+RESTORE = 'restore'
+REMOVE = 'remove'
+UNDO = 'undo'
+HINT = 'hint'
 WP = 0
 BP = 1
 WR = 2
@@ -72,7 +77,7 @@ class Gnuchess():
 
         self._width = gtk.gdk.screen_width()
         self._height = gtk.gdk.screen_height()
-        self._scale = int(self._height / 10)
+        self._scale = int((self._height - 55) / 10)
         self.we_are_sharing = False
         self._saved_game = "foo"
 
@@ -93,44 +98,62 @@ class Gnuchess():
 
         # Generate the sprites we'll need...
         self._sprites = Sprites(self._canvas)
-        self._generate_sprites()
+        self._generate_sprites(colors)
 
         self._all_clear()
 
-    def move(self, my_move=None):
-        ''' Send a move to the saved gnuchess instance '''
-
+    def move(self, my_move):
+        ''' Send a move to the saved gnuchess instance
+        (1) set the color
+        (2) force manual
+        (3) reload any moves from the move list
+        (4) and, if my_move is not None, add the new move
+            or, if my_move == 'robot'
+                then ask the computer to move by sending a go command
+            or, refresh after a restore or a remove
+        (5) show board to refresh the current state
+        (6) prompt the robot to move
+        '''
         _logger.debug(my_move)
-        level = '--%s' % (self._activity.mode)
+
+        p = subprocess.Popen(['%s/bin/gnuchess' % (self._bundle_path)],
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+
+        if self._activity.playing_mode == 'easy':
+            level = 'easy\nbook off\ndepth 1\n'
+        else:
+            level = 'hard\nbook on\n'
         if self._activity.playing_white:
             color = 'white'
         else:
             color = 'black'
 
-        p = subprocess.Popen(['%s/bin/gnuchess' % (self._bundle_path), level],
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT)
-
-        if my_move == 'remove':
-            self.move_list = self.move_list[:-2]
+        if my_move in [REMOVE, UNDO, RESTORE, HINT]:
+            if my_move == REMOVE:
+                self.move_list = self.move_list[:-2]
+            elif my_move == UNDO:
+                self.move_list = self.move_list[:-1]
             cmd = '%s\nforce manual\n' % (color)
             for move in self.move_list:
                 cmd += '%s\n' % (move)
-            cmd += 'show board\nquit\n'
+            if my_move == HINT:
+                cmd += 'show moves\nquit\n'
+            else:
+                cmd += 'show board\nquit\n'
             _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=None)
-        elif my_move == 'restore':
+        elif my_move == ROBOT:  # Ask the computer to play
             cmd = '%s\nforce manual\n' % (color)
             for move in self.move_list:
                 cmd += '%s\n' % (move)
-            cmd += 'show board\nquit\n'
+            cmd += '%sgo\nshow board\nquit\n' % (level)
             _logger.debug(cmd)
             output = p.communicate(input=cmd)
-            self._process_output(output[0], my_move=None)
-        elif my_move is not None:
-            # TODO: if playing black and no moves yet, let white move
+            self._process_output(output[0], my_move='robot')
+        elif my_move is not None:  # My move
             cmd = '%s\nforce manual\n' % (color)
             for move in self.move_list:
                 cmd += '%s\n' % (move)
@@ -139,63 +162,92 @@ class Gnuchess():
             _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=my_move)
-        else:  # Must be a new game where the robot is playing White
-            cmd = '%s\nforce manual\n' % (color)
-            cmd += 'go\nshow board\nquit\n'
-            _logger.debug(cmd)
-            output = p.communicate(input=cmd)
-            self._process_output(output[0], my_move=my_move)
+        else:
+            _logger.debug('my move == None')
 
     def _process_output(self, output, my_move=None):
         ''' process output '''
         _logger.debug(output)
-        if 'Illegal move' in output:
+        checkmate = False
+        if 'moves generated' in output:
+            # processing hint
+            if self._activity.playing_white:
+                looking_for = 'White ('
+            else:
+                looking_for = 'Black ('
+            last = ''
+            while find(output, looking_for) > 0:
+                last = output
+                output = output[find(output, looking_for):]
+            _logger.debug(last)
+            return
+        elif 'wins' in output:
+            self._activity.status.set_label(_('Checkmate'))
+            checkmate = True
+        elif 'Illegal move' in output:
             self._activity.status.set_label(_('Illegal move'))
             if self._last_piece_played[0] is not None:
                 self._last_piece_played[0].move(self._last_piece_played[1])
                 self._last_piece_played[0] = None
-        else:
-            if find(output, 'My move is : ') < 0:
-                # Black unable to move
+        elif my_move == ROBOT:
+            if find(output, ROBOT_MOVE) < 0:
                 if self._activity.playing_white:
                     _logger.debug('Black cannot move')
+                    self._activity.status.set_label('Black cannot move')
                 else:
                     _logger.debug('White cannot move')
-                self._activity.status.set_label(_('Checkmate'))
-            output = output[find(output, OPP_MOVE):]
-            opponent_move = output[len(OPP_MOVE):find(output, '\n')]
-            _logger.debug(opponent_move)
+                    self._activity.status.set_label('White cannot move')
+            output = output[find(output, ROBOT_MOVE):]
+            robot_move = output[len(ROBOT_MOVE):find(output, '\n')]
+            _logger.debug(robot_move)
+            self.move_list.append(robot_move)
             if self._activity.playing_white:
-                self._activity.black_entry.set_text(opponent_move)
+                self._activity.black_entry.set_text(robot_move)
+                self._activity.white_entry.set_text('')
             else:
-                self._activity.white_entry.set_text(opponent_move)
-            if my_move is not None:
-                self.move_list.append(my_move)
+                self._activity.white_entry.set_text(robot_move)
+                self._activity.black_entry.set_text('')
+        elif my_move is not None:
+            self.move_list.append(my_move)
+            if self._activity.playing_white:
+                self._activity.white_entry.set_text(my_move)
+                self._activity.black_entry.set_text('')
             else:
-                if self._activity.playing_white:
-                    self._activity.black_entry.set_text('')
-                else:
-                    self._activity.white_entry.set_text('')
-            self.move_list.append(opponent_move)
+                self._activity.black_entry.set_text(my_move)
+                self._activity.white_entry.set_text('')
 
-        if self._activity.playing_white or my_move is None:
+        if self._activity.playing_white and len(self.move_list) % 2 == 0:
             looking_for = 'white  '
-        else:
+        elif self._activity.playing_white and len(self.move_list) % 2 == 1:
             looking_for = 'black  '
+        elif not self._activity.playing_white and len(self.move_list) % 2 == 0:
+            looking_for = 'black  '
+        else:
+            looking_for = 'white  '
+        _logger.debug('looking for %s' % (looking_for))
         while find(output, looking_for) > 0:
             output = output[find(output, looking_for):]
             output = output[find(output, '\n'):]
         if len(output) < 136:
+            self._activity.status.set_label(_('bad board output'))
             _logger.debug('bad board output')
             _logger.debug(output)
-            return
-        if self._activity.playing_white:
+        else:
+            self._load_board(output)
+
+        if len(self.move_list) % 2 == 0:
             self._activity.status.set_label(_("It is White's move."))
-            self._activity.white_entry.set_text('')
         else:
             self._activity.status.set_label(_("It is Black's move."))
-            self._activity.black_entry.set_text('')
-        self._load_board(output)
+
+        if my_move == ROBOT or checkmate:
+            return
+        elif self._activity.playing_white and len(self.move_list) % 2 == 1:
+            _logger.debug('asking computer to play black')
+            gobject.timeout_add(100, self.move, ROBOT)
+        elif not self._activity.playing_white and len(self.move_list) % 2 == 0:
+            _logger.debug('asking computer to play white')
+            gobject.timeout_add(100, self.move, ROBOT)
 
     def _load_board(self, board):
         ''' Load the board based on gnuchess board output '''
@@ -362,14 +414,18 @@ class Gnuchess():
         self.move_list = []
         self._all_clear()
         if not self._activity.playing_white:
-            self.move()
+            self.move(RESTORE)
 
     def restore_game(self, move_list):
         self.move_list = []
         for move in move_list:
             self.move_list.append(str(move))
         _logger.debug(self.move_list)
-        self.move(my_move='restore')
+        if self._activity.playing_white:
+            _logger.debug('really... restoring game to white')
+        else:
+            _logger.debug('really... restoring game to black')
+        self.move(RESTORE)
         return
 
     def save_game(self):
@@ -429,7 +485,8 @@ class Gnuchess():
         self._release.set_layer(MID)
         self._press = None
         self._release = None
-        move = '%s%s' % (spr.type, self._xy_to_grid((x, y)))
+        # move = '%s%s' % (spr.type, self._xy_to_grid((x, y)))
+        move = '%s%s' % (self._xy_to_grid(self._last_piece_played[1]), self._xy_to_grid((x, y)))
         if self._activity.playing_white:
             self._activity.white_entry.set_text(move)
         else:
@@ -442,8 +499,13 @@ class Gnuchess():
         self.move(my_move=move)
 
     def undo(self):
+        # TODO: Lock out while robot is playing
         if len(self.move_list) > 1:
-            self.move(my_move='remove')
+            self.move(REMOVE)
+
+    def hint(self):
+        # TODO: Lock out while robot is playing
+        self.move(HINT)
 
     def remote_button_press(self, dot, color):
         ''' Receive a button press from a sharer '''
@@ -483,7 +545,7 @@ class Gnuchess():
     def _destroy_cb(self, win, event):
         gtk.main_quit()
 
-    def _generate_sprites(self):
+    def _generate_sprites(self, colors):
         bg = Sprite(self._sprites, 0, 0, self._box(self._width, self._height,
                                               color=colors[1]))
         bg.set_layer(-1)
