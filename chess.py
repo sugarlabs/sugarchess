@@ -36,6 +36,9 @@ RESTORE = 'restore'
 REMOVE = 'remove'
 UNDO = 'undo'
 HINT = 'hint'
+GAME = 'game'
+NEW = 'new'
+# Skin indicies
 WP = 0
 BP = 1
 WR = 2
@@ -82,6 +85,7 @@ class Gnuchess():
         self._saved_game = "foo"
 
         self.move_list = []
+        self.game = ''
 
         self._press = None
         self._release = None
@@ -94,7 +98,7 @@ class Gnuchess():
         self.black = []
         self._squares = []
 
-        self.skins = []  # WPBPWRBRWNBNWBBBWQBQWKBK
+        self.skins = []
 
         # Generate the sprites we'll need...
         self._sprites = Sprites(self._canvas)
@@ -125,28 +129,26 @@ class Gnuchess():
             level = 'easy\nbook off\ndepth 1\n'
         else:
             level = 'hard\nbook on\n'
-        if self._activity.playing_white:
-            color = 'white'
-        else:
-            color = 'black'
 
-        if my_move in [REMOVE, UNDO, RESTORE, HINT]:
+        if my_move in [REMOVE, UNDO, RESTORE, HINT, GAME, NEW]:
             if my_move == REMOVE:
                 self.move_list = self.move_list[:-2]
             elif my_move == UNDO:
                 self.move_list = self.move_list[:-1]
-            cmd = '%s\nforce manual\n' % (color)
+            cmd = 'force manual\n'
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             if my_move == HINT:
                 cmd += 'show moves\nquit\n'
+            elif my_move == GAME:
+                cmd += 'show game\nquit\n'
             else:
                 cmd += 'show board\nquit\n'
             _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=None)
         elif my_move == ROBOT:  # Ask the computer to play
-            cmd = '%s\nforce manual\n' % (color)
+            cmd = 'force manual\n'
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             cmd += '%sgo\nshow board\nquit\n' % (level)
@@ -154,11 +156,11 @@ class Gnuchess():
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move='robot')
         elif my_move is not None:  # My move
-            cmd = '%s\nforce manual\n' % (color)
+            cmd = 'force manual\n'
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             cmd += '%s\n' % (my_move)
-            cmd += 'go\nshow board\nquit\n'
+            cmd += 'show board\nquit\n'
             _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=my_move)
@@ -167,19 +169,29 @@ class Gnuchess():
 
     def _process_output(self, output, my_move=None):
         ''' process output '''
-        _logger.debug(output)
         checkmate = False
-        if 'moves generated' in output:
-            # processing hint
+        _logger.debug(output)
+        if 'White   Black' in output:  # processing show game
+            target = 'White   Black'
+            output = output[find(output, target):]
+            self.game = output[:find(output, '\n\n')]
+            return
+        elif 'moves generated' in output:  # processing hint
             if self._activity.playing_white:
-                looking_for = 'White ('
+                target = 'White (%d) : ' % (1 + int(len(self.move_list) / 2))
             else:
-                looking_for = 'Black ('
-            last = ''
-            while find(output, looking_for) > 0:
-                last = output
-                output = output[find(output, looking_for):]
-            _logger.debug(last)
+                target = 'Black (%d) : ' % (1 + int(len(self.move_list) / 2))
+            output = output[find(output, target):]
+            output = output[find(output, ':') + 1: find(output, 'No. of')]
+            hint_list = output.split()
+            hint = ''
+            maxv = -10000
+            for i in range(len(hint_list)):
+                if i % 2 == 1 and int(hint_list[i]) > maxv:
+                    hint = hint_list[i - 1]
+                    maxv = int(hint_list[i])
+            _logger.debug(hint)
+            self._activity.status.set_label(hint)
             return
         elif 'wins' in output:
             self._activity.status.set_label(_('Checkmate'))
@@ -190,6 +202,7 @@ class Gnuchess():
                 self._last_piece_played[0].move(self._last_piece_played[1])
                 self._last_piece_played[0] = None
         elif my_move == ROBOT:
+            '''
             if find(output, ROBOT_MOVE) < 0:
                 if self._activity.playing_white:
                     _logger.debug('Black cannot move')
@@ -197,6 +210,7 @@ class Gnuchess():
                 else:
                     _logger.debug('White cannot move')
                     self._activity.status.set_label('White cannot move')
+            '''
             output = output[find(output, ROBOT_MOVE):]
             robot_move = output[len(ROBOT_MOVE):find(output, '\n')]
             _logger.debug(robot_move)
@@ -216,17 +230,13 @@ class Gnuchess():
                 self._activity.black_entry.set_text(my_move)
                 self._activity.white_entry.set_text('')
 
-        if self._activity.playing_white and len(self.move_list) % 2 == 0:
-            looking_for = 'white  '
-        elif self._activity.playing_white and len(self.move_list) % 2 == 1:
-            looking_for = 'black  '
-        elif not self._activity.playing_white and len(self.move_list) % 2 == 0:
-            looking_for = 'black  '
+        if len(self.move_list) % 2 == 0:
+            target = 'white  '
         else:
-            looking_for = 'white  '
-        _logger.debug('looking for %s' % (looking_for))
-        while find(output, looking_for) > 0:
-            output = output[find(output, looking_for):]
+            target = 'black  '
+        _logger.debug('looking for %s' % (target))
+        while find(output, target) > 0:
+            output = output[find(output, target):]
             output = output[find(output, '\n'):]
         if len(output) < 136:
             self._activity.status.set_label(_('bad board output'))
@@ -240,14 +250,22 @@ class Gnuchess():
         else:
             self._activity.status.set_label(_("It is Black's move."))
 
-        if my_move == ROBOT or checkmate:
+        if checkmate:
+            _logger.debug('checkmate')
+            return
+        elif my_move == ROBOT:
+            _logger.debug('robot took a turn')
+            return
+        elif self._activity.playing_white and len(self.move_list) == 0:
+            _logger.debug('new game (white)')
+            return
+        elif not self._activity.playing_white and len(self.move_list) == 1:
+            _logger.debug('new game (black) robot played')
             return
         elif self._activity.playing_white and len(self.move_list) % 2 == 1:
             _logger.debug('asking computer to play black')
-            gobject.timeout_add(100, self.move, ROBOT)
         elif not self._activity.playing_white and len(self.move_list) % 2 == 0:
             _logger.debug('asking computer to play white')
-            gobject.timeout_add(100, self.move, ROBOT)
 
     def _load_board(self, board):
         ''' Load the board based on gnuchess board output '''
@@ -339,85 +357,21 @@ class Gnuchess():
 
     def _all_clear(self):
         ''' Things to reinitialize when starting up a new game. '''
-        self.reskin()
-        self._reposition()
-
-    def reskin(self):
-        for i in range(8):
-            if self._activity.playing_white:
-                self.black[i + 8].set_image(self.skins[BP])
-                self.white[i + 8].set_image(self.skins[WP])
-            else:
-                self.black[i + 8].set_image(self.skins[WP])
-                self.white[i + 8].set_image(self.skins[BP])
-            # In case some pawns were changed to queens in previous game
-            self.black[i + 8].type = 'p'
-            self.white[i + 8].type = 'P'
-        if self._activity.playing_white:
-            self.black[0].set_image(self.skins[BR])
-            self.black[1].set_image(self.skins[BN])
-            self.black[2].set_image(self.skins[BB])
-            self.black[3].set_image(self.skins[BQ])
-            self.black[4].set_image(self.skins[BK])
-            self.black[5].set_image(self.skins[BB])
-            self.black[6].set_image(self.skins[BN])
-            self.black[7].set_image(self.skins[BR])
-            self.white[0].set_image(self.skins[WR])
-            self.white[1].set_image(self.skins[WN])
-            self.white[2].set_image(self.skins[WB])
-            self.white[3].set_image(self.skins[WQ])
-            self.white[4].set_image(self.skins[WK])
-            self.white[5].set_image(self.skins[WB])
-            self.white[6].set_image(self.skins[WN])
-            self.white[7].set_image(self.skins[WR])
-        else:
-            self.black[0].set_image(self.skins[WR])
-            self.black[1].set_image(self.skins[WN])
-            self.black[2].set_image(self.skins[WB])
-            self.black[3].set_image(self.skins[WQ])
-            self.black[4].set_image(self.skins[WK])
-            self.black[5].set_image(self.skins[WB])
-            self.black[6].set_image(self.skins[WN])
-            self.black[7].set_image(self.skins[WR])
-            self.white[0].set_image(self.skins[BR])
-            self.white[1].set_image(self.skins[BN])
-            self.white[2].set_image(self.skins[BB])
-            self.white[3].set_image(self.skins[BQ])
-            self.white[4].set_image(self.skins[BK])
-            self.white[5].set_image(self.skins[BB])
-            self.white[6].set_image(self.skins[BN])
-            self.white[7].set_image(self.skins[BR])
-        for i in range(16):
-            if self._activity.playing_white:
-                self.black[i].set_layer(MID)
-                self.white[i].set_layer(MID)
-            else:
-                self.white[i].set_layer(MID)
-                self.black[i].set_layer(MID)
-
-    def _reposition(self):
-        w, h = self.white[0].get_dimensions()
-        xo = self._width - 8 * self._scale
-        xo = int(xo / 2)
-        yo = int(self._scale / 2)
-        for i in range(8):
-            self.black[i].move((xo + i * self._scale, yo))
-            self.black[i + 8].move((xo + i * self._scale, yo + self._scale))
-            self.white[i].move((xo + i * self._scale, yo + 7 * self._scale))
-            self.white[i + 8].move((xo + i * self._scale,
-                                   yo + 6 * self._scale))
+        self.move_list = []
+        self.game = ''
+        self.move(NEW)
 
     def _initiating(self):
         return self._activity.initiating
 
     def new_game(self):
-        self.move_list = []
         self._all_clear()
         if not self._activity.playing_white:
-            self.move(RESTORE)
+            self.move(ROBOT)
 
     def restore_game(self, move_list):
         self.move_list = []
+        
         for move in move_list:
             self.move_list.append(str(move))
         _logger.debug(self.move_list)
@@ -427,6 +381,11 @@ class Gnuchess():
             _logger.debug('really... restoring game to black')
         self.move(RESTORE)
         return
+
+    def copy_game(self):
+        self.move(GAME)
+        _logger.debug(self.game)
+        return self.game
 
     def save_game(self):
         return self.move_list
@@ -442,8 +401,9 @@ class Gnuchess():
         if spr == None or spr.type == None:
             return
         
-        # Computer plays lowercase letters
-        if spr.type[0] in 'prnbqk':
+        if self._activity.playing_white and spr.type[0] in 'prnbqk':
+            return
+        elif not self._activity.playing_white and spr.type[0] in 'PRNBQK':
             return
 
         self._release = None
@@ -485,18 +445,17 @@ class Gnuchess():
         self._release.set_layer(MID)
         self._press = None
         self._release = None
-        # move = '%s%s' % (spr.type, self._xy_to_grid((x, y)))
-        move = '%s%s' % (self._xy_to_grid(self._last_piece_played[1]), self._xy_to_grid((x, y)))
+        move = '%s%s' % (self._xy_to_grid(self._last_piece_played[1]),
+                         self._xy_to_grid((x, y)))
         if self._activity.playing_white:
             self._activity.white_entry.set_text(move)
         else:
             self._activity.black_entry.set_text(move)
+        self.move(move)
+        
         self._activity.status.set_label('Thinking')
-        gobject.timeout_add(200, self.mover, move)
+        gobject.timeout_add(500, self.move, ROBOT)
         return True
-
-    def mover(self, move):
-        self.move(my_move=move)
 
     def undo(self):
         # TODO: Lock out while robot is playing

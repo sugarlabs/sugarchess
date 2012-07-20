@@ -242,20 +242,34 @@ class GNUChessActivity(activity.Activity):
         self.fullscreen()
 
     def _copy_cb(self, *args):
-        ''' Copying as JSON data (FIXME) '''
         clipboard = gtk.Clipboard()
-        _logger.debug('Serialize the game and copy to clipboard.')
-        text = json_dump(self._gnuchess.save_game())
-        if text is not None:
-            clipboard.set_text(text)
+        clipboard.set_text(self._gnuchess.copy_game())
 
     def _paste_cb(self, *args):
-        ''' Pasting from JSON data (FIXME) '''
+        ''' Pasting '''
         clipboard = gtk.Clipboard()
-        _logger.debug('Restore from paste')
         text = clipboard.wait_for_text()
-        if text is not None:
-            self._gnuchess.restore_game(json_load(text))
+        # Assuming of form ... 1. e4 e6 2. ...
+        # Assuming no comments
+        move_list = []
+        found_one = False
+        for move in text.split():
+            if move == '1.':
+                found_one = True
+                number = True
+                white = False
+            elif found_one:
+                if not number:
+                    number = True
+                elif not white:
+                    move_list.append(move)
+                    white = True
+                else:
+                    move_list.append(move)
+                    number = False
+                    white = False
+        if move_list is not None:
+            self._gnuchess.restore_game(move_list)
 
     def _undo_cb(self, *args):
         self._gnuchess.undo()
@@ -329,7 +343,6 @@ class GNUChessActivity(activity.Activity):
             if self.metadata['playing_white'] == 'False':
                 self.playing_white = False
                 self.play_black_button.set_active(True)
-                self._gnuchess.reskin()
         if 'playing_mode' in self.metadata:
             _logger.debug(self.metadata['playing_mode'])
             self.playing_mode = self.metadata['playing_mode']
