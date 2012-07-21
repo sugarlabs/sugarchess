@@ -53,6 +53,7 @@ class GNUChessActivity(activity.Activity):
         except dbus.exceptions.DBusException, e:
             _logger.error(str(e))
 
+        self.game_data = None
         self.playing_white = True
         self.playing_mode = 'easy'
         self.playing_robot = True
@@ -82,7 +83,7 @@ class GNUChessActivity(activity.Activity):
                                   colors=self.colors)
         self._setup_presence_service()
 
-        if 'saved_game' in self.metadata:
+        if self.game_data is not None:  # 'saved_game' in self.metadata:
             self._restoring = True
             self._restore()
         else:
@@ -248,7 +249,12 @@ class GNUChessActivity(activity.Activity):
     def _paste_cb(self, *args):
         ''' Pasting '''
         clipboard = gtk.Clipboard()
-        text = clipboard.wait_for_text()
+        move_list = self._parse_move_list(clipboard.wait_for_text())
+        if move_list is not None:
+            self._gnuchess.restore_game(move_list)
+ 
+    def _parse_move_list(self, text):
+        ''' Take a standard game description and return a move list '''
         # Assuming of form ... 1. e4 e6 2. ...
         # Assuming no comments
         move_list = []
@@ -268,8 +274,7 @@ class GNUChessActivity(activity.Activity):
                     move_list.append(move)
                     number = False
                     white = False
-        if move_list is not None:
-            self._gnuchess.restore_game(move_list)
+        return move_list
 
     def _undo_cb(self, *args):
         self._gnuchess.undo()
@@ -326,7 +331,10 @@ class GNUChessActivity(activity.Activity):
 
     def write_file(self, file_path):
         ''' Write the grid status to the Journal '''
-        self.metadata['saved_game'] = json_dump(self._gnuchess.save_game())
+        fd = open(file_path, 'w')
+        fd.write(self._gnuchess.copy_game())
+        fd.close()
+        # self.metadata['saved_game'] = json_dump(self._gnuchess.save_game())
         if self.playing_white:
             self.metadata['playing_white'] = 'True'
         else:
@@ -336,6 +344,12 @@ class GNUChessActivity(activity.Activity):
             self.metadata['playing_robot'] = 'True'
         else:
             self.metadata['playing_robot'] = 'False'
+
+    def read_file(self, file_path):
+        ''' Read project file on relaunch '''
+        fd = open(file_path, 'r')
+        self.game_data = fd.read()
+        fd.close()
 
     def _restore(self):
         ''' Restore the gnuchess state from metadata '''
@@ -353,7 +367,7 @@ class GNUChessActivity(activity.Activity):
             if self.metadata['playing_robot'] == 'False':
                 self.playing_robot = False
                 self.play_human_button.set_active(True)
-        self._gnuchess.restore_game(json_load(self.metadata['saved_game']))
+        self._gnuchess.restore_game(self._parse_move_list(self.game_data))
 
     # Collaboration-related methods
 
