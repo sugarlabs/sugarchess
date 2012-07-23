@@ -504,6 +504,25 @@ class Gnuchess():
     def _destroy_cb(self, win, event):
         gtk.main_quit()
 
+    def reskin(self, piece, file_path):
+        DICT = {'white-pawn': WP, 'black-pawn': BP,
+                'white-rook': WR, 'black-rook': BR,
+                'white-knight': WN, 'black-knight': BN,
+                'white-bishop': WB, 'black-bishop': BB,
+                'white-queen': WQ, 'black-queen': BQ,
+                'white-king': WK, 'black-king': BK}
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
+            file_path, self._scale, self._scale)
+        self.skins[DICT[piece]] = pixbuf
+        if piece == 'white-pawn':
+            for i in range(8):
+                self.white[i + 8].set_image(pixbuf)
+        elif piece == 'black-pawn':
+            for i in range(8):
+                self.black[i + 8].set_image(pixbuf)
+        else:
+            _logger.debug('FIXME')
+
     def _generate_sprites(self, colors):
         bg = Sprite(self._sprites, 0, 0, self._box(self._width, self._height,
                                               color=colors[1]))
@@ -537,29 +556,29 @@ class Gnuchess():
             y += self._scale
 
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/WP.png', w, h))
+                '%s/icons/white-pawn.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/BP.png', w, h))
+                '%s/icons/black-pawn.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/WR.png', w, h))
+                '%s/icons/white-rook.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/BR.png', w, h))
+                '%s/icons/black-rook.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/WN.png', w, h))
+                '%s/icons/white-knight.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/BN.png', w, h))
+                '%s/icons/black-knight.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/WB.png', w, h))
+                '%s/icons/white-bishop.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/BB.png', w, h))
+                '%s/icons/black-bishop.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/WQ.png', w, h))
+                '%s/icons/white-queen.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/BQ.png', w, h))
+                '%s/icons/black-queen.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/WK.png', w, h))
+                '%s/icons/white-king.svg' % (self._bundle_path), w, h))
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
-                'images/BK.png', w, h))
+                '%s/icons/black-king.svg' % (self._bundle_path), w, h))
 
         self.white.append(Sprite(self._sprites, 0, 0, self.skins[WR]))
         self.white[-1].type = 'R'

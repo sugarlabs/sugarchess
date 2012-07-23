@@ -18,6 +18,9 @@ from sugar.graphics.toolbarbox import ToolbarBox
 from sugar.activity.widgets import ActivityToolbarButton
 from sugar.activity.widgets import StopButton
 from sugar.graphics.toolbarbox import ToolbarButton
+from sugar.graphics.objectchooser import ObjectChooser
+from sugar.datastore import datastore
+from sugar import mime
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
     radio_factory, entry_factory
@@ -126,14 +129,12 @@ class GNUChessActivity(activity.Activity):
         toolbox.toolbar.insert(adjust_toolbar_button, -1)
         adjust_toolbar_button.show()
 
-        '''
         custom_toolbar_button = ToolbarButton(label=_("Custom"),
                                               page=self.custom_toolbar,
                                               icon_name='view-source')
         self.custom_toolbar.show()
         toolbox.toolbar.insert(custom_toolbar_button, -1)
         custom_toolbar_button.show()
-        '''
 
         self.set_toolbar_box(toolbox)
         toolbox.show()
@@ -238,6 +239,85 @@ class GNUChessActivity(activity.Activity):
         toolbox.toolbar.insert(stop_button, -1)
         stop_button.show()
 
+        button_factory('white-pawn',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='white-pawn',
+                       tooltip=_('White Pawn'))
+
+        button_factory('black-pawn',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='black-pawn',
+                       tooltip=_('Black Pawn'))
+
+        button_factory('white-rook',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='white-rook',
+                       tooltip=_('White Rook'))
+
+        button_factory('black-rook',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='black-rook',
+                       tooltip=_('Black Rook'))
+
+        button_factory('white-knight',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='white-knight',
+                       tooltip=_('White Knight'))
+
+        button_factory('black-knight',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='black-knight',
+                       tooltip=_('Black Knight'))
+
+        button_factory('white-bishop',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='white-bishop',
+                       tooltip=_('White Bishop'))
+
+        button_factory('black-bishop',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='black-bishop',
+                       tooltip=_('Black Bishop'))
+
+        button_factory('white-queen',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='white-queen',
+                       tooltip=_('White Queen'))
+
+        button_factory('black-queen',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='black-queen',
+                       tooltip=_('Black Queen'))
+
+        button_factory('white-king',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='white-king',
+                       tooltip=_('White King'))
+
+        button_factory('black-king',
+                       self.custom_toolbar,
+                       self._reskin,
+                       cb_arg='black-king',
+                       tooltip=_('Black King'))
+
+    def _reskin(self, button, piece):
+        _logger.debug('reskin %s' % (piece))
+        id, file_path = self._choose_skin()
+        if file_path is not None:
+            self._gnuchess.reskin(piece, file_path)
+            self.metadate[piece] = id
+
     def do_fullscreen_cb(self, button):
         ''' Hide the Sugar toolbars. '''
         self.fullscreen()
@@ -256,24 +336,29 @@ class GNUChessActivity(activity.Activity):
     def _parse_move_list(self, text):
         ''' Take a standard game description and return a move list '''
         # Assuming of form ... 1. e4 e6 2. ...
-        # Assuming no comments
         move_list = []
         found_one = False
+        comment = False
         for move in text.split():
-            if move == '1.':
-                found_one = True
-                number = True
-                white = False
-            elif found_one:
-                if not number:
+            if move[0] == '{':
+                comment = True
+            elif move[-1] == '}':
+                comment = False
+            if not comment:
+                if move == '1.':
+                    found_one = True
                     number = True
-                elif not white:
-                    move_list.append(move)
-                    white = True
-                else:
-                    move_list.append(move)
-                    number = False
                     white = False
+                elif found_one:
+                    if not number:
+                        number = True
+                    elif not white:
+                        move_list.append(move)
+                        white = True
+                    else:
+                        move_list.append(move)
+                        number = False
+                        white = False
         return move_list
 
     def _undo_cb(self, *args):
@@ -368,6 +453,43 @@ class GNUChessActivity(activity.Activity):
                 self.playing_robot = False
                 self.play_human_button.set_active(True)
         self._gnuchess.restore_game(self._parse_move_list(self.game_data))
+        # TODO: restore pieces...
+
+
+    def _choose_skin(self):
+        ''' Select a skin from the Journal '''
+        chooser = None
+        name = None
+        if hasattr(mime, 'GENERIC_TYPE_IMAGE'):
+            if 'image/svg+xml' not in \
+                    mime.get_generic_type(mime.GENERIC_TYPE_IMAGE).mime_types:
+                mime.get_generic_type(
+                    mime.GENERIC_TYPE_IMAGE).mime_types.append('image/svg+xml')
+            chooser = ObjectChooser(parent=self,
+                                    what_filter=mime.GENERIC_TYPE_IMAGE)
+        else:
+            try:
+                chooser = ObjectChooser(parent=self, what_filter=None)
+            except TypeError:
+                chooser = ObjectChooser(None, activity,
+                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT)
+        if chooser is not None:
+            try:
+                result = chooser.run()
+                if result == gtk.RESPONSE_ACCEPT:
+                    jobject = chooser.get_selected_object()
+                    if jobject and jobject.file_path:
+                        name = jobject.metadata['title']
+                        mime_type = jobject.metadata['mime_type']
+                        _logger.debug('result of choose: %s (%s)' % \
+                                          (name, str(mime_type)))
+            finally:
+                chooser.destroy()
+                del chooser
+            if name is not None:
+                return jobject.object_id, jobject.file_path
+        else:
+            return None, None
 
     # Collaboration-related methods
 
