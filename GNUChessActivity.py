@@ -451,7 +451,7 @@ class GNUChessActivity(activity.Activity):
             _logger.debug(self.metadata['playing_robot'])
             if self.metadata['playing_robot'] == 'False':
                 self.playing_robot = False
-                self.play_human_button.set_active(True)
+                self.human_button.set_active(True)
         self._gnuchess.restore_game(self._parse_move_list(self.game_data))
         for piece in ['white_pawn', 'black_pawn',
                       'white_rook', 'black_rook', 

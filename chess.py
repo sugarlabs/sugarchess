@@ -126,12 +126,15 @@ class Gnuchess():
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
 
-        if self._activity.playing_mode == 'easy':
+        if my_move == HINT:
+            level = 'hard\nbook on\n'  # may as well get a good hint
+        elif self._activity.playing_mode == 'easy':
             level = 'easy\nbook off\ndepth 1\n'
         else:
             level = 'hard\nbook on\n'
 
         if my_move in [REMOVE, UNDO, RESTORE, HINT, GAME, NEW]:
+            hint = False
             if my_move == REMOVE:
                 self.move_list = self.move_list[:-2]
             elif my_move == UNDO:
@@ -140,14 +143,16 @@ class Gnuchess():
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             if my_move == HINT:
-                cmd += 'show moves\nquit\n'
+                # cmd += '%sshow moves\nquit\n' % (level)
+                cmd += '%sgo\nquit\n' % (level)
+                hint = True
             elif my_move == GAME:
                 cmd += 'show game\nquit\n'
             else:
                 cmd += 'show board\nquit\n'
             _logger.debug(cmd)
             output = p.communicate(input=cmd)
-            self._process_output(output[0], my_move=None)
+            self._process_output(output[0], my_move=None, hint=hint)
         elif my_move == ROBOT:  # Ask the computer to play
             cmd = 'force manual\n'
             for move in self.move_list:
@@ -156,7 +161,7 @@ class Gnuchess():
             _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move='robot')
-        elif my_move is not None:  # My move
+        elif my_move is not None:  # human's move
             cmd = 'force manual\n'
             for move in self.move_list:
                 cmd += '%s\n' % (move)
@@ -166,9 +171,9 @@ class Gnuchess():
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=my_move)
         else:
-            _logger.debug('my move == None')
+            _logger.debug('my_move == None')
 
-    def _process_output(self, output, my_move=None):
+    def _process_output(self, output, my_move=None, hint=False):
         ''' process output '''
         checkmate = False
         _logger.debug(output)
@@ -177,22 +182,12 @@ class Gnuchess():
             output = output[find(output, target):]
             self.game = output[:find(output, '\n\n')]
             return
-        elif 'moves generated' in output:  # processing hint
-            if self._activity.playing_white:
-                target = 'White (%d) : ' % (1 + int(len(self.move_list) / 2))
-            else:
-                target = 'Black (%d) : ' % (1 + int(len(self.move_list) / 2))
-            output = output[find(output, target):]
-            output = output[find(output, ':') + 1: find(output, 'No. of')]
-            hint_list = output.split()
-            hint = ''
-            maxv = -10000
-            for i in range(len(hint_list)):
-                if i % 2 == 1 and int(hint_list[i]) > maxv:
-                    hint = hint_list[i - 1]
-                    maxv = int(hint_list[i])
-            _logger.debug(hint)
+        elif hint:  # What would the robot do?
+            output = output[find(output, ROBOT_MOVE):]
+            hint = output[len(ROBOT_MOVE):find(output, '\n')]
             self._activity.status.set_label(hint)
+            _logger.debug(hint)
+            # self._animate_hint(hint)
             return
         elif 'wins' in output:
             self._activity.status.set_label(_('Checkmate'))
@@ -203,15 +198,6 @@ class Gnuchess():
                 self._last_piece_played[0].move(self._last_piece_played[1])
                 self._last_piece_played[0] = None
         elif my_move == ROBOT:
-            '''
-            if find(output, ROBOT_MOVE) < 0:
-                if self._activity.playing_white:
-                    _logger.debug('Black cannot move')
-                    self._activity.status.set_label('Black cannot move')
-                else:
-                    _logger.debug('White cannot move')
-                    self._activity.status.set_label('White cannot move')
-            '''
             output = output[find(output, ROBOT_MOVE):]
             robot_move = output[len(ROBOT_MOVE):find(output, '\n')]
             _logger.debug(robot_move)
@@ -268,23 +254,193 @@ class Gnuchess():
         elif not self._activity.playing_white and len(self.move_list) % 2 == 0:
             _logger.debug('asking computer to play white')
 
+    def _all_clear(self):
+        ''' Things to reinitialize when starting up a new game. '''
+        self.move_list = []
+        self.game = ''
+        self.move(NEW)
+
+    def _initiating(self):
+        return self._activity.initiating
+
+    def new_game(self):
+        self._all_clear()
+        if not self._activity.playing_white:
+            self.move(ROBOT)
+
+    def restore_game(self, move_list):
+        self.move_list = []
+        
+        for move in move_list:
+            self.move_list.append(str(move))
+        _logger.debug(self.move_list)
+        if self._activity.playing_white:
+            _logger.debug('really... restoring game to white')
+        else:
+            _logger.debug('really... restoring game to black')
+        self.move(RESTORE)
+        return
+
+    def copy_game(self):
+        self.move(GAME)
+        _logger.debug(self.game)
+        return self.game
+
+    def save_game(self):
+        return self.move_list
+
+    def _button_press_cb(self, win, event):
+        win.grab_focus()
+        x, y = map(int, event.get_coords())
+
+        self._dragpos = [x, y]
+        self._total_drag = [0, 0]
+
+        spr = self._sprites.find_sprite((x, y))
+        if spr == None or spr.type == None:
+            return
+        
+        if self._activity.playing_robot:
+            if self._activity.playing_white and spr.type[0] in 'prnbqk':
+                return
+            elif not self._activity.playing_white and spr.type[0] in 'PRNBQK':
+                return
+        else:
+            if len(self.move_list) % 2 == 0 and spr.type[0] in 'prnbqk':
+                return
+            elif len(self.move_list) % 2 == 1 and spr.type[0] in 'PRNBQK':
+                return
+
+        self._release = None
+        self._press = spr
+        self._press.set_layer(TOP)
+        self._last_piece_played = [spr, spr.get_xy()]
+
+        self._activity.status.set_label(spr.type)
+        return True
+
+    def _mouse_move_cb(self, win, event):
+        """ Drag a tile with the mouse. """
+        spr = self._press
+        if spr is None:
+            self._dragpos = [0, 0]
+            return True
+        win.grab_focus()
+        x, y = map(int, event.get_coords())
+        dx = x - self._dragpos[0]
+        dy = y - self._dragpos[1]
+        spr.move_relative([dx, dy])
+        self._dragpos = [x, y]
+        self._total_drag[0] += dx
+        self._total_drag[1] += dy
+        return True
+
+    def _button_release_cb(self, win, event):
+        win.grab_focus()
+
+        self._dragpos = [0, 0]
+
+        if self._press is None:
+            return
+
+        x, y = map(int, event.get_coords())
+        spr = self._sprites.find_sprite((x, y))
+
+        self._release = spr
+        self._release.set_layer(MID)
+        self._press = None
+        self._release = None
+
+        g1 = self._xy_to_grid(self._last_piece_played[1])
+        g2 = self._xy_to_grid((x, y))
+        if g1 == g2:  # We'll let beginners touch a piece and return it.
+            spr.move(self._last_piece_played[1])
+            return True
+
+        move = '%s%s' % (g1, g2)
+
+        # Queen a pawn (FIXME: really should be able to choose any piece)
+        if spr.type == 'p' and g2[1] == '1':
+            move += 'Q'
+        elif spr.type == 'P' and g2[1] == '8':
+            move += 'Q'
+
+        if len(self.move_list) % 2 == 0:
+            self._activity.white_entry.set_text(move)
+        else:
+            self._activity.black_entry.set_text(move)
+        self.move(move)
+        
+        if self._activity.playing_robot:
+            self._activity.status.set_label('Thinking')
+            gobject.timeout_add(500, self.move, ROBOT)
+
+        return True
+
+    def undo(self):
+        # TODO: Lock out while robot is playing
+        if len(self.move_list) > 1:
+            self.move(REMOVE)
+
+    def hint(self):
+        # TODO: Lock out while robot is playing
+        self.move(HINT)
+
+    def remote_button_press(self, dot, color):
+        ''' Receive a button press from a sharer '''
+        return
+
+    def set_sharing(self, share=True):
+        _logger.debug('enabling sharing')
+        self.we_are_sharing = share
+
+    def _grid_to_xy(self, pos):
+        ''' calculate the xy position from a column and row in the board '''
+        return 
+
+    def _xy_to_grid(self, pos):
+        ''' calculate the board column and row for an xy position '''
+        xo = self._width - 8 * self._scale
+        xo = int(xo / 2)
+        x = pos[0] - xo
+        yo = int(self._scale / 2)
+        y = yo
+        return ('%s%d' % ('abcdefgh'[int((pos[0] - xo) / self._scale)],
+                8 - int((pos[1] - yo) / self._scale)))
+ 
+    def _expose_cb(self, win, event):
+        self.do_expose_event(event)
+
+    def do_expose_event(self, event):
+        ''' Handle the expose-event by drawing '''
+        # Restrict Cairo to the exposed area
+        cr = self._canvas.window.cairo_create()
+        cr.rectangle(event.area.x, event.area.y,
+                event.area.width, event.area.height)
+        cr.clip()
+        # Refresh sprite list
+        self._sprites.redraw_sprites(cr=cr)
+
+    def _destroy_cb(self, win, event):
+        gtk.main_quit()
+
     def _load_board(self, board):
         ''' Load the board based on gnuchess board output '''
-        black_pawns = 0
-        black_rooks = 0
-        black_knights = 0
-        black_bishops = 0
-        black_queens = 0
         white_pawns = 0
         white_rooks = 0
         white_knights = 0
         white_bishops = 0
         white_queens = 0
+        black_pawns = 0
+        black_rooks = 0
+        black_knights = 0
+        black_bishops = 0
+        black_queens = 0
         w, h = self.white[0].get_dimensions()
         xo = self._width - 8 * self._scale
         xo = int(xo / 2)
         yo = int(self._scale / 2)
-        for i in range(16):
+        for i in range(17):  # extra queen
             self.black[i].move((-self._scale, -self._scale))
             self.white[i].move((-self._scale, -self._scale))
         k = 1
@@ -366,168 +522,6 @@ class Gnuchess():
             x = xo
             y += self._scale
             k += 1
-
-    def _all_clear(self):
-        ''' Things to reinitialize when starting up a new game. '''
-        self.move_list = []
-        self.game = ''
-        self.move(NEW)
-
-    def _initiating(self):
-        return self._activity.initiating
-
-    def new_game(self):
-        self._all_clear()
-        if not self._activity.playing_white:
-            self.move(ROBOT)
-
-    def restore_game(self, move_list):
-        self.move_list = []
-        
-        for move in move_list:
-            self.move_list.append(str(move))
-        _logger.debug(self.move_list)
-        if self._activity.playing_white:
-            _logger.debug('really... restoring game to white')
-        else:
-            _logger.debug('really... restoring game to black')
-        self.move(RESTORE)
-        return
-
-    def copy_game(self):
-        self.move(GAME)
-        _logger.debug(self.game)
-        return self.game
-
-    def save_game(self):
-        return self.move_list
-
-    def _button_press_cb(self, win, event):
-        win.grab_focus()
-        x, y = map(int, event.get_coords())
-
-        self._dragpos = [x, y]
-        self._total_drag = [0, 0]
-
-        spr = self._sprites.find_sprite((x, y))
-        if spr == None or spr.type == None:
-            return
-        
-        if self._activity.playing_white and spr.type[0] in 'prnbqk':
-            return
-        elif not self._activity.playing_white and spr.type[0] in 'PRNBQK':
-            return
-
-        self._release = None
-        self._press = spr
-        self._press.set_layer(TOP)
-        self._last_piece_played = [spr, spr.get_xy()]
-
-        self._activity.status.set_label(spr.type)
-        return True
-
-    def _mouse_move_cb(self, win, event):
-        """ Drag a tile with the mouse. """
-        spr = self._press
-        if spr is None:
-            self._dragpos = [0, 0]
-            return True
-        win.grab_focus()
-        x, y = map(int, event.get_coords())
-        dx = x - self._dragpos[0]
-        dy = y - self._dragpos[1]
-        spr.move_relative([dx, dy])
-        self._dragpos = [x, y]
-        self._total_drag[0] += dx
-        self._total_drag[1] += dy
-        return True
-
-    def _button_release_cb(self, win, event):
-        win.grab_focus()
-
-        self._dragpos = [0, 0]
-
-        if self._press is None:
-            return
-
-        x, y = map(int, event.get_coords())
-        spr = self._sprites.find_sprite((x, y))
-
-        self._release = spr
-        self._release.set_layer(MID)
-        self._press = None
-        self._release = None
-
-        g1 = self._xy_to_grid(self._last_piece_played[1])
-        g2 = self._xy_to_grid((x, y))
-        if g1 == g2:  # We'll let beginners touch a piece and return it.
-            spr.move(self._last_piece_played[1])
-            return True
-
-        move = '%s%s' % (g1, g2)
-
-        # Queen a pawn (FIXME: really should be able to choose any piece)
-        if spr.type == 'p' and g2[1] == '1':
-            move += 'Q'
-        elif spr.type == 'P' and g2[1] == '8':
-            move += 'Q'
-
-        if self._activity.playing_white:
-            self._activity.white_entry.set_text(move)
-        else:
-            self._activity.black_entry.set_text(move)
-        self.move(move)
-        
-        self._activity.status.set_label('Thinking')
-        gobject.timeout_add(500, self.move, ROBOT)
-        return True
-
-    def undo(self):
-        # TODO: Lock out while robot is playing
-        if len(self.move_list) > 1:
-            self.move(REMOVE)
-
-    def hint(self):
-        # TODO: Lock out while robot is playing
-        self.move(HINT)
-
-    def remote_button_press(self, dot, color):
-        ''' Receive a button press from a sharer '''
-        return
-
-    def set_sharing(self, share=True):
-        _logger.debug('enabling sharing')
-        self.we_are_sharing = share
-
-    def _grid_to_xy(self, pos):
-        ''' calculate the xy position from a column and row in the board '''
-        return 
-
-    def _xy_to_grid(self, pos):
-        ''' calculate the board column and row for an xy position '''
-        xo = self._width - 8 * self._scale
-        xo = int(xo / 2)
-        x = pos[0] - xo
-        yo = int(self._scale / 2)
-        y = yo
-        return ('%s%d' % ('abcdefgh'[int((pos[0] - xo) / self._scale)],
-                8 - int((pos[1] - yo) / self._scale)))
- 
-    def _expose_cb(self, win, event):
-        self.do_expose_event(event)
-
-    def do_expose_event(self, event):
-        ''' Handle the expose-event by drawing '''
-        # Restrict Cairo to the exposed area
-        cr = self._canvas.window.cairo_create()
-        cr.rectangle(event.area.x, event.area.y,
-                event.area.width, event.area.height)
-        cr.clip()
-        # Refresh sprite list
-        self._sprites.redraw_sprites(cr=cr)
-
-    def _destroy_cb(self, win, event):
-        gtk.main_quit()
 
     def reskin(self, piece, file_path):
         DICT = {'white_pawn': WP, 'black_pawn': BP,
