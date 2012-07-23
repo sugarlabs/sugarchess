@@ -31,6 +31,7 @@ ROBOT_MOVE = 'My move is : '
 TOP = 3
 MID = 2
 BOT = 1
+HIDDEN = 0
 ROBOT = 'robot'
 RESTORE = 'restore'
 REMOVE = 'remove'
@@ -269,15 +270,16 @@ class Gnuchess():
 
     def _load_board(self, board):
         ''' Load the board based on gnuchess board output '''
-        # TODO: Add extra pieces for queened pawns
         black_pawns = 0
         black_rooks = 0
         black_knights = 0
         black_bishops = 0
+        black_queens = 0
         white_pawns = 0
         white_rooks = 0
         white_knights = 0
         white_bishops = 0
+        white_queens = 0
         w, h = self.white[0].get_dimensions()
         xo = self._width - 8 * self._scale
         xo = int(xo / 2)
@@ -318,7 +320,12 @@ class Gnuchess():
                             self.white[5].move((x, y))
                             white_bishops += 1
                     elif piece == 'Q':
-                        self.white[3].move((x, y))
+                        if white_queens == 0:
+                            self.white[3].move((x, y))
+                            white_queens += 1
+                        else:
+                            self.white[16].move((x, y))
+                            self.white[16].set_layer(MID)
                     elif piece == 'K':
                         self.white[4].move((x, y))
                 elif piece in 'prnbqk':  # black
@@ -347,7 +354,12 @@ class Gnuchess():
                             self.black[5].move((x, y))
                             black_bishops += 1
                     elif piece == 'q':
-                        self.black[3].move((x, y))
+                        if black_queens == 0:
+                            self.black[3].move((x, y))
+                            black_queens += 1
+                        else:
+                            self.black[16].move((x, y))
+                            self.black[16].set_layer(MID)
                     elif piece == 'k':
                         self.black[4].move((x, y))
                 x += self._scale
@@ -445,8 +457,21 @@ class Gnuchess():
         self._release.set_layer(MID)
         self._press = None
         self._release = None
-        move = '%s%s' % (self._xy_to_grid(self._last_piece_played[1]),
-                         self._xy_to_grid((x, y)))
+
+        g1 = self._xy_to_grid(self._last_piece_played[1])
+        g2 = self._xy_to_grid((x, y))
+        if g1 == g2:  # We'll let beginners touch a piece and return it.
+            spr.move(self._last_piece_played[1])
+            return True
+
+        move = '%s%s' % (g1, g2)
+
+        # Queen a pawn (FIXME: really should be able to choose any piece)
+        if spr.type == 'p' and g2[1] == '1':
+            move += 'Q'
+        elif spr.type == 'P' and g2[1] == '8':
+            move += 'Q'
+
         if self._activity.playing_white:
             self._activity.white_entry.set_text(move)
         else:
@@ -505,23 +530,49 @@ class Gnuchess():
         gtk.main_quit()
 
     def reskin(self, piece, file_path):
-        DICT = {'white-pawn': WP, 'black-pawn': BP,
-                'white-rook': WR, 'black-rook': BR,
-                'white-knight': WN, 'black-knight': BN,
-                'white-bishop': WB, 'black-bishop': BB,
-                'white-queen': WQ, 'black-queen': BQ,
-                'white-king': WK, 'black-king': BK}
+        DICT = {'white_pawn': WP, 'black_pawn': BP,
+                'white_rook': WR, 'black_rook': BR,
+                'white_knight': WN, 'black_knight': BN,
+                'white_bishop': WB, 'black_bishop': BB,
+                'white_queen': WQ, 'black_queen': BQ,
+                'white_king': WK, 'black_king': BK}
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
             file_path, self._scale, self._scale)
         self.skins[DICT[piece]] = pixbuf
-        if piece == 'white-pawn':
+        if piece == 'white_pawn':
             for i in range(8):
                 self.white[i + 8].set_image(pixbuf)
-        elif piece == 'black-pawn':
+        elif piece == 'black_pawn':
             for i in range(8):
                 self.black[i + 8].set_image(pixbuf)
-        else:
-            _logger.debug('FIXME')
+        elif piece == 'white_rook':
+            self.white[0].set_image(pixbuf)
+            self.white[7].set_image(pixbuf)
+        elif piece == 'black_rook':
+            self.black[0].set_image(pixbuf)
+            self.black[7].set_image(pixbuf)
+        elif piece == 'white_knight':
+            self.white[1].set_image(pixbuf)
+            self.white[6].set_image(pixbuf)
+        elif piece == 'black_knight':
+            self.black[1].set_image(pixbuf)
+            self.black[6].set_image(pixbuf)
+        elif piece == 'white_bishop':
+            self.white[2].set_image(pixbuf)
+            self.white[5].set_image(pixbuf)
+        elif piece == 'black_bishop':
+            self.black[2].set_image(pixbuf)
+            self.black[5].set_image(pixbuf)
+        elif piece == 'white_queen':
+            self.white[3].set_image(pixbuf)
+            self.white[16].set_image(pixbuf)
+        elif piece == 'black_queen':
+            self.black[3].set_image(pixbuf)
+            self.black[16].set_image(pixbuf)
+        elif piece == 'white_king':
+            self.white[4].set_image(pixbuf)
+        elif piece == 'black_king':
+            self.black[4].set_image(pixbuf)
 
     def _generate_sprites(self, colors):
         bg = Sprite(self._sprites, 0, 0, self._box(self._width, self._height,
@@ -608,6 +659,10 @@ class Gnuchess():
             self.white.append(Sprite(self._sprites, 0, 0, self.skins[WP]))
             self.white[-1].type = 'P'
             self.white[-1].set_layer(MID)
+        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WQ]))
+        self.white[-1].type = 'Q'
+        self.white[-1].hide()  # extra queen for pawn
+
         self.black.append(Sprite(self._sprites, 0, 0, self.skins[BR]))
         self.black[-1].type = 'r'
         self.black[-1].set_layer(MID)
@@ -636,6 +691,9 @@ class Gnuchess():
             self.black.append(Sprite(self._sprites, 0, 0, self.skins[BP]))
             self.black[-1].type = 'p'
             self.black[-1].set_layer(MID)
+        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BQ]))
+        self.black[-1].type = 'q'
+        self.black[-1].hide()  # extra queen for pawn
 
     def _box(self, w, h, color='black'):
         ''' Generate a box '''

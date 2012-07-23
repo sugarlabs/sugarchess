@@ -241,82 +241,82 @@ class GNUChessActivity(activity.Activity):
 
         button_factory('white-pawn',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='white-pawn',
+                       self._reskin_cb,
+                       cb_arg='white_pawn',
                        tooltip=_('White Pawn'))
 
         button_factory('black-pawn',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='black-pawn',
+                       self._reskin_cb,
+                       cb_arg='black_pawn',
                        tooltip=_('Black Pawn'))
 
         button_factory('white-rook',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='white-rook',
+                       self._reskin_cb,
+                       cb_arg='white_rook',
                        tooltip=_('White Rook'))
 
         button_factory('black-rook',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='black-rook',
+                       self._reskin_cb,
+                       cb_arg='black_rook',
                        tooltip=_('Black Rook'))
 
         button_factory('white-knight',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='white-knight',
+                       self._reskin_cb,
+                       cb_arg='white_knight',
                        tooltip=_('White Knight'))
 
         button_factory('black-knight',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='black-knight',
+                       self._reskin_cb,
+                       cb_arg='black_knight',
                        tooltip=_('Black Knight'))
 
         button_factory('white-bishop',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='white-bishop',
+                       self._reskin_cb,
+                       cb_arg='white_bishop',
                        tooltip=_('White Bishop'))
 
         button_factory('black-bishop',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='black-bishop',
+                       self._reskin_cb,
+                       cb_arg='black_bishop',
                        tooltip=_('Black Bishop'))
 
         button_factory('white-queen',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='white-queen',
+                       self._reskin_cb,
+                       cb_arg='white_queen',
                        tooltip=_('White Queen'))
 
         button_factory('black-queen',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='black-queen',
+                       self._reskin_cb,
+                       cb_arg='black_queen',
                        tooltip=_('Black Queen'))
 
         button_factory('white-king',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='white-king',
+                       self._reskin_cb,
+                       cb_arg='white_king',
                        tooltip=_('White King'))
 
         button_factory('black-king',
                        self.custom_toolbar,
-                       self._reskin,
-                       cb_arg='black-king',
+                       self._reskin_cb,
+                       cb_arg='black_king',
                        tooltip=_('Black King'))
 
-    def _reskin(self, button, piece):
+    def _reskin_cb(self, button, piece):
         _logger.debug('reskin %s' % (piece))
         id, file_path = self._choose_skin()
         if file_path is not None:
             self._gnuchess.reskin(piece, file_path)
-            self.metadate[piece] = id
+            self.metadata[piece] = str(id)
 
     def do_fullscreen_cb(self, button):
         ''' Hide the Sugar toolbars. '''
@@ -453,8 +453,17 @@ class GNUChessActivity(activity.Activity):
                 self.playing_robot = False
                 self.play_human_button.set_active(True)
         self._gnuchess.restore_game(self._parse_move_list(self.game_data))
-        # TODO: restore pieces...
-
+        for piece in ['white_pawn', 'black_pawn',
+                      'white_rook', 'black_rook', 
+                      'white_knight', 'black_knight',
+                      'white_bishop', 'black_bishop', 
+                      'white_queen', 'black_queen',
+                      'white_king', 'black_king']:
+            if piece in self.metadata:
+                id = self.metadata[piece]
+                jobject = datastore.get(id)
+                if jobject is not None and jobject.file_path is not None:
+                    self._gnuchess.reskin(piece, jobject.file_path)
 
     def _choose_skin(self):
         ''' Select a skin from the Journal '''
