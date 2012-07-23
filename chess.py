@@ -31,7 +31,6 @@ ROBOT_MOVE = 'My move is : '
 TOP = 3
 MID = 2
 BOT = 1
-HIDDEN = 0
 ROBOT = 'robot'
 RESTORE = 'restore'
 REMOVE = 'remove'
@@ -52,7 +51,8 @@ WQ = 8
 BQ = 9
 WK = 10
 BK = 11
-
+FILES = 'abcdefgh'
+RANKS = '12345678'
 
 class Gnuchess():
 
@@ -95,8 +95,11 @@ class Gnuchess():
         self._last_piece_played = [None, (0, 0)]
 
         self._move = 0
+        self._counter = 0
+
         self.white = []
         self.black = []
+        self._board = []
         self._squares = []
 
         self.skins = []
@@ -175,6 +178,7 @@ class Gnuchess():
 
     def _process_output(self, output, my_move=None, hint=False):
         ''' process output '''
+        check = False
         checkmate = False
         _logger.debug(output)
         if 'White   Black' in output:  # processing show game
@@ -187,10 +191,9 @@ class Gnuchess():
             hint = output[len(ROBOT_MOVE):find(output, '\n')]
             self._activity.status.set_label(hint)
             _logger.debug(hint)
-            # self._animate_hint(hint)
+            self._parse_move(hint)
             return
-        elif 'wins' in output:
-            self._activity.status.set_label(_('Checkmate'))
+        elif 'wins' in output or 'loses' in output:
             checkmate = True
         elif 'Illegal move' in output:
             self._activity.status.set_label(_('Illegal move'))
@@ -202,6 +205,10 @@ class Gnuchess():
             robot_move = output[len(ROBOT_MOVE):find(output, '\n')]
             _logger.debug(robot_move)
             self.move_list.append(robot_move)
+            if '+' in robot_move:
+                check = True
+            if '#' in robot_move or '++' in robot_move:
+                checkmate = True
             if self._activity.playing_white:
                 self._activity.black_entry.set_text(robot_move)
                 self._activity.white_entry.set_text('')
@@ -238,7 +245,12 @@ class Gnuchess():
             self._activity.status.set_label(_("It is Black's move."))
 
         if checkmate:
+            self._activity.status.set_label(_('Checkmate'))
             _logger.debug('checkmate')
+            return
+        elif check:
+            self._activity.status.set_label(_('Check'))
+            _logger.debug('check')
             return
         elif my_move == ROBOT:
             _logger.debug('robot took a turn')
@@ -351,8 +363,8 @@ class Gnuchess():
         self._press = None
         self._release = None
 
-        g1 = self._xy_to_grid(self._last_piece_played[1])
-        g2 = self._xy_to_grid((x, y))
+        g1 = self._xy_to_file_and_rank(self._last_piece_played[1])
+        g2 = self._xy_to_file_and_rank((x, y))
         if g1 == g2:  # We'll let beginners touch a piece and return it.
             spr.move(self._last_piece_played[1])
             return True
@@ -379,12 +391,437 @@ class Gnuchess():
 
     def undo(self):
         # TODO: Lock out while robot is playing
-        if len(self.move_list) > 1:
-            self.move(REMOVE)
+        if self._activity.playing_robot:
+            if len(self.move_list) > 1:
+                if len(self.move_list) % 2 == 0 and \
+                   not self._activity.playing_white:
+                    self.move(UNDO)
+                else:
+                    self.move(REMOVE)
+        else:
+            if len(self.move_list) > 0:
+                self.move(UNDO)
 
     def hint(self):
         # TODO: Lock out while robot is playing
-        self.move(HINT)
+        self._activity.status.set_label('Thinking')
+        gobject.timeout_add(500, self.move, HINT)
+
+    def _flash_tile(self, sfile, srank, cfile, crank):
+        tiles = []
+        self._counter = 0
+        tiles.append('%s%s' % (sfile, srank))
+        tiles.append('%s%s' % (cfile, crank))
+        _logger.debug(tiles)
+        gobject.timeout_add(100, self._flasher, tiles)
+        return
+
+    def _flasher(self, tiles):
+        if self._counter < 9:
+            self._counter += 1
+            for tile in tiles:
+                i = self._file_and_rank_to_index(tile)
+                if self._counter % 2 == 0:
+                    self._board[i].set_image(self._squares[2])
+                else:
+                    self._board[i].set_image(self._squares[black_or_white(i)])
+                self._board[i].set_layer(BOT)
+            gobject.timeout_add(200, self._flasher, tiles)
+
+    def _parse_move(self, move):
+        label = move
+        source_file = None
+        source_rank = None
+        capture_piece = None
+        capture_file = None
+        capture_rank = None
+        if 'x' in move:
+            capture = True
+        else:
+            capture = False
+        if len(self.move_list) % 2 == 0:
+            white = True
+            if move[0] in FILES:
+                piece = 'P'
+                source_file = move[0]
+                if move[1] in RANKS:
+                    source_rank = move[1]
+            elif move[0] == 'O':
+                if move == 'O-O':
+                    piece = 'K'
+                    source_file = 'g'
+                    source_rank = 1
+                    print 'K and R[1] and g1 and f1'
+                else:
+                    print 'K and R[0] and c1 and d1'
+            else:
+                piece = move[0]
+                if move[1] in FILES:
+                    source_file = move[1]
+                    if move[2] in RANKS:
+                        source_rank = move[2]
+                elif move[1] in RANKS:
+                    source_rank = move[1]
+        else:
+            white = False
+            if move[0] in FILES:
+                piece = 'p'
+                source_file = move[0]
+                if move[1] in RANKS:
+                    source_rank = move[1]
+            elif move[0] == 'O':
+                if move == 'O-O':
+                    piece = 'k'
+                    source_file = 'g'
+                    source_rank = 8
+                    print 'k and r[1] and g8 and f8'
+                else:
+                    print 'k and r[0] and c8 and d8'
+            else:
+                piece = move[0]
+                if move[1] in FILES:
+                    source_file = move[1]
+                    if move[2] in RANKS:
+                        source_rank = move[2]
+                elif move[1] in RANKS:
+                    source_rank = move[1]
+        if capture:
+            move = move[find(move, 'x') + 1:]
+            if white:
+                if move[0] in 'kqbnr':
+                    capture_piece = move[0]
+                    if len(move) > 1:
+                        if move[1] in FILES:
+                            capture_file = move[1]
+                            if len(move) > 2:
+                                if move[2] in RANKS:
+                                    capture_rank = move[2]
+                        elif move[1] in RANKS:
+                            capture_rank = move[1]
+                else:
+                    capture_piece = 'p'
+                    if move[0] in FILES:
+                        capture_file = move[0]
+                        if len(move) > 1:
+                            if move[1] in RANKS:
+                                capture_rank = move[1]
+                    elif move[0] in RANKS:
+                        capture_rank = move[0]
+            else:
+                if move[0] in 'KQBNR':
+                    capture_piece = move[0]
+                    if len(move) > 1:
+                        if move[1] in FILES:
+                            capture_file = move[1]
+                            if len(move) > 2:
+                                if move[2] in RANKS:
+                                    capture_rank = move[2]
+                        elif move[1] in RANKS:
+                            capture_rank = move[1]
+                else:
+                    capture_piece = 'P'
+                    if move[0] in FILES:
+                        capture_file = move[0]
+                        if len(move) > 1:
+                            if move[1] in RANKS:
+                                capture_rank = move[1]
+                    elif move[0] in RANKS:
+                        capture_rank = move[0]
+        self._activity.status.set_label('%s: %s %s%s %s%s' % (
+                label, piece, source_file, source_rank,
+                capture_file, capture_rank))
+
+        if capture_file is None:
+            capture_file = source_file
+        if capture_rank is None:
+            capture_rank = source_rank
+        if source_file is None:
+            source_file = capture_file
+        if source_rank is None:
+            source_rank = capture_rank
+
+        if piece in 'pP':
+            source_file, source_rank = self._search_for_pawn(
+                piece, source_file, source_rank, capture_file, capture_rank)
+        elif piece in 'rR':
+            source_file, source_rank = self._search_for_rook(
+                piece, source_file, source_rank, capture_file, capture_rank)
+        elif piece in 'nN':
+            source_file, source_rank = self._search_for_knight(
+                piece, source_file, source_rank, capture_file, capture_rank)
+        elif piece in 'bB':
+            source_file, source_rank = self._search_for_bishop(
+                piece, source_file, source_rank, capture_file, capture_rank)
+        elif piece in 'qQ':
+            source_file, source_rank = self._search_for_queen(
+                piece, source_file, source_rank, capture_file, capture_rank)
+        elif piece in 'kK':
+            source_file, source_rank = self._search_for_king(
+                piece, source_file, source_rank, capture_file, capture_rank)
+        self._flash_tile(source_file, source_rank, capture_file, capture_rank)
+
+    def _search_for_pawn(
+        self, piece, source_file, source_rank, capture_file, capture_rank):
+        # Check for first move
+        if piece == 'p' and capture_rank == '5':
+            i = self._file_and_rank_to_index('%s7' % (capture_file))
+            x, y = self._index_to_xy(i)
+            for p in range(8):
+                pos = self.black[8 + p].get_xy()
+                if x == pos[0] and y == pos[1]:
+                    return capture_file, '7'
+        elif piece == 'P' and capture_rank == '4':
+            i = self._file_and_rank_to_index('%s2' % (capture_file))
+            x, y = self._index_to_xy(i)
+            for p in range(8):
+                pos = self.white[8 + p].get_xy()
+                if x == pos[0] and y == pos[1]:
+                    return capture_file, '7'
+        # Check for previous space
+        if piece == 'p':
+            i = self._file_and_rank_to_index('%s%d' % (
+                    capture_file, int(capture_rank) + 1))
+            x, y = self._index_to_xy(i)
+            for p in range(8):
+                pos = self.black[8 + p].get_xy()
+                if x == pos[0] and y == pos[1]:
+                    return capture_file, str(int(capture_rank) + 1)
+        elif piece == 'P':
+            i = self._file_and_rank_to_index('%s%d' % (
+                    capture_file, int(capture_rank) - 1))
+            x, y = self._index_to_xy(i)
+            for p in range(8):
+                pos = self.black[8 + p].get_xy()
+                if x == pos[0] and y == pos[1]:
+                    return capture_file, str(int(capture_rank) - 1)
+        # Check for capture
+        if piece == 'p':
+            if source_file == capture_file:
+                f = FILES.index(capture_file)
+                if f > 0:
+                    i = self._file_and_rank_to_index('%s%d' % (
+                            FILES[f - 1], int(capture_rank) + 1))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.black[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f - 1], str(int(capture_rank) + 1)
+                if f < 7:
+                    i = self._file_and_rank_to_index('%s%d' % (
+                            FILES[f + 1], int(capture_rank) + 1))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.black[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f + 1], str(int(capture_rank) + 1)
+            else:
+                i = self._file_and_rank_to_index('%s%d' % (
+                        source_file, int(capture_rank) + 1))
+                x, y = self._index_to_xy(i)
+                for p in range(8):
+                    pos = self.black[8 + p].get_xy()
+                    if x == pos[0] and y == pos[1]:
+                        return source_file, str(int(capture_rank) + 1)
+        if piece == 'P':
+            if source_file == capture_file:
+                f = FILES.index(capture_file)
+                if f > 0:
+                    i = self._file_and_rank_to_index('%s%d' % (
+                            FILES[f - 1], int(capture_rank) - 1))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.white[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f - 1], str(int(capture_rank) - 1)
+                if f < 7:
+                    i = self._file_and_rank_to_index('%s%d' % (
+                            FILES[f + 1], int(capture_rank) - 1))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.white[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f + 1], str(int(capture_rank) - 1)
+            else:
+                i = self._file_and_rank_to_index('%s%d' % (
+                        source_file, int(capture_rank) - 1))
+                x, y = self._index_to_xy(i)
+                for p in range(8):
+                    pos = self.white[8 + p].get_xy()
+                    if x == pos[0] and y == pos[1]:
+                        return source_file, str(int(capture_rank) - 1)
+        return capture_file, capture_rank
+
+    def _search_for_rook(
+        self, piece, source_file, source_rank, capture_file, capture_rank):
+        # Change rank
+        if piece in 'rq':
+            for r in range(8 - int(capture_rank)):
+                i = self._file_and_rank_to_index('%s%d' % (
+                        capture_file, int(capture_rank) + r))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if piece == 'r' and (b == 0 or b == 7):
+                        return capture_file, str(int(capture_rank) + r)
+                    elif piece == 'q' and b == 3:
+                        return capture_file, str(int(capture_rank) + r)
+                    else:
+                        break
+                elif p is not None:
+                    break
+            for r in range(int(capture_rank) - 1):
+                i = self._file_and_rank_to_index('%s%d' % (
+                        capture_file, int(capture_rank) - r))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if piece == 'r' and (b == 0 or b == 7):
+                        return capture_file, str(int(capture_rank) - r)
+                    elif piece == 'q' and b == 3:
+                        return capture_file, str(int(capture_rank) - r)
+                    else:
+                        break
+                elif p is not None:
+                    break
+        else:
+            for r in range(8 - int(capture_rank)):
+                i = self._file_and_rank_to_index('%s%d' % (
+                        capture_file, int(capture_rank) + r))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if piece == 'R' and (w == 0 or w == 7):
+                        return capture_file, str(int(capture_rank) + r)
+                    elif piece == 'Q' and w == 3:
+                        return capture_file, str(int(capture_rank) + r)
+                    else:
+                        break
+                elif p is not None:
+                    break
+            for r in range(int(capture_rank) - 1):
+                i = self._file_and_rank_to_index('%s%d' % (
+                        capture_file, int(capture_rank) - r))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if piece == 'R' and (w == 0 or w == 7):
+                        return capture_file, str(int(capture_rank) - r)
+                    elif piece == 'Q' and w == 3:
+                        return capture_file, str(int(capture_rank) - r)
+                    else:
+                        break
+                elif p is not None:
+                    break
+        # Change file
+        if piece in 'rq':
+            for f in range(8 - FILES.index(capture_file)):
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[f + FILES.index(capture_file)], capture_rank))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if piece == 'r' and (b == 0 or b == 7):
+                        return FILES[f + FILES.index(capture_file)], \
+                               capture_rank
+                    elif piece == 'q' and b == 3:
+                        return FILES[f + FILES.index(capture_file)], \
+                               capture_rank
+                    if b == 0 or b == 7:
+                        return FILES[f + FILES.index(capture_file)], \
+                               capture_rank
+                    else:
+                        break
+                elif p is not None:
+                    break
+            for f in range(FILES.index(capture_file) - 1):
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - f], capture_rank))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if piece == 'r' and (b == 0 or b == 7):
+                        return FILES[FILES.index(capture_file) - f], \
+                               capture_rank
+                    elif piece == 'q' and b == 3:
+                        return FILES[FILES.index(capture_file) - f], \
+                               capture_rank
+                    else:
+                        break
+                elif p is not None:
+                    break
+        else:
+            for f in range(8 - FILES.index(capture_file)):
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[f + FILES.index(capture_file)], capture_rank))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if piece == 'R' and (w == 0 or w == 7):
+                        return FILES[f + FILES.index(capture_file)], \
+                               capture_rank
+                    elif piece == 'Q' and w == 3:
+                        return FILES[f + FILES.index(capture_file)], \
+                               capture_rank
+                    else:
+                        break
+                elif p is not None:
+                    break
+            for f in range(FILES.index(capture_file) - 1):
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - f], capture_rank))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if piece == 'R' and (w == 0 or w == 7):
+                        return FILES[FILES.index(capture_file) - f], \
+                               capture_rank
+                    elif piece == 'Q' and w == 3:
+                        return FILES[FILES.index(capture_file) - f], \
+                               capture_rank
+                    else:
+                        break
+                elif p is not None:
+                    break
+        if piece in 'rR':
+            return capture_file, capture_rank
+        else:
+            return None, None
+
+    def _search_for_knight(
+        self, piece, source_file, source_rank, capture_file, capture_rank):
+        return capture_file, capture_rank
+
+    def _search_for_bishop(
+        self, piece, source_file, source_rank, capture_file, capture_rank):
+        return capture_file, capture_rank
+
+    def _search_for_queen(
+        self, piece, source_file, source_rank, capture_file, capture_rank):
+        file_and_rank = self._search_for_rook(
+            self, piece, source_file, source_rank, capture_file, capture_rank)
+        if file_and_rank[0] is not None:
+            return file_and_rank[0], file_and_rank[1]
+        return self._search_for_bishop(
+            self, piece, source_file, source_rank, capture_file, capture_rank)
+
+    def _search_for_king(
+        self, piece, source_file, source_rank, capture_file, capture_rank):
+        return capture_file, capture_rank
+
+    def _find_piece_at_index(self, i):
+        pos = self._index_to_xy(i)
+        return self._find_piece_at_xy(self, pos)
+
+    def _find_piece_at_index(self, pos):
+        for w in self.white:
+            x, y = w.get_pos()
+            if x == pos[0] and y == pos[1]:
+                return w
+        for b in self.black:
+            x, y = b.get_pos()
+            if x == pos[0] and y == pos[1]:
+                return b
+        return None
 
     def remote_button_press(self, dot, color):
         ''' Receive a button press from a sharer '''
@@ -394,18 +831,22 @@ class Gnuchess():
         _logger.debug('enabling sharing')
         self.we_are_sharing = share
 
-    def _grid_to_xy(self, pos):
-        ''' calculate the xy position from a column and row in the board '''
-        return 
+    def _file_and_rank_to_index(self, file_and_rank):
+        ''' calculate the tile index from the file and rank '''
+        return FILES.index(file_and_rank[0]) + \
+            8 * (7 - RANKS.index(file_and_rank[1]))
 
-    def _xy_to_grid(self, pos):
+    def _index_to_xy(self, i):
+        return self._board[i].get_xy()
+
+    def _xy_to_file_and_rank(self, pos):
         ''' calculate the board column and row for an xy position '''
         xo = self._width - 8 * self._scale
         xo = int(xo / 2)
         x = pos[0] - xo
         yo = int(self._scale / 2)
         y = yo
-        return ('%s%d' % ('abcdefgh'[int((pos[0] - xo) / self._scale)],
+        return ('%s%d' % (FILES[int((pos[0] - xo) / self._scale)],
                 8 - int((pos[1] - yo) / self._scale)))
  
     def _expose_cb(self, win, event):
@@ -575,9 +1016,9 @@ class Gnuchess():
         bg.type = None
 
         w = h = self._scale
-        self._squares.append( self._box(w, h, color='black'))
-        self._squares.append( self._box(w, h, color='white'))
-        self._squares.append( self._box(w, h, color=colors[0]))
+        self._squares.append(self._box(w, h, color='black'))
+        self._squares.append(self._box(w, h, color='white'))
+        self._squares.append(self._box(w, h, color=colors[0]))
         xo = self._width - 8 * self._scale
         xo = int(xo / 2)
         yo = int(self._scale / 2)
@@ -585,18 +1026,11 @@ class Gnuchess():
         for i in range(8):
             x = xo
             for j in range(8):
-                if i % 2 == 0:
-                    if (i * 8 + j) % 2 == 1:
-                        square = Sprite(self._sprites, x, y, self._squares[0])
-                    else:
-                        square = Sprite(self._sprites, x, y, self._squares[1])
-                else:
-                    if (i * 8 + j) % 2 == 1:
-                        square = Sprite(self._sprites, x, y, self._squares[1])
-                    else:
-                        square = Sprite(self._sprites, x, y, self._squares[0])
-                square.type = None  # '%s%d' % ('abcdefgh'[j], 8 - i)
-                square.set_layer(BOT)
+                self._board.append(
+                    Sprite(self._sprites, x, y,
+                           self._squares[black_or_white([i, j])]))
+                self._board[-1].type = None  # '%s%d' % (FILES[j], 8 - i)
+                self._board[-1].set_layer(BOT)
                 x += self._scale
             y += self._scale
 
@@ -733,3 +1167,27 @@ def svg_str_to_pixbuf(svg_string):
     pl.close()
     pixbuf = pl.get_pixbuf()
     return pixbuf
+
+
+def black_or_white(n):
+    ''' Return 0 is it is a black square; 1 if it is a white square '''
+    if type(n) is int:
+        i = int(n / 8)
+        j = n % 8
+    else:
+        i = n[0]
+        j = n[1]
+
+    if i % 2 == 0:
+        if (i * 8 + j) % 2 == 1:
+            return 0
+        else:
+            return 1
+    else:
+        if (i * 8 + j) % 2 == 1:
+            return 1
+        else:
+            return 0
+
+
+
