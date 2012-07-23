@@ -160,6 +160,18 @@ class GNUChessActivity(activity.Activity):
                        tooltip=_('Fullscreen'),
                        accelerator='<Alt>Return')
 
+        button_factory('media-playback-start',
+                       self.view_toolbar,
+                       self._play_history_cb,
+                       tooltip=_('Play game history'))
+
+        button_factory('list-numbered',
+                       self.view_toolbar,
+                       self._show_history_cb,
+                       tooltip=_('Show game history'))
+
+        separator_factory(self.view_toolbar, False, True)
+
         label_factory(self.view_toolbar,
                       _('White: '))
         self.white_entry = entry_factory('',
@@ -321,6 +333,12 @@ class GNUChessActivity(activity.Activity):
     def do_fullscreen_cb(self, button):
         ''' Hide the Sugar toolbars. '''
         self.fullscreen()
+
+    def _play_history_cb(self, button):
+        return
+
+    def _show_history_cb(self, button):
+        return
 
     def _copy_cb(self, *args):
         clipboard = gtk.Clipboard()
