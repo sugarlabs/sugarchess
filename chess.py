@@ -87,6 +87,7 @@ class Gnuchess():
 
         self.move_list = []
         self.game = ''
+        self._showing_game_history = False
 
         self._press = None
         self._release = None
@@ -268,6 +269,8 @@ class Gnuchess():
 
     def _all_clear(self):
         ''' Things to reinitialize when starting up a new game. '''
+        self.bg.set_layer(-1)
+        self.bg.set_label('')
         self.move_list = []
         self.game = ''
         self.move(NEW)
@@ -300,6 +303,28 @@ class Gnuchess():
 
     def save_game(self):
         return self.move_list
+
+    def show_game_history(self):
+        if not self._showing_game_history:
+            self.bg.set_layer(TOP)
+            self.bg.set_label(self.copy_game())
+            self._showing_game_history = True
+        else:
+            self.bg.set_layer(-1)
+            self.bg.set_label('')
+            self._showing_game_history = False
+
+    def play_game_history(self):
+        self._counter = 0
+        self._copy_of_move_list = self.move_list[:]
+        self._all_clear()
+        self._stepper()
+
+    def _stepper(self):
+        if self._counter < len(self._copy_of_move_list):
+            self.move(self._copy_of_move_list[self._counter])
+            self._counter += 1
+            gobject.timeout_add(2000, self._stepper)
 
     def _button_press_cb(self, win, event):
         win.grab_focus()
@@ -1010,10 +1035,12 @@ class Gnuchess():
             self.black[4].set_image(pixbuf)
 
     def _generate_sprites(self, colors):
-        bg = Sprite(self._sprites, 0, 0, self._box(self._width, self._height,
-                                              color=colors[1]))
-        bg.set_layer(-1)
-        bg.type = None
+        self.bg = Sprite(self._sprites, 0, 0, self._box(
+                self._width, self._height, color=colors[1]))
+        self.bg.set_layer(-1)
+        self.bg.set_margins(l=10, t=10, r=10, b=10)
+        self.bg.set_label_attributes(12, horiz_align="left", vert_align="top")
+        self.bg.type = None
 
         w = h = self._scale
         self._squares.append(self._box(w, h, color='black'))

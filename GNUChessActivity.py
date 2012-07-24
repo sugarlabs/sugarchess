@@ -335,9 +335,11 @@ class GNUChessActivity(activity.Activity):
         self.fullscreen()
 
     def _play_history_cb(self, button):
+        self._gnuchess.play_game_history()
         return
 
     def _show_history_cb(self, button):
+        self._gnuchess.show_game_history()
         return
 
     def _copy_cb(self, *args):
