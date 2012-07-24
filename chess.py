@@ -277,11 +277,21 @@ class Gnuchess():
     def show_game_history(self):
         if not self._showing_game_history:
             self.bg.set_layer(TOP)
-            self.bg.set_label(self.copy_game())
+            self.bg2.set_layer(TOP)
+            self.move(GAME)
+            # Split into two columns
+            if ' 21.' in self.game:
+                i = self.game.index(' 21.')
+                self.bg.set_label(self.game[: i - 1])
+                self.bg2.set_label(self.game[i: ])
+            else:
+                self.bg.set_label(self.game)
             self._showing_game_history = True
         else:
             self.bg.set_layer(-1)
             self.bg.set_label('')
+            self.bg2.set_layer(-1)
+            self.bg2.set_label('')
             self._showing_game_history = False
 
     def play_game_history(self):
@@ -1509,11 +1519,18 @@ class Gnuchess():
 
     def _generate_sprites(self, colors):
         self.bg = Sprite(self._sprites, 0, 0, self._box(
-                self._width, self._height, color=colors[1]))
+                int(self._width / 2), self._height, color=colors[1]))
         self.bg.set_layer(-1)
         self.bg.set_margins(l=10, t=10, r=10, b=10)
         self.bg.set_label_attributes(12, horiz_align="left", vert_align="top")
         self.bg.type = None
+
+        self.bg2 = Sprite(self._sprites, int(self._width / 2), 0, self._box(
+                int(self._width / 2), self._height, color=colors[1]))
+        self.bg2.set_layer(-1)
+        self.bg2.set_margins(l=10, t=10, r=10, b=10)
+        self.bg2.set_label_attributes(12, horiz_align="left", vert_align="top")
+        self.bg2.type = None
 
         w = h = self._scale
         self._squares.append(self._box(w, h, color='black'))
@@ -1688,6 +1705,3 @@ def black_or_white(n):
             return 1
         else:
             return 0
-
-
-
