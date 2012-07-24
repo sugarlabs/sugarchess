@@ -123,7 +123,7 @@ class Gnuchess():
         (5) show board to refresh the current state
         (6) prompt the robot to move
         '''
-        _logger.debug(my_move)
+        # _logger.debug(my_move)
 
         p = subprocess.Popen(['%s/bin/gnuchess' % (self._bundle_path)],
                              stdin=subprocess.PIPE,
@@ -154,7 +154,7 @@ class Gnuchess():
                 cmd += 'show game\nquit\n'
             else:
                 cmd += 'show board\nquit\n'
-            _logger.debug(cmd)
+            # _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=None, hint=hint)
         elif my_move == ROBOT:  # Ask the computer to play
@@ -162,7 +162,7 @@ class Gnuchess():
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             cmd += '%sgo\nshow board\nquit\n' % (level)
-            _logger.debug(cmd)
+            # _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move='robot')
         elif my_move is not None:  # human's move
@@ -171,7 +171,7 @@ class Gnuchess():
                 cmd += '%s\n' % (move)
             cmd += '%s\n' % (my_move)
             cmd += 'show board\nquit\n'
-            _logger.debug(cmd)
+            # _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=my_move)
         else:
@@ -181,7 +181,7 @@ class Gnuchess():
         ''' process output '''
         check = False
         checkmate = False
-        _logger.debug(output)
+        # _logger.debug(output)
         if 'White   Black' in output:  # processing show game
             target = 'White   Black'
             output = output[find(output, target):]
@@ -191,7 +191,6 @@ class Gnuchess():
             output = output[find(output, ROBOT_MOVE):]
             hint = output[len(ROBOT_MOVE):find(output, '\n')]
             self._activity.status.set_label(hint)
-            _logger.debug(hint)
             self._parse_move(hint)
             return
         elif 'wins' in output or 'loses' in output:
@@ -204,7 +203,7 @@ class Gnuchess():
         elif my_move == ROBOT:
             output = output[find(output, ROBOT_MOVE):]
             robot_move = output[len(ROBOT_MOVE):find(output, '\n')]
-            _logger.debug(robot_move)
+            # _logger.debug(robot_move)
             self.move_list.append(robot_move)
             if '+' in robot_move:
                 check = True
@@ -229,14 +228,14 @@ class Gnuchess():
             target = 'white  '
         else:
             target = 'black  '
-        _logger.debug('looking for %s' % (target))
+        # _logger.debug('looking for %s' % (target))
         while find(output, target) > 0:
             output = output[find(output, target):]
             output = output[find(output, '\n'):]
         if len(output) < 136:
             self._activity.status.set_label(_('bad board output'))
             _logger.debug('bad board output')
-            _logger.debug(output)
+            # _logger.debug(output)
         else:
             self._load_board(output)
 
@@ -269,17 +268,18 @@ class Gnuchess():
 
     def _all_clear(self):
         ''' Things to reinitialize when starting up a new game. '''
+        _logger.debug('all clear')
         self.bg.set_layer(-1)
         self.bg.set_label('')
         self.move_list = []
         self.game = ''
-        self.move(NEW)
 
     def _initiating(self):
         return self._activity.initiating
 
     def new_game(self):
         self._all_clear()
+        self.move(NEW)
         if not self._activity.playing_white:
             self.move(ROBOT)
 
@@ -432,12 +432,8 @@ class Gnuchess():
         self._activity.status.set_label('Thinking')
         gobject.timeout_add(500, self.move, HINT)
 
-    def _flash_tile(self, sfile, srank, cfile, crank):
-        tiles = []
+    def _flash_tile(self, tiles):
         self._counter = 0
-        tiles.append('%s%s' % (sfile, srank))
-        tiles.append('%s%s' % (cfile, crank))
-        _logger.debug(tiles)
         gobject.timeout_add(100, self._flasher, tiles)
         return
 
@@ -454,6 +450,7 @@ class Gnuchess():
             gobject.timeout_add(200, self._flasher, tiles)
 
     def _parse_move(self, move):
+        tiles = []
         label = move
         source_file = None
         source_rank = None
@@ -473,12 +470,13 @@ class Gnuchess():
                     source_rank = move[1]
             elif move[0] == 'O':
                 if move == 'O-O':
-                    piece = 'K'
-                    source_file = 'g'
-                    source_rank = 1
-                    print 'K and R[1] and g1 and f1'
-                else:
-                    print 'K and R[0] and c1 and d1'
+                    tiles.append('e1')
+                    tiles.append('g1')
+                else:  # O-O-O
+                    tiles.append('b1')
+                    tiles.append('e1')
+                self._flash_tile(tiles)
+                return
             else:
                 piece = move[0]
                 if move[1] in FILES:
@@ -487,6 +485,12 @@ class Gnuchess():
                         source_rank = move[2]
                 elif move[1] in RANKS:
                     source_rank = move[1]
+                if source_rank is None or source_file is None:
+                    if move[2] in FILES:
+                        capture_file = move[2]
+                        if len(move) > 3:
+                            if move[3] in RANKS:
+                                capture_rank = move[3]
         else:
             white = False
             if move[0] in FILES:
@@ -496,12 +500,13 @@ class Gnuchess():
                     source_rank = move[1]
             elif move[0] == 'O':
                 if move == 'O-O':
-                    piece = 'k'
-                    source_file = 'g'
-                    source_rank = 8
-                    print 'k and r[1] and g8 and f8'
-                else:
-                    print 'k and r[0] and c8 and d8'
+                    tiles.append('e8')
+                    tiles.append('g8')
+                else:  # O-O-O
+                    tiles.append('b8')
+                    tiles.append('e8')
+                self._flash_tile(tiles)
+                return
             else:
                 piece = move[0]
                 if move[1] in FILES:
@@ -510,6 +515,12 @@ class Gnuchess():
                         source_rank = move[2]
                 elif move[1] in RANKS:
                     source_rank = move[1]
+                if source_rank is None or source_file is None:
+                    if move[2] in FILES:
+                        capture_file = move[2]
+                        if len(move) > 3:
+                            if move[3] in RANKS:
+                                capture_rank = move[3]
         if capture:
             move = move[find(move, 'x') + 1:]
             if white:
@@ -552,9 +563,6 @@ class Gnuchess():
                                 capture_rank = move[1]
                     elif move[0] in RANKS:
                         capture_rank = move[0]
-        self._activity.status.set_label('%s: %s %s%s %s%s' % (
-                label, piece, source_file, source_rank,
-                capture_file, capture_rank))
 
         if capture_file is None:
             capture_file = source_file
@@ -583,7 +591,9 @@ class Gnuchess():
         elif piece in 'kK':
             source_file, source_rank = self._search_for_king(
                 piece, source_file, source_rank, capture_file, capture_rank)
-        self._flash_tile(source_file, source_rank, capture_file, capture_rank)
+        tiles.append('%s%s' % (source_file, source_rank))
+        tiles.append('%s%s' % (capture_file, capture_rank))
+        self._flash_tile(tiles)
 
     def _search_for_pawn(
         self, piece, source_file, source_rank, capture_file, capture_rank):
@@ -601,145 +611,159 @@ class Gnuchess():
             for p in range(8):
                 pos = self.white[8 + p].get_xy()
                 if x == pos[0] and y == pos[1]:
-                    return capture_file, '7'
+                    return capture_file, '2'
         # Check for previous space
         if piece == 'p':
-            i = self._file_and_rank_to_index('%s%d' % (
-                    capture_file, int(capture_rank) + 1))
+            i = self._file_and_rank_to_index('%s%s' % (
+                    capture_file, RANKS[RANKS.index(capture_rank) + 1]))
             x, y = self._index_to_xy(i)
             for p in range(8):
                 pos = self.black[8 + p].get_xy()
                 if x == pos[0] and y == pos[1]:
-                    return capture_file, str(int(capture_rank) + 1)
+                    return capture_file, RANKS[RANKS.index(capture_rank) + 1]
         elif piece == 'P':
-            i = self._file_and_rank_to_index('%s%d' % (
-                    capture_file, int(capture_rank) - 1))
+            i = self._file_and_rank_to_index('%s%s' % (
+                    capture_file, RANKS[RANKS.index(capture_rank) - 1]))
             x, y = self._index_to_xy(i)
             for p in range(8):
-                pos = self.black[8 + p].get_xy()
+                pos = self.white[8 + p].get_xy()
                 if x == pos[0] and y == pos[1]:
-                    return capture_file, str(int(capture_rank) - 1)
+                    return capture_file, RANKS[RANKS.index(capture_rank) - 1]
         # Check for capture
         if piece == 'p':
             if source_file == capture_file:
                 f = FILES.index(capture_file)
                 if f > 0:
-                    i = self._file_and_rank_to_index('%s%d' % (
-                            FILES[f - 1], int(capture_rank) + 1))
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f - 1], RANKS[RANKS.index(capture_rank) + 1]))
                     x, y = self._index_to_xy(i)
                     for p in range(8):
                         pos = self.black[8 + p].get_xy()
                         if x == pos[0] and y == pos[1]:
-                            return FILES[f - 1], str(int(capture_rank) + 1)
+                            return FILES[f - 1], \
+                                   RANKS[RANKS.index(capture_rank) + 1]
                 if f < 7:
-                    i = self._file_and_rank_to_index('%s%d' % (
-                            FILES[f + 1], int(capture_rank) + 1))
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f + 1], RANKS[RANKS.index(capture_rank) + 1]))
                     x, y = self._index_to_xy(i)
                     for p in range(8):
                         pos = self.black[8 + p].get_xy()
                         if x == pos[0] and y == pos[1]:
-                            return FILES[f + 1], str(int(capture_rank) + 1)
+                            return FILES[f + 1], \
+                                   RANKS[RANKS.index(capture_rank) + 1]
             else:
-                i = self._file_and_rank_to_index('%s%d' % (
-                        source_file, int(capture_rank) + 1))
+                i = self._file_and_rank_to_index('%s%s' % (
+                        source_file, RANKS[RANKS.index(capture_rank) + 1]))
                 x, y = self._index_to_xy(i)
                 for p in range(8):
                     pos = self.black[8 + p].get_xy()
                     if x == pos[0] and y == pos[1]:
-                        return source_file, str(int(capture_rank) + 1)
+                        return source_file, \
+                               RANKS[RANKS.index(capture_rank) + 1]
         if piece == 'P':
             if source_file == capture_file:
                 f = FILES.index(capture_file)
                 if f > 0:
-                    i = self._file_and_rank_to_index('%s%d' % (
-                            FILES[f - 1], int(capture_rank) - 1))
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f - 1], RANKS[RANKS.index(capture_rank) - 1]))
                     x, y = self._index_to_xy(i)
                     for p in range(8):
                         pos = self.white[8 + p].get_xy()
                         if x == pos[0] and y == pos[1]:
-                            return FILES[f - 1], str(int(capture_rank) - 1)
+                            return FILES[f - 1], \
+                                   RANKS[RANKS.index(capture_rank) - 1]
                 if f < 7:
-                    i = self._file_and_rank_to_index('%s%d' % (
-                            FILES[f + 1], int(capture_rank) - 1))
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f + 1], RANKS[RANKS.index(capture_rank) - 1]))
                     x, y = self._index_to_xy(i)
                     for p in range(8):
                         pos = self.white[8 + p].get_xy()
                         if x == pos[0] and y == pos[1]:
-                            return FILES[f + 1], str(int(capture_rank) - 1)
+                            return FILES[f + 1], \
+                                   RANKS[RANKS.index(capture_rank) - 1]
             else:
-                i = self._file_and_rank_to_index('%s%d' % (
-                        source_file, int(capture_rank) - 1))
+                i = self._file_and_rank_to_index('%s%s' % (
+                        source_file, RANKS[RANKS.index(capture_rank) - 1]))
                 x, y = self._index_to_xy(i)
                 for p in range(8):
                     pos = self.white[8 + p].get_xy()
                     if x == pos[0] and y == pos[1]:
-                        return source_file, str(int(capture_rank) - 1)
+                        return source_file, \
+                               RANKS[RANKS.index(capture_rank) - 1]
         return capture_file, capture_rank
 
     def _search_for_rook(
         self, piece, source_file, source_rank, capture_file, capture_rank):
         # Change rank
         if piece in 'rq':
-            for r in range(8 - int(capture_rank)):
-                i = self._file_and_rank_to_index('%s%d' % (
-                        capture_file, int(capture_rank) + r))
+            for r in range(7 - RANKS.index(capture_rank)):
+                i = self._file_and_rank_to_index('%s%s' % (
+                        capture_file, RANKS[RANKS.index(capture_rank) + r]))
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
                     if piece == 'r' and (b == 0 or b == 7):
-                        return capture_file, str(int(capture_rank) + r)
+                        return capture_file, \
+                               RANKS[RANKS.index(capture_rank) + r]
                     elif piece == 'q' and b == 3:
-                        return capture_file, str(int(capture_rank) + r)
+                        return capture_file, \
+                               RANKS[RANKS.index(capture_rank) + r]
                     else:
                         break
                 elif p is not None:
                     break
-            for r in range(int(capture_rank) - 1):
-                i = self._file_and_rank_to_index('%s%d' % (
-                        capture_file, int(capture_rank) - r))
+            for r in range(RANKS.index(capture_rank)):
+                i = self._file_and_rank_to_index('%s%s' % (
+                        capture_file, RANKS[RANKS.index(capture_rank) - r]))
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
                     if piece == 'r' and (b == 0 or b == 7):
-                        return capture_file, str(int(capture_rank) - r)
+                        return capture_file, \
+                               RANKS[RANKS.index(capture_rank) - r - 1]
                     elif piece == 'q' and b == 3:
-                        return capture_file, str(int(capture_rank) - r)
+                        return capture_file, \
+                               RANKS[RANKS.index(capture_rank) - r - 1]
                     else:
                         break
                 elif p is not None:
                     break
         else:
-            for r in range(8 - int(capture_rank)):
-                i = self._file_and_rank_to_index('%s%d' % (
-                        capture_file, int(capture_rank) + r))
+            for r in range(7 - RANKS.index(capture_rank)):
+                i = self._file_and_rank_to_index('%s%s' % (
+                        capture_file, RANKS[RANKS.index(capture_rank) + r]))
                 p = self._find_piece_at_index(i)
                 if p in self.white:
                     w = self.white.index(p)
                     if piece == 'R' and (w == 0 or w == 7):
-                        return capture_file, str(int(capture_rank) + r)
+                        return capture_file, \
+                               RANKS[RANKS.index(capture_rank) + r]
                     elif piece == 'Q' and w == 3:
-                        return capture_file, str(int(capture_rank) + r)
+                        return capture_file, \
+                               RANKS[RANKS.index(capture_rank) + r]
                     else:
                         break
                 elif p is not None:
                     break
-            for r in range(int(capture_rank) - 1):
-                i = self._file_and_rank_to_index('%s%d' % (
-                        capture_file, int(capture_rank) - r))
+            for r in range(RANKS.index(capture_rank)):
+                i = self._file_and_rank_to_index('%s%s' % (
+                        capture_file, RANKS[RANKS.index(capture_rank) - r - 1]))
                 p = self._find_piece_at_index(i)
                 if p in self.white:
                     w = self.white.index(p)
                     if piece == 'R' and (w == 0 or w == 7):
-                        return capture_file, str(int(capture_rank) - r)
+                        return capture_file, \
+                               RANKS[RANKS.index(capture_rank) - r - 1]
                     elif piece == 'Q' and w == 3:
-                        return capture_file, str(int(capture_rank) - r)
+                        return capture_file, \
+                               RANKS[RANKS.index(capture_rank) - r - 1]
                     else:
                         break
                 elif p is not None:
                     break
         # Change file
         if piece in 'rq':
-            for f in range(8 - FILES.index(capture_file)):
+            for f in range(7 - FILES.index(capture_file)):
                 i = self._file_and_rank_to_index('%s%s' % (
                         FILES[f + FILES.index(capture_file)], capture_rank))
                 p = self._find_piece_at_index(i)
@@ -758,24 +782,24 @@ class Gnuchess():
                         break
                 elif p is not None:
                     break
-            for f in range(FILES.index(capture_file) - 1):
+            for f in range(FILES.index(capture_file)):
                 i = self._file_and_rank_to_index('%s%s' % (
-                        FILES[FILES.index(capture_file) - f], capture_rank))
+                        FILES[FILES.index(capture_file) - f - 1], capture_rank))
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
                     if piece == 'r' and (b == 0 or b == 7):
-                        return FILES[FILES.index(capture_file) - f], \
+                        return FILES[FILES.index(capture_file) - f - 1], \
                                capture_rank
                     elif piece == 'q' and b == 3:
-                        return FILES[FILES.index(capture_file) - f], \
+                        return FILES[FILES.index(capture_file) - f - 1], \
                                capture_rank
                     else:
                         break
                 elif p is not None:
                     break
         else:
-            for f in range(8 - FILES.index(capture_file)):
+            for f in range(7 - FILES.index(capture_file)):
                 i = self._file_and_rank_to_index('%s%s' % (
                         FILES[f + FILES.index(capture_file)], capture_rank))
                 p = self._find_piece_at_index(i)
@@ -791,17 +815,17 @@ class Gnuchess():
                         break
                 elif p is not None:
                     break
-            for f in range(FILES.index(capture_file) - 1):
+            for f in range(FILES.index(capture_file)):
                 i = self._file_and_rank_to_index('%s%s' % (
-                        FILES[FILES.index(capture_file) - f], capture_rank))
+                        FILES[FILES.index(capture_file) - f - 1], capture_rank))
                 p = self._find_piece_at_index(i)
                 if p in self.white:
                     w = self.white.index(p)
                     if piece == 'R' and (w == 0 or w == 7):
-                        return FILES[FILES.index(capture_file) - f], \
+                        return FILES[FILES.index(capture_file) - f - 1], \
                                capture_rank
                     elif piece == 'Q' and w == 3:
-                        return FILES[FILES.index(capture_file) - f], \
+                        return FILES[FILES.index(capture_file) - f - 1], \
                                capture_rank
                     else:
                         break
@@ -814,36 +838,492 @@ class Gnuchess():
 
     def _search_for_knight(
         self, piece, source_file, source_rank, capture_file, capture_rank):
+        if piece == 'n':
+            if RANKS.index(capture_rank) < 6 and FILES.index(capture_file) > 0:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - 1],
+                        RANKS[RANKS.index(capture_rank) + 2]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b in [1, 6]:
+                        return FILES[FILES.index(capture_file) - 1], \
+                               RANKS[RANKS.index(capture_rank) + 2]
+            if RANKS.index(capture_rank) < 6 and FILES.index(capture_file) < 7:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) + 1],
+                        RANKS[RANKS.index(capture_rank) + 2]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b in [1, 6]:
+                        return FILES[FILES.index(capture_file) + 1], \
+                               RANKS[RANKS.index(capture_rank) + 2]
+            if RANKS.index(capture_rank) > 1 and FILES.index(capture_file) < 7:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) + 1],
+                        RANKS[RANKS.index(capture_rank) - 2]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b in [1, 6]:
+                        return FILES[FILES.index(capture_file) + 1], \
+                               RANKS[RANKS.index(capture_rank) - 2]
+            if RANKS.index(capture_rank) > 1 and FILES.index(capture_file) > 0:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - 1],
+                        RANKS[RANKS.index(capture_rank) - 2]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b in [1, 6]:
+                        return FILES[FILES.index(capture_file) - 1], \
+                               RANKS[RANKS.index(capture_rank) - 2]
+            if RANKS.index(capture_rank) < 7 and FILES.index(capture_file) > 1:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - 2],
+                        RANKS[RANKS.index(capture_rank) + 1]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b in [1, 6]:
+                        return FILES[FILES.index(capture_file) - 2], \
+                               RANKS[RANKS.index(capture_rank) + 1]
+            if RANKS.index(capture_rank) < 7 and FILES.index(capture_file) < 6:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) + 2],
+                        RANKS[RANKS.index(capture_rank) + 1]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b in [1, 6]:
+                        return FILES[FILES.index(capture_file) + 2], \
+                               RANKS[RANKS.index(capture_rank) + 1]
+            if RANKS.index(capture_rank) > 0 and FILES.index(capture_file) < 6:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) + 2],
+                        RANKS[RANKS.index(capture_rank) - 1]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b in [1, 6]:
+                        return FILES[FILES.index(capture_file) + 2], \
+                               RANKS[RANKS.index(capture_rank) - 1]
+            if RANKS.index(capture_rank) > 0 and FILES.index(capture_file) > 1:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - 2],
+                        RANKS[RANKS.index(capture_rank) - 1]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b in [1, 6]:
+                        return FILES[FILES.index(capture_file) - 2], \
+                               RANKS[RANKS.index(capture_rank) - 1]
+        else:
+            if RANKS.index(capture_rank) < 6 and FILES.index(capture_file) > 0:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - 1],
+                        RANKS[RANKS.index(capture_rank) + 2]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w in [1, 6]:
+                        return FILES[FILES.index(capture_file) - 1], \
+                               RANKS[RANKS.index(capture_rank) + 2]
+            if RANKS.index(capture_rank) < 6 and FILES.index(capture_file) < 7:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) + 1],
+                        RANKS[RANKS.index(capture_rank) + 2]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w in [1, 6]:
+                        return FILES[FILES.index(capture_file) + 1], \
+                               RANKS[RANKS.index(capture_rank) + 2]
+            if RANKS.index(capture_rank) > 1 and FILES.index(capture_file) < 7:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) + 1],
+                        RANKS[RANKS.index(capture_rank) - 2]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w in [1, 6]:
+                        return FILES[FILES.index(capture_file) + 1], \
+                               RANKS[RANKS.index(capture_rank) - 2]
+            if RANKS.index(capture_rank) > 1 and FILES.index(capture_file) > 0:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - 1],
+                        RANKS[RANKS.index(capture_rank) - 2]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w in [1, 6]:
+                        return FILES[FILES.index(capture_file) - 1], \
+                               RANKS[RANKS.index(capture_rank) - 2]
+            if RANKS.index(capture_rank) < 7 and FILES.index(capture_file) > 1:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - 2],
+                        RANKS[RANKS.index(capture_rank) + 1]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w in [1, 6]:
+                        return FILES[FILES.index(capture_file) - 2], \
+                               RANKS[RANKS.index(capture_rank) + 1]
+            if RANKS.index(capture_rank) < 7 and FILES.index(capture_file) < 6:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) + 2],
+                        RANKS[RANKS.index(capture_rank) + 1]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w in [1, 6]:
+                        return FILES[FILES.index(capture_file) + 2], \
+                               RANKS[RANKS.index(capture_rank) + 1]
+            if RANKS.index(capture_rank) > 0 and FILES.index(capture_file) < 6:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) + 2],
+                        RANKS[RANKS.index(capture_rank) - 1]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w in [1, 6]:
+                        return FILES[FILES.index(capture_file) + 2], \
+                               RANKS[RANKS.index(capture_rank) - 1]
+            if RANKS.index(capture_rank) > 0 and FILES.index(capture_file) > 1:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        FILES[FILES.index(capture_file) - 2],
+                        RANKS[RANKS.index(capture_rank) - 1]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w in [1, 6]:
+                        return FILES[FILES.index(capture_file) - 2], \
+                               RANKS[RANKS.index(capture_rank) - 1]
         return capture_file, capture_rank
 
     def _search_for_bishop(
         self, piece, source_file, source_rank, capture_file, capture_rank):
+        # rank++, file++
+        if piece in 'bq':
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file) + 1
+            while r < 8 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if piece == 'b' and (b == 2 or b == 5):
+                        return FILES[f], RANKS[r]
+                    elif piece == 'q' and b == 3:
+                        return FILES[f], RANKS[r]
+                    else:
+                        break
+                elif p is not None:
+                    break
+                r += 1
+                f += 1
+        if piece in 'BQ':
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file) + 1
+            while r < 8 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if piece == 'B' and (w == 2 or w == 5):
+                        return FILES[f], RANKS[r]
+                    elif piece == 'Q' and w == 3:
+                        return FILES[f], RANKS[r]
+                    else:
+                        break
+                elif p is not None:
+                    break
+                r += 1
+                f += 1
+        # rank--, file++
+        if piece in 'bq':
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file) + 1
+            while r > -1 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if piece == 'b' and (b == 2 or b == 5):
+                        return FILES[f], RANKS[r]
+                    elif piece == 'q' and b == 3:
+                        return FILES[f], RANKS[r]
+                    else:
+                        break
+                elif p is not None:
+                    break
+                r -= 1
+                f += 1
+        if piece in 'BQ':
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file) + 1
+            while r > -1 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if piece == 'B' and (w == 2 or w == 5):
+                        return FILES[f], RANKS[r]
+                    elif piece == 'Q' and w == 3:
+                        return FILES[f], RANKS[r]
+                    else:
+                        break
+                elif p is not None:
+                    break
+                r -= 1
+                f += 1
+        # rank-- file--
+        if piece in 'bq':
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file) - 1
+            while r > -1 and f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if piece == 'b' and (b == 2 or b == 5):
+                        return FILES[f], RANKS[r]
+                    elif piece == 'q' and b == 3:
+                        return FILES[f], RANKS[r]
+                    else:
+                        break
+                elif p is not None:
+                    break
+                r -= 1
+                f -= 1
+        if piece in 'BQ':
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file) - 1
+            while r > -1 and f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if piece == 'B' and (w == 2 or w == 5):
+                        return FILES[f], RANKS[r]
+                    elif piece == 'Q' and w == 3:
+                        return FILES[f], RANKS[r]
+                    else:
+                        break
+                elif p is not None:
+                    break
+                r -= 1
+                f -= 1
+        # rank++ file--
+        if piece in 'bq':
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file) - 1
+            while r < 8 and f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if piece == 'b' and (b == 2 or b == 5):
+                        return FILES[f], RANKS[r]
+                    elif piece == 'q' and b == 3:
+                        return FILES[f], RANKS[r]
+                    else:
+                        break
+                elif p is not None:
+                    break
+                r += 1
+                f -= 1
+        if piece in 'BQ':
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file) - 1
+            while r < 8 and f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if piece == 'B' and (w == 2 or w == 5):
+                        return FILES[f], RANKS[r]
+                    elif piece == 'Q' and w == 3:
+                        return FILES[f], RANKS[r]
+                    else:
+                        break
+                elif p is not None:
+                    break
+                r += 1
+                f -= 1
         return capture_file, capture_rank
 
     def _search_for_queen(
         self, piece, source_file, source_rank, capture_file, capture_rank):
         file_and_rank = self._search_for_rook(
-            self, piece, source_file, source_rank, capture_file, capture_rank)
+            piece, source_file, source_rank, capture_file, capture_rank)
         if file_and_rank[0] is not None:
             return file_and_rank[0], file_and_rank[1]
         return self._search_for_bishop(
-            self, piece, source_file, source_rank, capture_file, capture_rank)
+            piece, source_file, source_rank, capture_file, capture_rank)
 
     def _search_for_king(
         self, piece, source_file, source_rank, capture_file, capture_rank):
+        if piece == 'k':
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file) + 1
+            if r < 8 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file)
+            if r < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file) - 1
+            if r < 8 and f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank)
+            f = FILES.index(capture_file) + 1
+            if r < 8 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank)
+            f = FILES.index(capture_file) - 1
+            if f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file) + 1
+            if r > -1 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file)
+            if r > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file) - 1
+            if r > -1 and f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.black:
+                    b = self.black.index(p)
+                    if b == 4:
+                        return FILES[f], RANKS[r]
+        else:
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file) + 1
+            if r < 8 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file)
+            if r < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) + 1
+            f = FILES.index(capture_file) - 1
+            if r < 8 and f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank)
+            f = FILES.index(capture_file) + 1
+            if r < 8 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank)
+            f = FILES.index(capture_file) - 1
+            if f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file) + 1
+            if r > -1 and f < 8:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file)
+            if r > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w == 4:
+                        return FILES[f], RANKS[r]
+            r = RANKS.index(capture_rank) - 1
+            f = FILES.index(capture_file) - 1
+            if r > -1 and f > -1:
+                i = self._file_and_rank_to_index('%s%s' % (FILES[f], RANKS[r]))
+                p = self._find_piece_at_index(i)
+                if p in self.white:
+                    w = self.white.index(p)
+                    if w == 4:
+                        return FILES[f], RANKS[r]
         return capture_file, capture_rank
 
     def _find_piece_at_index(self, i):
         pos = self._index_to_xy(i)
-        return self._find_piece_at_xy(self, pos)
+        return self._find_piece_at_xy(pos)
 
-    def _find_piece_at_index(self, pos):
+    def _find_piece_at_xy(self, pos):
         for w in self.white:
-            x, y = w.get_pos()
+            x, y = w.get_xy()
             if x == pos[0] and y == pos[1]:
                 return w
         for b in self.black:
-            x, y = b.get_pos()
+            x, y = b.get_xy()
             if x == pos[0] and y == pos[1]:
                 return b
         return None
