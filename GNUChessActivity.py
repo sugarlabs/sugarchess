@@ -440,7 +440,7 @@ class GNUChessActivity(activity.Activity):
 
     def _new_gnuchess_cb(self, button=None):
         ''' Start a new gnuchess. '''
-        self._new_game_alert()
+        self._new_game_alert('new')
 
     def write_file(self, file_path):
         ''' Write the grid status to the Journal '''
