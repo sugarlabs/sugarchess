@@ -11,6 +11,7 @@
 
 
 import gtk
+import gobject
 
 from sugar.activity import activity
 from sugar import profile
@@ -21,6 +22,7 @@ from sugar.graphics.toolbarbox import ToolbarButton
 from sugar.graphics.objectchooser import ObjectChooser
 from sugar.datastore import datastore
 from sugar import mime
+from sugar.graphics.alert import ConfirmationAlert, NotifyAlert
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
     radio_factory, entry_factory
@@ -60,10 +62,9 @@ class GNUChessActivity(activity.Activity):
         self.playing_white = True
         self.playing_mode = 'easy'
         self.playing_robot = True
-        self._restoring = False
+        self._restoring = True
 
         self.nick = profile.get_nick_name()
-        self._reload_custom = False
         if profile.get_color() is not None:
             self.colors = profile.get_color().to_string().split(',')
         else:
@@ -87,7 +88,6 @@ class GNUChessActivity(activity.Activity):
         self._setup_presence_service()
 
         if self.game_data is not None:  # 'saved_game' in self.metadata:
-            self._restoring = True
             self._restore()
         else:
             self._gnuchess.new_game()
@@ -186,45 +186,52 @@ class GNUChessActivity(activity.Activity):
                                          self.view_toolbar,
                                          tooltip=_("Black's move"))
 
-        play_white_button = radio_factory('white-rook',
-                                          self.adjust_toolbar,
-                                          self._play_white_cb,
-                                          group=None,
-                                          tooltip=_('Play White'))
+        self.play_white_button = radio_factory('white-rook',
+                                               self.adjust_toolbar,
+                                               self._play_white_cb,
+                                               group=None,
+                                               tooltip=_('Play White'))
 
         self.play_black_button = radio_factory('black-rook',
                                                self.adjust_toolbar,
                                                self._play_black_cb,
-                                               group=play_white_button,
+                                               group=self.play_white_button,
                                                tooltip=_('Play Black'))
+
+        self.play_white_button.set_active(True)
 
         separator_factory(self.adjust_toolbar, False, True)
 
-        easy_button = radio_factory('beginner',
-                                    self.adjust_toolbar,
-                                    self._easy_cb,
-                                    group=None,
-                                    tooltip=_('Beginner'))
+        self.easy_button = radio_factory('beginner',
+                                         self.adjust_toolbar,
+                                         self._easy_cb,
+                                         group=None,
+                                         tooltip=_('Beginner'))
 
         self.hard_button = radio_factory('expert',
                                          self.adjust_toolbar,
                                          self._hard_cb,
-                                         group=easy_button,
+                                         group=self.easy_button,
                                          tooltip=_('Expert'))
+
+        self.easy_button.set_active(True)
 
         separator_factory(self.adjust_toolbar, False, True)
 
-        robot_button = radio_factory('robot',
-                                    self.adjust_toolbar,
-                                    self._robot_cb,
-                                    group=None,
-                                    tooltip=_('Play against the computer'))
+        self.robot_button = radio_factory('robot',
+                                          self.adjust_toolbar,
+                                          self._robot_cb,
+                                          group=None,
+                                          tooltip=_(
+                'Play against the computer'))
 
         self.human_button = radio_factory('human',
                                           self.adjust_toolbar,
                                           self._human_cb,
-                                          group=robot_button,
+                                          group=self.robot_button,
                                           tooltip=_('Play against a person'))
+
+        self.robot_button.set_active(True)
 
         button_factory('new-game',
                        self.toolbar,
@@ -324,7 +331,6 @@ class GNUChessActivity(activity.Activity):
                        tooltip=_('Black King'))
 
     def _reskin_cb(self, button, piece):
-        _logger.debug('reskin %s' % (piece))
         id, file_path = self._choose_skin()
         if file_path is not None:
             self._gnuchess.reskin(piece, file_path)
@@ -387,52 +393,54 @@ class GNUChessActivity(activity.Activity):
     def _hint_cb(self, *args):
         self._gnuchess.hint()
 
+    def _reset_restoring_flag(self):
+        self._restoring = False
+
     def _play_white_cb(self, *args):
-        _logger.debug('in play white cb')
+        if not self.play_white_button.get_active():
+            return
         if not self._restoring:
-            _logger.debug('setting play white')
-            self.playing_white = True
-            self._gnuchess.new_game()
-        return
+            self._new_game_alert('white')
+        return True
 
     def _play_black_cb(self, *args):
-        _logger.debug('in play black cb')
+        if not self.play_black_button.get_active():
+            return
         if not self._restoring:
-            _logger.debug('setting play black')
-            self.playing_white = False
-            self._gnuchess.new_game()
-        return
+            self._new_game_alert('black')
+        return True
 
     def _easy_cb(self, *args):
+        if not self.easy_button.get_active():
+            return
         if not self._restoring:
-            self.playing_mode = 'easy'
-            self._gnuchess.new_game()
-        return
+            self._new_game_alert('easy')
+        return True
 
     def _hard_cb(self, *args):
+        if not self.hard_button.get_active():
+            return
         if not self._restoring:
-            self.playing_mode = 'hard'
-            self._gnuchess.new_game()
-        return
+            self._new_game_alert('hard')
+        return True
 
     def _robot_cb(self, *args):
+        if not self.robot_button.get_active():
+            return
         if not self._restoring:
-            self.playing_robot = True
-            self._gnuchess.new_game()
-        return
+            self._new_game_alert('robot')
+        return True
 
     def _human_cb(self, *args):
+        if not self.human_button.get_active():
+            return
         if not self._restoring:
-            self.playing_robot = False
-            self._gnuchess.new_game()
-        return
+            self._new_game_alert('human')
+        return True
 
     def _new_gnuchess_cb(self, button=None):
         ''' Start a new gnuchess. '''
-        self._gnuchess.new_game()
-
-    def _custom_cb(self, button=None):
-        return
+        self._new_game_alert()
 
     def write_file(self, file_path):
         ''' Write the grid status to the Journal '''
@@ -463,12 +471,10 @@ class GNUChessActivity(activity.Activity):
                 self.playing_white = False
                 self.play_black_button.set_active(True)
         if 'playing_mode' in self.metadata:
-            _logger.debug(self.metadata['playing_mode'])
             self.playing_mode = self.metadata['playing_mode']
             if self.playing_mode == 'hard':
                 self.hard_button.set_active(True)
         if 'playing_robot' in self.metadata:
-            _logger.debug(self.metadata['playing_robot'])
             if self.metadata['playing_robot'] == 'False':
                 self.playing_robot = False
                 self.human_button.set_active(True)
@@ -510,8 +516,6 @@ class GNUChessActivity(activity.Activity):
                     if jobject and jobject.file_path:
                         name = jobject.metadata['title']
                         mime_type = jobject.metadata['mime_type']
-                        _logger.debug('result of choose: %s (%s)' % \
-                                          (name, str(mime_type)))
             finally:
                 chooser.destroy()
                 del chooser
@@ -519,6 +523,62 @@ class GNUChessActivity(activity.Activity):
                 return jobject.object_id, jobject.file_path
         else:
             return None, None
+
+    def _take_button_action(self, button):
+        if button == 'black':
+            self.playing_white = False
+        elif button == 'white':
+            self.playing_white = True
+        elif button == 'easy':
+            self.playing_mode = 'easy'
+        elif button == 'hard':
+            self.playing_mode = 'hard'
+        elif button == 'robot':
+            self.playing_robot = True
+        elif button == 'human':
+            self.playing_robot = False
+        self._gnuchess.new_game()
+
+    def _new_game_alert(self, button):
+        ''' We warn the user if the game is in progress before loading
+        a new game. '''
+        if len(self._gnuchess.move_list) == 0:
+            self._take_button_action(button)
+            return
+
+        self._restoring = True
+        alert = ConfirmationAlert()
+        alert.props.title = _('Game in progress.')
+        alert.props.msg = _('Do you want to start a new game?')
+
+        def _new_game_alert_response_cb(alert, response_id, self, button):
+            if response_id is gtk.RESPONSE_OK:
+                self._take_button_action(button)
+            elif response_id is gtk.RESPONSE_CANCEL:
+                if button == 'black':
+                    self.play_white_button.set_active(True)
+                    self.playing_white = True
+                elif button == 'white':
+                    self.play_black_button.set_active(True)
+                    self.playing_white = False
+                elif button == 'easy':
+                    self.hard_button.set_active(True)
+                    self.playing_mode = 'hard'
+                elif button == 'hard':
+                    self.easy_button.set_active(True)
+                    self.playing_mode = 'easy'
+                elif button == 'robot':
+                    self.robot_button.set_active(False)
+                    self.playing_human = False
+                elif button == 'human':
+                    self.robot_button.set_active(True)
+                    self.playing_robot = True
+            self._restoring = False
+            self.remove_alert(alert)
+
+        alert.connect('response', _new_game_alert_response_cb, self, button)
+        self.add_alert(alert)
+        alert.show()
 
     # Collaboration-related methods
 
