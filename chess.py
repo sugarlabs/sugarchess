@@ -97,6 +97,8 @@ class Gnuchess():
 
         self._move = 0
         self._counter = 0
+        self.check = False
+        self.checkmate = False
 
         self.white = []
         self.black = []
@@ -112,19 +114,7 @@ class Gnuchess():
         self._all_clear()
 
     def move(self, my_move):
-        ''' Send a move to the saved gnuchess instance
-        (1) set the color
-        (2) force manual
-        (3) reload any moves from the move list
-        (4) and, if my_move is not None, add the new move
-            or, if my_move == 'robot'
-                then ask the computer to move by sending a go command
-            or, refresh after a restore or a remove
-        (5) show board to refresh the current state
-        (6) prompt the robot to move
-        '''
-        # _logger.debug(my_move)
-
+        ''' Send a command to gnuchess. '''
         p = subprocess.Popen(['%s/bin/gnuchess' % (self._bundle_path)],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
@@ -147,14 +137,12 @@ class Gnuchess():
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             if my_move == HINT:
-                # cmd += '%sshow moves\nquit\n' % (level)
                 cmd += '%sgo\nquit\n' % (level)
                 hint = True
             elif my_move == GAME:
                 cmd += 'show game\nquit\n'
             else:
                 cmd += 'show board\nquit\n'
-            # _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=None, hint=hint)
         elif my_move == ROBOT:  # Ask the computer to play
@@ -162,7 +150,6 @@ class Gnuchess():
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             cmd += '%sgo\nshow board\nquit\n' % (level)
-            # _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move='robot')
         elif my_move is not None:  # human's move
@@ -171,17 +158,14 @@ class Gnuchess():
                 cmd += '%s\n' % (move)
             cmd += '%s\n' % (my_move)
             cmd += 'show board\nquit\n'
-            # _logger.debug(cmd)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move=my_move)
-        else:
-            _logger.debug('my_move == None')
 
     def _process_output(self, output, my_move=None, hint=False):
-        ''' process output '''
-        check = False
-        checkmate = False
+        ''' process output from gnuchess command '''
         # _logger.debug(output)
+        self.check = False
+        self.checkmate = False
         if 'White   Black' in output:  # processing show game
             target = 'White   Black'
             output = output[find(output, target):]
@@ -193,22 +177,21 @@ class Gnuchess():
             self._activity.status.set_label(hint)
             self._parse_move(hint)
             return
-        elif 'wins' in output or 'loses' in output:
-            checkmate = True
         elif 'Illegal move' in output:
             self._activity.status.set_label(_('Illegal move'))
             if self._last_piece_played[0] is not None:
                 self._last_piece_played[0].move(self._last_piece_played[1])
                 self._last_piece_played[0] = None
         elif my_move == ROBOT:
+            if 'wins' in output or 'loses' in output:
+                self.checkmate = True
             output = output[find(output, ROBOT_MOVE):]
             robot_move = output[len(ROBOT_MOVE):find(output, '\n')]
-            # _logger.debug(robot_move)
             self.move_list.append(robot_move)
             if '+' in robot_move:
-                check = True
+                self.check = True
             if '#' in robot_move or '++' in robot_move:
-                checkmate = True
+                self.checkmate = True
             if self._activity.playing_white:
                 self._activity.black_entry.set_text(robot_move)
                 self._activity.white_entry.set_text('')
@@ -216,6 +199,8 @@ class Gnuchess():
                 self._activity.white_entry.set_text(robot_move)
                 self._activity.black_entry.set_text('')
         elif my_move is not None:
+            if 'wins' in output or 'loses' in output:
+                self.checkmate = True
             self.move_list.append(my_move)
             if self._activity.playing_white:
                 self._activity.white_entry.set_text(my_move)
@@ -228,14 +213,12 @@ class Gnuchess():
             target = 'white  '
         else:
             target = 'black  '
-        # _logger.debug('looking for %s' % (target))
         while find(output, target) > 0:
             output = output[find(output, target):]
             output = output[find(output, '\n'):]
         if len(output) < 136:
             self._activity.status.set_label(_('bad board output'))
             _logger.debug('bad board output')
-            # _logger.debug(output)
         else:
             self._load_board(output)
 
@@ -244,27 +227,17 @@ class Gnuchess():
         else:
             self._activity.status.set_label(_("It is Black's move."))
 
-        if checkmate:
-            self._activity.status.set_label(_('Checkmate'))
-            _logger.debug('checkmate')
-            return
-        elif check:
-            self._activity.status.set_label(_('Check'))
-            _logger.debug('check')
-            return
-        elif my_move == ROBOT:
-            _logger.debug('robot took a turn')
-            return
-        elif self._activity.playing_white and len(self.move_list) == 0:
-            _logger.debug('new game (white)')
-            return
-        elif not self._activity.playing_white and len(self.move_list) == 1:
-            _logger.debug('new game (black) robot played')
-            return
-        elif self._activity.playing_white and len(self.move_list) % 2 == 1:
-            _logger.debug('asking computer to play black')
-        elif not self._activity.playing_white and len(self.move_list) % 2 == 0:
-            _logger.debug('asking computer to play white')
+        if self.checkmate or self.check:
+            if self.check:
+                self._activity.status.set_label(_('Check'))
+            else:
+                self._activity.status.set_label(_('Checkmate'))
+            if len(self.move_list) % 2 == 0:
+                self._flash_tile([self._xy_to_file_and_rank(
+                            self.white[4].get_xy())])
+            else:
+                self._flash_tile([self._xy_to_file_and_rank(
+                            self.black[4].get_xy())])
 
     def _all_clear(self):
         ''' Things to reinitialize when starting up a new game. '''
@@ -273,6 +246,8 @@ class Gnuchess():
         self.bg.set_label('')
         self.move_list = []
         self.game = ''
+        self.check = False
+        self.checkmate = False
 
     def _initiating(self):
         return self._activity.initiating
@@ -289,16 +264,11 @@ class Gnuchess():
         for move in move_list:
             self.move_list.append(str(move))
         _logger.debug(self.move_list)
-        if self._activity.playing_white:
-            _logger.debug('really... restoring game to white')
-        else:
-            _logger.debug('really... restoring game to black')
         self.move(RESTORE)
         return
 
     def copy_game(self):
         self.move(GAME)
-        _logger.debug(self.game)
         return self.game
 
     def save_game(self):
@@ -407,8 +377,34 @@ class Gnuchess():
         else:
             self._activity.black_entry.set_text(move)
         self.move(move)
-        
-        if self._activity.playing_robot:
+
+        # Get game notation from last move to check for check, checkmate
+        self.move(GAME)
+        last_move = self.game.split()[-1]
+        if '+' in last_move:
+            self.check = True
+            self._activity.status.set_label(_('Check'))
+        if '#' in last_move or '++' in last_move:
+            self.checkmate = True
+            self._activity.status.set_label(_('Checkmate'))
+
+        if self.checkmate or self.check:
+            if self.check:
+                self._activity.status.set_label(_('Check'))
+            else:
+                self._activity.status.set_label(_('Checkmate'))
+            if len(self.move_list) % 2 == 0:
+                _logger.debug([self._xy_to_file_and_rank(
+                            self.white[4].get_xy())])
+                self._flash_tile([self._xy_to_file_and_rank(
+                            self.white[4].get_xy())])
+            else:
+                _logger.debug([self._xy_to_file_and_rank(
+                            self.white[4].get_xy())])
+                self._flash_tile([self._xy_to_file_and_rank(
+                            self.black[4].get_xy())])
+
+        if self._activity.playing_robot and not self.checkmate:
             self._activity.status.set_label('Thinking')
             gobject.timeout_add(500, self.move, ROBOT)
 
@@ -524,7 +520,7 @@ class Gnuchess():
         if capture:
             move = move[find(move, 'x') + 1:]
             if white:
-                if move[0] in 'kqbnr':
+                if move[0] in 'kqbnrKQBNR':
                     capture_piece = move[0]
                     if len(move) > 1:
                         if move[1] in FILES:
@@ -544,7 +540,7 @@ class Gnuchess():
                     elif move[0] in RANKS:
                         capture_rank = move[0]
             else:
-                if move[0] in 'KQBNR':
+                if move[0] in 'KQBNRkqbnr':
                     capture_piece = move[0]
                     if len(move) > 1:
                         if move[1] in FILES:
@@ -695,33 +691,33 @@ class Gnuchess():
     def _search_for_rook(
         self, piece, source_file, source_rank, capture_file, capture_rank):
         # Change rank
-        if piece in 'rq':
+        if len(self.move_list) % 2 == 1:  #        if piece in 'rq':
             for r in range(7 - RANKS.index(capture_rank)):
                 i = self._file_and_rank_to_index('%s%s' % (
-                        capture_file, RANKS[RANKS.index(capture_rank) + r]))
+                        capture_file, RANKS[RANKS.index(capture_rank) + r + 1]))
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
-                    if piece == 'r' and (b == 0 or b == 7):
+                    if piece in 'rR' and (b == 0 or b == 7):
                         return capture_file, \
-                               RANKS[RANKS.index(capture_rank) + r]
-                    elif piece == 'q' and b == 3:
+                               RANKS[RANKS.index(capture_rank) + r + 1]
+                    elif piece in 'qQ' and b == 3:
                         return capture_file, \
-                               RANKS[RANKS.index(capture_rank) + r]
+                               RANKS[RANKS.index(capture_rank) + r + 1]
                     else:
                         break
                 elif p is not None:
                     break
             for r in range(RANKS.index(capture_rank)):
                 i = self._file_and_rank_to_index('%s%s' % (
-                        capture_file, RANKS[RANKS.index(capture_rank) - r]))
+                        capture_file, RANKS[RANKS.index(capture_rank) - r - 1]))
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
-                    if piece == 'r' and (b == 0 or b == 7):
+                    if piece in 'rR' and (b == 0 or b == 7):
                         return capture_file, \
                                RANKS[RANKS.index(capture_rank) - r - 1]
-                    elif piece == 'q' and b == 3:
+                    elif piece in 'qQ' and b == 3:
                         return capture_file, \
                                RANKS[RANKS.index(capture_rank) - r - 1]
                     else:
@@ -731,16 +727,16 @@ class Gnuchess():
         else:
             for r in range(7 - RANKS.index(capture_rank)):
                 i = self._file_and_rank_to_index('%s%s' % (
-                        capture_file, RANKS[RANKS.index(capture_rank) + r]))
+                        capture_file, RANKS[RANKS.index(capture_rank) + r + 1]))
                 p = self._find_piece_at_index(i)
                 if p in self.white:
                     w = self.white.index(p)
                     if piece == 'R' and (w == 0 or w == 7):
                         return capture_file, \
-                               RANKS[RANKS.index(capture_rank) + r]
+                               RANKS[RANKS.index(capture_rank) + r + 1]
                     elif piece == 'Q' and w == 3:
                         return capture_file, \
-                               RANKS[RANKS.index(capture_rank) + r]
+                               RANKS[RANKS.index(capture_rank) + r + 1]
                     else:
                         break
                 elif p is not None:
@@ -762,21 +758,18 @@ class Gnuchess():
                 elif p is not None:
                     break
         # Change file
-        if piece in 'rq':
+        if len(self.move_list) % 2 == 1:
             for f in range(7 - FILES.index(capture_file)):
                 i = self._file_and_rank_to_index('%s%s' % (
-                        FILES[f + FILES.index(capture_file)], capture_rank))
+                        FILES[FILES.index(capture_file) + f + 1], capture_rank))
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
-                    if piece == 'r' and (b == 0 or b == 7):
-                        return FILES[f + FILES.index(capture_file)], \
+                    if piece in 'rR' and (b == 0 or b == 7):
+                        return FILES[FILES.index(capture_file) + f + 1], \
                                capture_rank
-                    elif piece == 'q' and b == 3:
-                        return FILES[f + FILES.index(capture_file)], \
-                               capture_rank
-                    if b == 0 or b == 7:
-                        return FILES[f + FILES.index(capture_file)], \
+                    elif piece in 'qQ' and b == 3:
+                        return FILES[FILES.index(capture_file) + f + 1], \
                                capture_rank
                     else:
                         break
@@ -788,10 +781,10 @@ class Gnuchess():
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
-                    if piece == 'r' and (b == 0 or b == 7):
+                    if piece in 'rR' and (b == 0 or b == 7):
                         return FILES[FILES.index(capture_file) - f - 1], \
                                capture_rank
-                    elif piece == 'q' and b == 3:
+                    elif piece in 'qQ' and b == 3:
                         return FILES[FILES.index(capture_file) - f - 1], \
                                capture_rank
                     else:
@@ -801,15 +794,15 @@ class Gnuchess():
         else:
             for f in range(7 - FILES.index(capture_file)):
                 i = self._file_and_rank_to_index('%s%s' % (
-                        FILES[f + FILES.index(capture_file)], capture_rank))
+                        FILES[FILES.index(capture_file) + f + 1], capture_rank))
                 p = self._find_piece_at_index(i)
                 if p in self.white:
                     w = self.white.index(p)
                     if piece == 'R' and (w == 0 or w == 7):
-                        return FILES[f + FILES.index(capture_file)], \
+                        return FILES[FILES.index(capture_file) + f + 1], \
                                capture_rank
                     elif piece == 'Q' and w == 3:
-                        return FILES[f + FILES.index(capture_file)], \
+                        return FILES[FILES.index(capture_file) + f + 1], \
                                capture_rank
                     else:
                         break
@@ -838,7 +831,7 @@ class Gnuchess():
 
     def _search_for_knight(
         self, piece, source_file, source_rank, capture_file, capture_rank):
-        if piece == 'n':
+        if len(self.move_list) % 2 == 1:  # if piece == 'n':
             if RANKS.index(capture_rank) < 6 and FILES.index(capture_file) > 0:
                 i = self._file_and_rank_to_index('%s%s' % (
                         FILES[FILES.index(capture_file) - 1],
@@ -1005,7 +998,7 @@ class Gnuchess():
     def _search_for_bishop(
         self, piece, source_file, source_rank, capture_file, capture_rank):
         # rank++, file++
-        if piece in 'bq':
+        if len(self.move_list) % 2 == 1:  # if piece in 'bq':
             r = RANKS.index(capture_rank) + 1
             f = FILES.index(capture_file) + 1
             while r < 8 and f < 8:
@@ -1013,9 +1006,9 @@ class Gnuchess():
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
-                    if piece == 'b' and (b == 2 or b == 5):
+                    if piece in 'bB' and (b == 2 or b == 5):
                         return FILES[f], RANKS[r]
-                    elif piece == 'q' and b == 3:
+                    elif piece in 'qQ' and b == 3:
                         return FILES[f], RANKS[r]
                     else:
                         break
@@ -1023,7 +1016,7 @@ class Gnuchess():
                     break
                 r += 1
                 f += 1
-        if piece in 'BQ':
+        if len(self.move_list) % 2 == 0:  # if piece in 'BQ':
             r = RANKS.index(capture_rank) + 1
             f = FILES.index(capture_file) + 1
             while r < 8 and f < 8:
@@ -1042,7 +1035,7 @@ class Gnuchess():
                 r += 1
                 f += 1
         # rank--, file++
-        if piece in 'bq':
+        if len(self.move_list) % 2 == 1:  # if piece in 'bq':
             r = RANKS.index(capture_rank) - 1
             f = FILES.index(capture_file) + 1
             while r > -1 and f < 8:
@@ -1050,9 +1043,9 @@ class Gnuchess():
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
-                    if piece == 'b' and (b == 2 or b == 5):
+                    if piece in 'bB' and (b == 2 or b == 5):
                         return FILES[f], RANKS[r]
-                    elif piece == 'q' and b == 3:
+                    elif piece in 'qQ' and b == 3:
                         return FILES[f], RANKS[r]
                     else:
                         break
@@ -1060,7 +1053,7 @@ class Gnuchess():
                     break
                 r -= 1
                 f += 1
-        if piece in 'BQ':
+        if len(self.move_list) % 2 == 0:  # if piece in 'BQ':
             r = RANKS.index(capture_rank) - 1
             f = FILES.index(capture_file) + 1
             while r > -1 and f < 8:
@@ -1079,7 +1072,7 @@ class Gnuchess():
                 r -= 1
                 f += 1
         # rank-- file--
-        if piece in 'bq':
+        if len(self.move_list) % 2 == 1:  # if piece in 'bq':
             r = RANKS.index(capture_rank) - 1
             f = FILES.index(capture_file) - 1
             while r > -1 and f > -1:
@@ -1087,9 +1080,9 @@ class Gnuchess():
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
-                    if piece == 'b' and (b == 2 or b == 5):
+                    if piece in 'bB' and (b == 2 or b == 5):
                         return FILES[f], RANKS[r]
-                    elif piece == 'q' and b == 3:
+                    elif piece in 'qQ' and b == 3:
                         return FILES[f], RANKS[r]
                     else:
                         break
@@ -1097,7 +1090,7 @@ class Gnuchess():
                     break
                 r -= 1
                 f -= 1
-        if piece in 'BQ':
+        if len(self.move_list) % 2 == 0:  # if piece in 'BQ':
             r = RANKS.index(capture_rank) - 1
             f = FILES.index(capture_file) - 1
             while r > -1 and f > -1:
@@ -1116,7 +1109,7 @@ class Gnuchess():
                 r -= 1
                 f -= 1
         # rank++ file--
-        if piece in 'bq':
+        if len(self.move_list) % 2 == 1:  # if piece in 'bq':
             r = RANKS.index(capture_rank) + 1
             f = FILES.index(capture_file) - 1
             while r < 8 and f > -1:
@@ -1124,9 +1117,9 @@ class Gnuchess():
                 p = self._find_piece_at_index(i)
                 if p in self.black:
                     b = self.black.index(p)
-                    if piece == 'b' and (b == 2 or b == 5):
+                    if piece in 'bB' and (b == 2 or b == 5):
                         return FILES[f], RANKS[r]
-                    elif piece == 'q' and b == 3:
+                    elif piece in 'qQ' and b == 3:
                         return FILES[f], RANKS[r]
                     else:
                         break
@@ -1134,7 +1127,7 @@ class Gnuchess():
                     break
                 r += 1
                 f -= 1
-        if piece in 'BQ':
+        if len(self.move_list) % 2 == 0:  # if piece in 'BQ':
             r = RANKS.index(capture_rank) + 1
             f = FILES.index(capture_file) - 1
             while r < 8 and f > -1:
@@ -1165,7 +1158,7 @@ class Gnuchess():
 
     def _search_for_king(
         self, piece, source_file, source_rank, capture_file, capture_rank):
-        if piece == 'k':
+        if len(self.move_list) % 2 == 1:  # if piece == 'k':
             r = RANKS.index(capture_rank) + 1
             f = FILES.index(capture_file) + 1
             if r < 8 and f < 8:
