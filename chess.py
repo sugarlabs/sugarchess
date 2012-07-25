@@ -545,7 +545,7 @@ class Gnuchess():
         if capture:
             move = move[find(move, 'x') + 1:]
             if white:
-                if move[0] in 'kqbnrKQBNR':
+                if move[0] in 'KQBNR':
                     capture_piece = move[0]
                     if len(move) > 1:
                         if move[1] in FILES:
@@ -565,7 +565,7 @@ class Gnuchess():
                     elif move[0] in RANKS:
                         capture_rank = move[0]
             else:
-                if move[0] in 'KQBNRkqbnr':
+                if move[0] in 'KQBNR':
                     capture_piece = move[0]
                     if len(move) > 1:
                         if move[1] in FILES:
@@ -621,37 +621,7 @@ class Gnuchess():
         self, piece, source_file, source_rank, capture_file, capture_rank,
         capture=False):
         # Check for capture
-        if capture and piece == 'p':
-            if source_file == capture_file:
-                f = FILES.index(capture_file)
-                if f > 0:
-                    i = self._file_and_rank_to_index('%s%s' % (
-                            FILES[f - 1], RANKS[RANKS.index(capture_rank) + 1]))
-                    x, y = self._index_to_xy(i)
-                    for p in range(8):
-                        pos = self.black[8 + p].get_xy()
-                        if x == pos[0] and y == pos[1]:
-                            return FILES[f - 1], \
-                                   RANKS[RANKS.index(capture_rank) + 1]
-                if f < 7:
-                    i = self._file_and_rank_to_index('%s%s' % (
-                            FILES[f + 1], RANKS[RANKS.index(capture_rank) + 1]))
-                    x, y = self._index_to_xy(i)
-                    for p in range(8):
-                        pos = self.black[8 + p].get_xy()
-                        if x == pos[0] and y == pos[1]:
-                            return FILES[f + 1], \
-                                   RANKS[RANKS.index(capture_rank) + 1]
-            else:
-                i = self._file_and_rank_to_index('%s%s' % (
-                        source_file, RANKS[RANKS.index(capture_rank) + 1]))
-                x, y = self._index_to_xy(i)
-                for p in range(8):
-                    pos = self.black[8 + p].get_xy()
-                    if x == pos[0] and y == pos[1]:
-                        return source_file, \
-                               RANKS[RANKS.index(capture_rank) + 1]
-        if capture and piece == 'P':
+        if capture and len(self.move_list) % 2 == 0:
             if source_file == capture_file:
                 f = FILES.index(capture_file)
                 if f > 0:
@@ -681,6 +651,36 @@ class Gnuchess():
                     if x == pos[0] and y == pos[1]:
                         return source_file, \
                                RANKS[RANKS.index(capture_rank) - 1]
+        elif capture:
+            if source_file == capture_file:
+                f = FILES.index(capture_file)
+                if f > 0:
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f - 1], RANKS[RANKS.index(capture_rank) + 1]))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.black[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f - 1], \
+                                   RANKS[RANKS.index(capture_rank) + 1]
+                if f < 7:
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f + 1], RANKS[RANKS.index(capture_rank) + 1]))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.black[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f + 1], \
+                                   RANKS[RANKS.index(capture_rank) + 1]
+            else:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        source_file, RANKS[RANKS.index(capture_rank) + 1]))
+                x, y = self._index_to_xy(i)
+                for p in range(8):
+                    pos = self.black[8 + p].get_xy()
+                    if x == pos[0] and y == pos[1]:
+                        return source_file, \
+                               RANKS[RANKS.index(capture_rank) + 1]
         # Check for first move
         if piece == 'p' and capture_rank == '5':
             i = self._file_and_rank_to_index('%s7' % (capture_file))
