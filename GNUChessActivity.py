@@ -81,6 +81,11 @@ class GNUChessActivity(activity.Activity):
         canvas.show()
         self.show_all()
 
+        if hasattr(self.get_window(), 'get_cursor'):
+            self.old_cursor = self.get_window().get_cursor()
+        else:
+            self.old_cursor = None
+
         self._gnuchess = Gnuchess(canvas,
                                   parent=self,
                                   path=activity.get_bundle_path(),
@@ -92,6 +97,19 @@ class GNUChessActivity(activity.Activity):
         else:
             self._gnuchess.new_game()
         self._restoring = False
+
+    def restore_cursor(self):
+        ''' No longer thinking, so restore standard cursor. '''
+        if hasattr(self.get_window(), 'get_cursor'):
+            self.get_window().set_cursor(self.old_cursor)
+        else:
+            self.get_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.LEFT_PTR))
+
+    def set_thinking_cursor(self):
+        ''' Thinking, so set watch cursor. '''
+        if hasattr(self.get_window(), 'get_cursor'):
+            self.old_cursor = self.get_window().get_cursor()
+        self.get_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
 
     def _setup_toolbars(self):
         ''' Setup the toolbars. '''

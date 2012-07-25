@@ -176,6 +176,7 @@ class Gnuchess():
             hint = output[len(ROBOT_MOVE):find(output, '\n')]
             self._activity.status.set_label(hint)
             self._parse_move(hint)
+            self._activity.restore_cursor()
             return
         elif 'Illegal move' in output:
             self._activity.status.set_label(_('Illegal move'))
@@ -198,6 +199,7 @@ class Gnuchess():
             else:
                 self._activity.white_entry.set_text(robot_move)
                 self._activity.black_entry.set_text('')
+            self._activity.restore_cursor()
         elif my_move is not None:
             if 'wins' in output or 'loses' in output:
                 self.checkmate = True
@@ -217,8 +219,7 @@ class Gnuchess():
             output = output[find(output, target):]
             output = output[find(output, '\n'):]
         if len(output) < 136:
-            self._activity.status.set_label(_('bad board output'))
-            _logger.debug('bad board output')
+            self._activity.status.set_label('???')
         else:
             self._load_board(output)
 
@@ -415,6 +416,7 @@ class Gnuchess():
                             self.black[4].get_xy())])
 
         if self._activity.playing_robot and not self.checkmate:
+            self._activity.set_thinking_cursor()
             self._activity.status.set_label('Thinking')
             gobject.timeout_add(500, self.move, ROBOT)
 
@@ -435,6 +437,7 @@ class Gnuchess():
 
     def hint(self):
         # TODO: Lock out while robot is playing
+        self._activity.set_thinking_cursor()
         self._activity.status.set_label('Thinking')
         gobject.timeout_add(500, self.move, HINT)
 
@@ -581,7 +584,8 @@ class Gnuchess():
 
         if piece in 'pP':
             source_file, source_rank = self._search_for_pawn(
-                piece, source_file, source_rank, capture_file, capture_rank)
+                piece, source_file, source_rank, capture_file, capture_rank,
+                capture=capture)
         elif piece in 'rR':
             source_file, source_rank = self._search_for_rook(
                 piece, source_file, source_rank, capture_file, capture_rank)
@@ -602,7 +606,69 @@ class Gnuchess():
         self._flash_tile(tiles)
 
     def _search_for_pawn(
-        self, piece, source_file, source_rank, capture_file, capture_rank):
+        self, piece, source_file, source_rank, capture_file, capture_rank,
+        capture=False):
+        # Check for capture
+        if capture and piece == 'p':
+            if source_file == capture_file:
+                f = FILES.index(capture_file)
+                if f > 0:
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f - 1], RANKS[RANKS.index(capture_rank) + 1]))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.black[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f - 1], \
+                                   RANKS[RANKS.index(capture_rank) + 1]
+                if f < 7:
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f + 1], RANKS[RANKS.index(capture_rank) + 1]))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.black[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f + 1], \
+                                   RANKS[RANKS.index(capture_rank) + 1]
+            else:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        source_file, RANKS[RANKS.index(capture_rank) + 1]))
+                x, y = self._index_to_xy(i)
+                for p in range(8):
+                    pos = self.black[8 + p].get_xy()
+                    if x == pos[0] and y == pos[1]:
+                        return source_file, \
+                               RANKS[RANKS.index(capture_rank) + 1]
+        if capture and piece == 'P':
+            if source_file == capture_file:
+                f = FILES.index(capture_file)
+                if f > 0:
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f - 1], RANKS[RANKS.index(capture_rank) - 1]))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.white[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f - 1], \
+                                   RANKS[RANKS.index(capture_rank) - 1]
+                if f < 7:
+                    i = self._file_and_rank_to_index('%s%s' % (
+                            FILES[f + 1], RANKS[RANKS.index(capture_rank) - 1]))
+                    x, y = self._index_to_xy(i)
+                    for p in range(8):
+                        pos = self.white[8 + p].get_xy()
+                        if x == pos[0] and y == pos[1]:
+                            return FILES[f + 1], \
+                                   RANKS[RANKS.index(capture_rank) - 1]
+            else:
+                i = self._file_and_rank_to_index('%s%s' % (
+                        source_file, RANKS[RANKS.index(capture_rank) - 1]))
+                x, y = self._index_to_xy(i)
+                for p in range(8):
+                    pos = self.white[8 + p].get_xy()
+                    if x == pos[0] and y == pos[1]:
+                        return source_file, \
+                               RANKS[RANKS.index(capture_rank) - 1]
         # Check for first move
         if piece == 'p' and capture_rank == '5':
             i = self._file_and_rank_to_index('%s7' % (capture_file))
@@ -635,67 +701,6 @@ class Gnuchess():
                 pos = self.white[8 + p].get_xy()
                 if x == pos[0] and y == pos[1]:
                     return capture_file, RANKS[RANKS.index(capture_rank) - 1]
-        # Check for capture
-        if piece == 'p':
-            if source_file == capture_file:
-                f = FILES.index(capture_file)
-                if f > 0:
-                    i = self._file_and_rank_to_index('%s%s' % (
-                            FILES[f - 1], RANKS[RANKS.index(capture_rank) + 1]))
-                    x, y = self._index_to_xy(i)
-                    for p in range(8):
-                        pos = self.black[8 + p].get_xy()
-                        if x == pos[0] and y == pos[1]:
-                            return FILES[f - 1], \
-                                   RANKS[RANKS.index(capture_rank) + 1]
-                if f < 7:
-                    i = self._file_and_rank_to_index('%s%s' % (
-                            FILES[f + 1], RANKS[RANKS.index(capture_rank) + 1]))
-                    x, y = self._index_to_xy(i)
-                    for p in range(8):
-                        pos = self.black[8 + p].get_xy()
-                        if x == pos[0] and y == pos[1]:
-                            return FILES[f + 1], \
-                                   RANKS[RANKS.index(capture_rank) + 1]
-            else:
-                i = self._file_and_rank_to_index('%s%s' % (
-                        source_file, RANKS[RANKS.index(capture_rank) + 1]))
-                x, y = self._index_to_xy(i)
-                for p in range(8):
-                    pos = self.black[8 + p].get_xy()
-                    if x == pos[0] and y == pos[1]:
-                        return source_file, \
-                               RANKS[RANKS.index(capture_rank) + 1]
-        if piece == 'P':
-            if source_file == capture_file:
-                f = FILES.index(capture_file)
-                if f > 0:
-                    i = self._file_and_rank_to_index('%s%s' % (
-                            FILES[f - 1], RANKS[RANKS.index(capture_rank) - 1]))
-                    x, y = self._index_to_xy(i)
-                    for p in range(8):
-                        pos = self.white[8 + p].get_xy()
-                        if x == pos[0] and y == pos[1]:
-                            return FILES[f - 1], \
-                                   RANKS[RANKS.index(capture_rank) - 1]
-                if f < 7:
-                    i = self._file_and_rank_to_index('%s%s' % (
-                            FILES[f + 1], RANKS[RANKS.index(capture_rank) - 1]))
-                    x, y = self._index_to_xy(i)
-                    for p in range(8):
-                        pos = self.white[8 + p].get_xy()
-                        if x == pos[0] and y == pos[1]:
-                            return FILES[f + 1], \
-                                   RANKS[RANKS.index(capture_rank) - 1]
-            else:
-                i = self._file_and_rank_to_index('%s%s' % (
-                        source_file, RANKS[RANKS.index(capture_rank) - 1]))
-                x, y = self._index_to_xy(i)
-                for p in range(8):
-                    pos = self.white[8 + p].get_xy()
-                    if x == pos[0] and y == pos[1]:
-                        return source_file, \
-                               RANKS[RANKS.index(capture_rank) - 1]
         return capture_file, capture_rank
 
     def _search_for_rook(
