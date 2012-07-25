@@ -9,7 +9,7 @@
 # along with this library; if not, write to the Free Software
 # Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
-
+import os
 from StringIO import StringIO
 try:
     OLD_SUGAR_SYSTEM = False
@@ -24,6 +24,44 @@ except (ImportError, AttributeError):
         from simplejson import dump as jdump
     except:
         OLD_SUGAR_SYSTEM = True
+
+
+XO1 = 'xo1'
+XO15 = 'xo1.5'
+XO175 = 'xo1.75'
+UNKNOWN = 'unknown'
+
+
+def get_hardware():
+    """ Determine whether we are using XO 1.0, 1.5, or "unknown" hardware """
+    product = _get_dmi('product_name')
+    if product is None:
+        if os.path.exists('/sys/devices/platform/lis3lv02d/position'):
+            return XO175  # FIXME: temporary check for XO 1.75
+        elif os.path.exists('/etc/olpc-release') or \
+           os.path.exists('/sys/power/olpc-pm'):
+            return XO1
+        else:
+            return UNKNOWN
+    if product != 'XO':
+        return UNKNOWN
+    version = _get_dmi('product_version')
+    if version == '1':
+        return XO1
+    elif version == '1.5':
+        return XO15
+    else:
+        return XO175
+
+
+def _get_dmi(node):
+    ''' The desktop management interface should be a reliable source
+    for product and version information. '''
+    path = os.path.join('/sys/class/dmi/id', node)
+    try:
+        return open(path).readline().strip()
+    except:
+        return None
 
 
 def json_load(text):

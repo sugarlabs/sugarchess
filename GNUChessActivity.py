@@ -26,7 +26,7 @@ from sugar.graphics.alert import ConfirmationAlert, NotifyAlert
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
     radio_factory, entry_factory
-from utils import json_load, json_dump
+from utils import json_load, json_dump, get_hardware
 
 import telepathy
 import dbus
@@ -62,6 +62,7 @@ class GNUChessActivity(activity.Activity):
         self.playing_white = True
         self.playing_mode = 'easy'
         self.playing_robot = True
+        self.showing_game_history = False
         self._restoring = True
 
         self.nick = profile.get_nick_name()
@@ -70,6 +71,7 @@ class GNUChessActivity(activity.Activity):
         else:
             self.colors = ['#A0FFA0', '#FF8080']
 
+        self.hardware = get_hardware()
         self._setup_toolbars()
         self._setup_dispatch_table()
 
@@ -183,10 +185,10 @@ class GNUChessActivity(activity.Activity):
                        self._play_history_cb,
                        tooltip=_('Play game history'))
 
-        button_factory('list-numbered',
-                       self.view_toolbar,
-                       self._show_history_cb,
-                       tooltip=_('Show game history'))
+        self.history_button = button_factory('list-numbered',
+                                             self.view_toolbar,
+                                             self._show_history_cb,
+                                             tooltip=_('Show game history'))
 
         separator_factory(self.view_toolbar, False, True)
 
@@ -364,6 +366,12 @@ class GNUChessActivity(activity.Activity):
 
     def _show_history_cb(self, button):
         self._gnuchess.show_game_history()
+        if self.showing_game_history:
+            self.history_button.set_icon('checkerboard')
+            self.history_button.set_tooltip(_('Show game board'))
+        else:
+            self.history_button.set_icon('list-numbered')
+            self.history_button.set_tooltip(_('Show game history'))
         return
 
     def _copy_cb(self, *args):

@@ -83,11 +83,9 @@ class Gnuchess():
         self._height = gtk.gdk.screen_height()
         self._scale = int((self._height - 55) / 10)
         self.we_are_sharing = False
-        self._saved_game = "foo"
 
         self.move_list = []
         self.game = ''
-        self._showing_game_history = False
 
         self._press = None
         self._release = None
@@ -95,6 +93,7 @@ class Gnuchess():
         self._total_drag = [0, 0]
         self._last_piece_played = [None, (0, 0)]
 
+        self._thinking = False
         self._move = 0
         self._counter = 0
         self.check = False
@@ -176,6 +175,7 @@ class Gnuchess():
             hint = output[len(ROBOT_MOVE):find(output, '\n')]
             self._activity.status.set_label(hint)
             self._parse_move(hint)
+            self._thinking = False
             self._activity.restore_cursor()
             return
         elif 'Illegal move' in output:
@@ -199,6 +199,7 @@ class Gnuchess():
             else:
                 self._activity.white_entry.set_text(robot_move)
                 self._activity.black_entry.set_text('')
+            self._thinking = False
             self._activity.restore_cursor()
         elif my_move is not None:
             if 'wins' in output or 'loses' in output:
@@ -244,7 +245,9 @@ class Gnuchess():
         ''' Things to reinitialize when starting up a new game. '''
         _logger.debug('all clear')
         self.bg.set_layer(-1)
+        self.bg2.set_layer(-1)
         self.bg.set_label('')
+        self.bg2.set_label('')
         self.move_list = []
         self.game = ''
         self.check = False
@@ -276,24 +279,24 @@ class Gnuchess():
         return self.move_list
 
     def show_game_history(self):
-        if not self._showing_game_history:
+        if not self._activity.showing_game_history:
             self.bg.set_layer(TOP)
             self.bg2.set_layer(TOP)
             self.move(GAME)
             # Split into two columns
-            if ' 21.' in self.game:
-                i = self.game.index(' 21.')
+            if ' 17.' in self.game:
+                i = self.game.index(' 17.')
                 self.bg.set_label(self.game[: i - 1])
                 self.bg2.set_label(self.game[i: ])
             else:
                 self.bg.set_label(self.game)
-            self._showing_game_history = True
+            self._activity.showing_game_history = True
         else:
             self.bg.set_layer(-1)
             self.bg.set_label('')
             self.bg2.set_layer(-1)
             self.bg2.set_label('')
-            self._showing_game_history = False
+            self._activity.showing_game_history = False
 
     def play_game_history(self):
         self._counter = 0
@@ -318,6 +321,10 @@ class Gnuchess():
         if spr == None or spr.type == None:
             return
         
+        if self._thinking:
+            self._activity.status.set_label(_('Please wait for your turn.'))
+            return
+
         if self._activity.playing_robot:
             if self._activity.playing_white and spr.type[0] in 'prnbqk':
                 return
@@ -417,7 +424,8 @@ class Gnuchess():
 
         if self._activity.playing_robot and not self.checkmate:
             self._activity.set_thinking_cursor()
-            self._activity.status.set_label('Thinking')
+            self._activity.status.set_label(_('Thinking'))
+            self._thinking = True
             gobject.timeout_add(500, self.move, ROBOT)
 
         return True
@@ -437,8 +445,12 @@ class Gnuchess():
 
     def hint(self):
         # TODO: Lock out while robot is playing
+        if self._thinking:
+            self._activity.status.set_label(_('Please wait for your turn.'))
+            return
         self._activity.set_thinking_cursor()
-        self._activity.status.set_label('Thinking')
+        self._activity.status.set_label(_('Thinking'))
+        self._thinking = True
         gobject.timeout_add(500, self.move, HINT)
 
     def _flash_tile(self, tiles):
@@ -482,7 +494,7 @@ class Gnuchess():
                     tiles.append('e1')
                     tiles.append('g1')
                 else:  # O-O-O
-                    tiles.append('b1')
+                    tiles.append('c1')
                     tiles.append('e1')
                 self._flash_tile(tiles)
                 return
@@ -512,7 +524,7 @@ class Gnuchess():
                     tiles.append('e8')
                     tiles.append('g8')
                 else:  # O-O-O
-                    tiles.append('b8')
+                    tiles.append('c8')
                     tiles.append('e8')
                 self._flash_tile(tiles)
                 return
@@ -1523,18 +1535,24 @@ class Gnuchess():
             self.black[4].set_image(pixbuf)
 
     def _generate_sprites(self, colors):
+        if 'xo' in self._activity.hardware:
+            fontsize = 24
+        else:
+            fontsize = 18
         self.bg = Sprite(self._sprites, 0, 0, self._box(
                 int(self._width / 2), self._height, color=colors[1]))
         self.bg.set_layer(-1)
         self.bg.set_margins(l=10, t=10, r=10, b=10)
-        self.bg.set_label_attributes(12, horiz_align="left", vert_align="top")
+        self.bg.set_label_attributes(fontsize, horiz_align="left",
+                                     vert_align="top")
         self.bg.type = None
 
         self.bg2 = Sprite(self._sprites, int(self._width / 2), 0, self._box(
                 int(self._width / 2), self._height, color=colors[1]))
         self.bg2.set_layer(-1)
         self.bg2.set_margins(l=10, t=10, r=10, b=10)
-        self.bg2.set_label_attributes(12, horiz_align="left", vert_align="top")
+        self.bg2.set_label_attributes(fontsize, horiz_align="left",
+                                      vert_align="top")
         self.bg2.type = None
 
         w = h = self._scale
