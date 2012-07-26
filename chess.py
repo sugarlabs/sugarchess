@@ -224,11 +224,6 @@ class Gnuchess():
         else:
             self._load_board(output)
 
-        if len(self.move_list) % 2 == 0:
-            self._activity.status.set_label(_("It is White's move."))
-        else:
-            self._activity.status.set_label(_("It is Black's move."))
-
         if self.checkmate or self.check:
             if self.check:
                 self._activity.status.set_label(_('Check'))
@@ -240,6 +235,11 @@ class Gnuchess():
             else:
                 self._flash_tile([self._xy_to_file_and_rank(
                             self.black[4].get_xy())])
+        else:
+            if len(self.move_list) % 2 == 0:
+                self._activity.status.set_label(_("It is White's move."))
+            else:
+                self._activity.status.set_label(_("It is Black's move."))
 
     def _all_clear(self):
         ''' Things to reinitialize when starting up a new game. '''
@@ -268,8 +268,19 @@ class Gnuchess():
         for move in move_list:
             self.move_list.append(str(move))
         _logger.debug(self.move_list)
+
         self.move(RESTORE)
-        return
+
+        if '#' in self.move_list[-1] or '++' in self.move_list[-1]:
+            if len(self.move_list) % 2 == 0:
+                self._activity.status.set_label(_('Black wins.'))
+            else:
+                self._activity.status.set_label(_('White wins.'))
+        elif '+' in self.move_list[-1]:
+            if len(self.move_list) % 2 == 0:
+                self._activity.status.set_label(_("White's King is in check."))
+            else:
+                self._activity.status.set_label(_("Black's King is in check."))
 
     def copy_game(self):
         self.move(GAME)
