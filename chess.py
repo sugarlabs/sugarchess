@@ -443,16 +443,19 @@ class Gnuchess():
 
     def undo(self):
         # TODO: Lock out while robot is playing
-        if self._activity.playing_robot:
-            if len(self.move_list) > 1:
-                if len(self.move_list) % 2 == 0 and \
-                   not self._activity.playing_white:
-                    self.move(UNDO)
-                else:
+        if self._activity.playing_robot and len(self.move_list) > 1:
+            if self._activity.playing_white:
+                if len(self.move_list) % 2 == 0:
                     self.move(REMOVE)
-        else:
-            if len(self.move_list) > 0:
-                self.move(UNDO)
+                else:
+                    self.move(UNDO)
+            else:
+                if len(self.move_list) % 2 == 1:
+                    self.move(REMOVE)
+                else:
+                    self.move(UNDO)
+        elif len(self.move_list) > 0:
+            self.move(UNDO)
 
     def hint(self):
         # TODO: Lock out while robot is playing
