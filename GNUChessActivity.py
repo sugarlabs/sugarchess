@@ -51,6 +51,8 @@ PATH = '/org/augarlabs/GNUChessActivity'
 class GNUChessActivity(activity.Activity):
     ''' Gnuchess interface from Sugar '''
 
+    # FIXME: Disable most buttons when joiner
+
     def __init__(self, handle):
         ''' Initialize the toolbars and the gnuchess '''
         try:
@@ -116,7 +118,7 @@ class GNUChessActivity(activity.Activity):
     def _setup_toolbars(self):
         ''' Setup the toolbars. '''
 
-        self.max_participants = 1  # No sharing to begin with
+        self.max_participants = 2  # No sharing to begin with
 
         self.edit_toolbar = gtk.Toolbar()
         self.view_toolbar = gtk.Toolbar()
@@ -414,13 +416,12 @@ class GNUChessActivity(activity.Activity):
         return move_list
 
     def _undo_cb(self, *args):
-        self._gnuchess.undo()
+        # No undo while sharing
+        if self.initiating is None:
+            self._gnuchess.undo()
 
     def _hint_cb(self, *args):
         self._gnuchess.hint()
-
-    def _reset_restoring_flag(self):
-        self._restoring = False
 
     def _play_white_cb(self, *args):
         if not self.play_white_button.get_active():
@@ -565,9 +566,36 @@ class GNUChessActivity(activity.Activity):
             self.playing_robot = False
         self._gnuchess.new_game()
 
+    def _no_action(self, button):
+        if button == 'black':
+            self.play_white_button.set_active(True)
+            self.playing_white = True
+        elif button == 'white':
+            self.play_black_button.set_active(True)
+            self.playing_white = False
+        elif button == 'easy':
+            self.hard_button.set_active(True)
+            self.playing_mode = 'hard'
+        elif button == 'hard':
+            self.easy_button.set_active(True)
+            self.playing_mode = 'easy'
+        elif button == 'robot':
+            self.robot_button.set_active(False)
+            self.playing_human = False
+        elif button == 'human':
+            self.robot_button.set_active(True)
+            self.playing_robot = True
+
     def _new_game_alert(self, button):
         ''' We warn the user if the game is in progress before loading
         a new game. '''
+        if self.initiating is not None and not self.initiating:
+            # joiner cannot push buttons
+            self._restoring = True
+            self._no_action(button)
+            self._restoring = False
+            return
+
         if len(self._gnuchess.move_list) == 0:
             self._take_button_action(button)
             return
@@ -581,24 +609,7 @@ class GNUChessActivity(activity.Activity):
             if response_id is gtk.RESPONSE_OK:
                 self._take_button_action(button)
             elif response_id is gtk.RESPONSE_CANCEL:
-                if button == 'black':
-                    self.play_white_button.set_active(True)
-                    self.playing_white = True
-                elif button == 'white':
-                    self.play_black_button.set_active(True)
-                    self.playing_white = False
-                elif button == 'easy':
-                    self.hard_button.set_active(True)
-                    self.playing_mode = 'hard'
-                elif button == 'hard':
-                    self.easy_button.set_active(True)
-                    self.playing_mode = 'easy'
-                elif button == 'robot':
-                    self.robot_button.set_active(False)
-                    self.playing_human = False
-                elif button == 'human':
-                    self.robot_button.set_active(True)
-                    self.playing_robot = True
+                self._no_action(button)
             self._restoring = False
             self.remove_alert(alert)
 
@@ -607,8 +618,7 @@ class GNUChessActivity(activity.Activity):
         alert.show()
 
     # Collaboration-related methods
-
-    # FIXME: share mode is not set up properly
+    # TODO: color peices with XO colors
 
     def _setup_presence_service(self):
         ''' Setup the Presence Service. '''
@@ -637,7 +647,6 @@ class GNUChessActivity(activity.Activity):
             return
 
         self.initiating = sharer
-        self.waiting_for_hand = not sharer
 
         self.conn = self._shared_activity.telepathy_conn
         self.tubes_chan = self._shared_activity.telepathy_tubes_chan
@@ -655,7 +664,13 @@ class GNUChessActivity(activity.Activity):
             self.tubes_chan[telepathy.CHANNEL_TYPE_TUBES].ListTubes(
                 reply_handler=self._list_tubes_reply_cb,
                 error_handler=self._list_tubes_error_cb)
+
         self._gnuchess.set_sharing(True)
+        if self.playing_robot:
+            self.restoring = True
+            self.robot_button.set_active(False)
+            self.playing_human = False
+            self.restoring = False
 
     def _list_tubes_reply_cb(self, tubes):
         ''' Reply to a list request. '''
@@ -686,7 +701,9 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
     def _setup_dispatch_table(self):
         ''' Associate tokens with commands. '''
         self._processing_methods = {
-            'n': [self._receive_new_gnuchess, 'get a new gnuchess board'],
+            'n': [self._receive_new_game, 'start a new game'],
+            'm': [self._receive_move, 'make a move'],
+            'r': [self._receive_restore, 'restore game state'],
             }
 
     def event_received_cb(self, event_message):
@@ -698,15 +715,54 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         except ValueError:
             _logger.debug('Could not split event message %s' % (event_message))
             return
+        _logger.debug('%s: %s' % (self._processing_methods[command][1],
+                                  payload))
         self._processing_methods[command][0](payload)
 
-    def send_new_gnuchess(self):
-        ''' Send a new orientation, grid to all players '''
-        self.send_event('n|%s' % (json_dump(self._gnuchess.save_game())))
+    def send_new_game(self):
+        ''' Send a new game to joiner. '''
+        if not self.initiating:
+            return
+        if self.playing_white:
+            _logger.debug('send_new_game: B')
+            self.send_event('n|B')
+        else:
+            _logger.debug('send_new_game: W')
+            self.send_event('n|W')
 
-    def _receive_new_gnuchess(self, payload):
+    def send_restore(self):
+        ''' Send a new game to joiner. '''
+        if not self.initiating:
+            return
+        _logger.debug('send_restore')
+        self.send_event('r|%s' % (self._gnuchess.copy_game()))
+
+    def _receive_restore(self, payload):
+        ''' Get game state from sharer. '''
+        _logger.debug('received_restore %s' % (payload))
+        self._gnuchess.restore(self._parse_move_list(payload))
+
+    def _receive_move(self, payload):
+        ''' Get a move from opponent. '''
+        _logger.debug('received_move %s' % (payload))
+        self._gnuchess.remote_move(payload)
+
+    def _receive_new_game(self, payload):
         ''' Sharer can start a new gnuchess. '''
-        self._gnuchess.restore_game(json_load(payload))
+        _logger.debug('received_new_game %s' % (payload))
+        if payload == 'W':
+            if not self.playing_white:
+                self.restoring = True
+                self.play_white_button.set_active(True)
+                self.playing_white = True
+        else:
+            if self.playing_white:
+                self.restoring = True
+                self.play_black_button.set_active(True)
+                self.playing_white = False
+        self.restoring = False
+        self._gnuchess.set_sharing(True)
+        self._gnuchess.new_game()
 
     def send_event(self, entry):
         ''' Send event through the tube. '''

@@ -243,7 +243,6 @@ class Gnuchess():
 
     def _all_clear(self):
         ''' Things to reinitialize when starting up a new game. '''
-        _logger.debug('all clear')
         self.bg.set_layer(-1)
         self.bg2.set_layer(-1)
         self.bg.set_label('')
@@ -253,34 +252,39 @@ class Gnuchess():
         self.check = False
         self.checkmate = False
 
-    def _initiating(self):
-        return self._activity.initiating
-
     def new_game(self):
         self._all_clear()
         self.move(NEW)
-        if not self._activity.playing_white:
+        if self._activity.playing_robot and not self._activity.playing_white:
             self.move(ROBOT)
+
+        if self.we_are_sharing and self._activity.initiating:
+            self._activity.send_new_game()
 
     def restore_game(self, move_list):
         self.move_list = []
         
         for move in move_list:
             self.move_list.append(str(move))
-        _logger.debug(self.move_list)
 
         self.move(RESTORE)
 
-        if '#' in self.move_list[-1] or '++' in self.move_list[-1]:
-            if len(self.move_list) % 2 == 0:
-                self._activity.status.set_label(_('Black wins.'))
-            else:
-                self._activity.status.set_label(_('White wins.'))
-        elif '+' in self.move_list[-1]:
-            if len(self.move_list) % 2 == 0:
-                self._activity.status.set_label(_("White's King is in check."))
-            else:
-                self._activity.status.set_label(_("Black's King is in check."))
+        if len(self.move_list) > 0:
+            if '#' in self.move_list[-1] or '++' in self.move_list[-1]:
+                if len(self.move_list) % 2 == 0:
+                    self._activity.status.set_label(_('Black wins.'))
+                else:
+                    self._activity.status.set_label(_('White wins.'))
+            elif '+' in self.move_list[-1]:
+                if len(self.move_list) % 2 == 0:
+                    self._activity.status.set_label(
+                        _("White's King is in check."))
+                else:
+                    self._activity.status.set_label(
+                        _("Black's King is in check."))
+
+        if self.we_are_sharing and self._activity.initiating:
+            self._activity.send_restore()
 
     def copy_game(self):
         self.move(GAME)
@@ -332,28 +336,54 @@ class Gnuchess():
         if spr == None or spr.type == None:
             return
         
-        if self._thinking:
-            self._activity.status.set_label(_('Please wait for your turn.'))
+        if self._thinking:  # Robot is thinking or conjuring up a hint
+            self._wait_your_turn()
             return
+        elif self.we_are_sharing:
+            if not self._activity.playing_white and \
+               len(self.move_list) % 2 == 0:
+                self._wait_your_turn()
+                return
+            elif self._activity.playing_white and \
+                 len(self.move_list) % 2 == 1:
+                self._wait_your_turn()
+                return
 
-        if self._activity.playing_robot:
+        # Only play your color
+        if self._activity.playing_robot or self.we_are_sharing:
             if self._activity.playing_white and spr.type[0] in 'prnbqk':
+                self._play_your_color()
                 return
             elif not self._activity.playing_white and spr.type[0] in 'PRNBQK':
+                self._play_your_color()
                 return
         else:
             if len(self.move_list) % 2 == 0 and spr.type[0] in 'prnbqk':
+                self._play_your_color()
                 return
             elif len(self.move_list) % 2 == 1 and spr.type[0] in 'PRNBQK':
+                self._play_your_color()
                 return
 
         self._release = None
         self._press = spr
         self._press.set_layer(TOP)
         self._last_piece_played = [spr, spr.get_xy()]
-
-        self._activity.status.set_label(spr.type)
         return True
+
+    def _wait_your_turn(self):
+        if self._activity.playing_white:
+            self._activity.status.set_label(
+                _('White: please wait for your turn.'))
+        else:
+            self._activity.status.set_label(
+                _('Black: please wait for your turn.'))
+
+    def _play_your_color(self):
+        if self._activity.playing_white:
+            self._activity.status.set_label(_('Please play White.'))
+        else:
+            self._activity.status.set_label(_('Please play Black.'))
 
     def _mouse_move_cb(self, win, event):
         """ Drag a tile with the mouse. """
@@ -405,11 +435,15 @@ class Gnuchess():
             self._activity.white_entry.set_text(move)
         else:
             self._activity.black_entry.set_text(move)
+        self._activity.status.set_label('making a move %s' % (move))
         self.move(move)
 
-        # Get game notation from last move to check for check, checkmate
+        # Get game notation from last move to share and to check for
+        # check, checkmate
         self.move(GAME)
         last_move = self.game.split()[-1]
+        if self.we_are_sharing:
+            self._activity.send_event('m|%s' % (last_move))
         if '+' in last_move:
             self.check = True
             self._activity.status.set_label(_('Check'))
@@ -423,13 +457,9 @@ class Gnuchess():
             else:
                 self._activity.status.set_label(_('Checkmate'))
             if len(self.move_list) % 2 == 0:
-                _logger.debug([self._xy_to_file_and_rank(
-                            self.white[4].get_xy())])
                 self._flash_tile([self._xy_to_file_and_rank(
                             self.white[4].get_xy())])
             else:
-                _logger.debug([self._xy_to_file_and_rank(
-                            self.white[4].get_xy())])
                 self._flash_tile([self._xy_to_file_and_rank(
                             self.black[4].get_xy())])
 
@@ -1362,9 +1392,20 @@ class Gnuchess():
                 return b
         return None
 
-    def remote_button_press(self, dot, color):
-        ''' Receive a button press from a sharer '''
-        return
+    def remote_move(self, move):
+        ''' Receive a move from a network '''
+        if not self.we_are_sharing:
+            return
+        if self._activity.playing_white and len(self.move_list) % 2 == 0:
+            _logger.debug("received a remote move (%s) from Black but it is \
+White's turn." % (move))
+            return
+        elif not self._activity.playing_white and len(self.move_list) % 2 == 1:
+            _logger.debug("received a remote move (%s) from White but it is \
+Black's turn." % (move))
+            return
+        _logger.debug('Processing remote move (%s)' % (move))
+        self.move(move)
 
     def set_sharing(self, share=True):
         _logger.debug('enabling sharing')
