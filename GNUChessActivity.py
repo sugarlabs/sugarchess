@@ -104,8 +104,10 @@ class GNUChessActivity(activity.Activity):
         self._setup_presence_service()
 
         if self.game_data is not None:  # 'saved_game' in self.metadata:
+            _logger.debug('>>>>>>>>>>>>>>>>>>>>>> %s' % (str(self.game_data)))
             self._restore()
         else:
+            _logger.debug('>>>>>>>>>>>>>>>>>>>>>> new game')
             self._gnuchess.new_game()
         self._restoring = False
 
@@ -547,6 +549,7 @@ class GNUChessActivity(activity.Activity):
         fd = open(file_path, 'r')
         self.game_data = fd.read()
         fd.close()
+        _logger.debug(self.game_data)
 
     def _restore(self):
         ''' Restore the gnuchess state from metadata '''
@@ -725,8 +728,8 @@ class GNUChessActivity(activity.Activity):
         self._gnuchess.set_sharing(True)
         if self.playing_robot:
             self.restoring = True
-            self.robot_button.set_active(False)
-            self.playing_human = False
+            self.human_button.set_active(True)
+            self.playing_robot = False
             self.restoring = False
 
     def _list_tubes_reply_cb(self, tubes):
@@ -798,7 +801,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def send_nick(self):
         _logger.debug('send_nick')
-        self.send_event('r|%s' % (self.nick))
+        self.send_event('N|%s' % (self.nick))
 
     def _receive_nick(self, payload):
         _logger.debug('received_nick %s' % (payload))
@@ -806,6 +809,8 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def _receive_restore(self, payload):
         ''' Get game state from sharer. '''
+        if self.initiating:
+            return
         _logger.debug('received_restore %s' % (payload))
         self._gnuchess.restore_game(self._parse_move_list(payload))
 
