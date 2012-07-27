@@ -243,10 +243,9 @@ class Gnuchess():
 
     def _all_clear(self):
         ''' Things to reinitialize when starting up a new game. '''
-        self.bg.set_layer(-1)
-        self.bg2.set_layer(-1)
-        self.bg.set_label('')
-        self.bg2.set_label('')
+        for i in range(3):
+            self.bg[i].set_layer(-1)
+            self.bg[i].set_label('')
         self.move_list = []
         self.game = ''
         self.check = False
@@ -293,24 +292,28 @@ class Gnuchess():
     def save_game(self):
         return self.move_list
 
-    def show_game_history(self):
+    def show_game_history(self, tag_pairs):
         if not self._activity.showing_game_history:
-            self.bg.set_layer(TOP)
-            self.bg2.set_layer(TOP)
+            for i in range(3):
+                self.bg[i].set_layer(TOP)
             self.move(GAME)
             # Split into two columns
-            if ' 17.' in self.game:
-                i = self.game.index(' 17.')
-                self.bg.set_label(self.game[: i - 1])
-                self.bg2.set_label(self.game[i: ])
+            if ' 14.' in self.game:
+                i = self.game.index(' 14.')
+                self.bg[0].set_label(tag_pairs + self.game[: i - 1])
+                if '31.' in self.game:
+                    j = self.game.index('31.')
+                    self.bg[1].set_label(self.game[i: j - 1])
+                    self.bg[2].set_label(self.game[j: ])
+                else:
+                    self.bg[1].set_label(self.game[i: ])
             else:
-                self.bg.set_label(self.game)
+                self.bg[0].set_label(self.game)
             self._activity.showing_game_history = True
         else:
-            self.bg.set_layer(-1)
-            self.bg.set_label('')
-            self.bg2.set_layer(-1)
-            self.bg2.set_label('')
+            for i in range(3):
+                self.bg[i].set_layer(-1)
+                self.bg[i].set_label('')
             self._activity.showing_game_history = False
 
     def play_game_history(self):
@@ -1594,21 +1597,18 @@ Black's turn." % (move))
             fontsize = 24
         else:
             fontsize = 18
-        self.bg = Sprite(self._sprites, 0, 0, self._box(
-                int(self._width / 2), self._height, color=colors[1]))
-        self.bg.set_layer(-1)
-        self.bg.set_margins(l=10, t=10, r=10, b=10)
-        self.bg.set_label_attributes(fontsize, horiz_align="left",
-                                     vert_align="top")
-        self.bg.type = None
+        self.bg = []
+        for i in range(3):
+            self.bg.append(Sprite(self._sprites, 0, 0, self._box(
+                        int(self._width), self._height, color=colors[1])))
+            self.bg[-1].set_layer(-1)
+            self.bg[-1].set_margins(l=10, t=10, r=10, b=10)
+            self.bg[-1].set_label_attributes(fontsize, horiz_align="left",
+                                             vert_align="top")
+            self.bg[-1].type = None
 
-        self.bg2 = Sprite(self._sprites, int(self._width / 2), 0, self._box(
-                int(self._width / 2), self._height, color=colors[1]))
-        self.bg2.set_layer(-1)
-        self.bg2.set_margins(l=10, t=10, r=10, b=10)
-        self.bg2.set_label_attributes(fontsize, horiz_align="left",
-                                      vert_align="top")
-        self.bg2.type = None
+        self.bg[1].move_relative((int(self._width / 3), 0))
+        self.bg[2].move_relative((int(2 * self._width / 3), 0))
 
         w = h = self._scale
         self._squares.append(self._box(w, h, color='black'))

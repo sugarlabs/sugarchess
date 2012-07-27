@@ -70,7 +70,8 @@ def button_factory(icon_name, toolbar, callback, cb_arg=None, tooltip=None,
         button.set_tooltip(tooltip)
     button.props.sensitive = True
     if accelerator is not None:
-        button.props.accelerator = accelerator
+        if hasattr(button.props, 'accelerator'):
+            button.props.accelerator = accelerator
     if cb_arg is not None:
         button.connect('clicked', callback, cb_arg)
     else:

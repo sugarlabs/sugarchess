@@ -15,10 +15,15 @@ import gobject
 
 from sugar.activity import activity
 from sugar import profile
-from sugar.graphics.toolbarbox import ToolbarBox
-from sugar.activity.widgets import ActivityToolbarButton
-from sugar.activity.widgets import StopButton
-from sugar.graphics.toolbarbox import ToolbarButton
+try:
+    from sugar.graphics.toolbarbox import ToolbarBox
+    _have_toolbox = True
+except ImportError:
+    _have_toolbox = False
+if _have_toolbox:
+    from sugar.activity.widgets import ActivityToolbarButton
+    from sugar.activity.widgets import StopButton
+    from sugar.graphics.toolbarbox import ToolbarButton
 from sugar.graphics.objectchooser import ObjectChooser
 from sugar.datastore import datastore
 from sugar import mime
@@ -72,6 +77,7 @@ class GNUChessActivity(activity.Activity):
             self.colors = profile.get_color().to_string().split(',')
         else:
             self.colors = ['#A0FFA0', '#FF8080']
+        self.buddy = None
 
         self.hardware = get_hardware()
         self._setup_toolbars()
@@ -85,7 +91,8 @@ class GNUChessActivity(activity.Activity):
         canvas.show()
         self.show_all()
 
-        if hasattr(self.get_window(), 'get_cursor'):
+        if hasattr(self, 'get_window') and \
+           hasattr(self.get_window(), 'get_cursor'):
             self.old_cursor = self.get_window().get_cursor()
         else:
             self.old_cursor = None
@@ -104,6 +111,8 @@ class GNUChessActivity(activity.Activity):
 
     def restore_cursor(self):
         ''' No longer thinking, so restore standard cursor. '''
+        if not hasattr(self, 'get_window'):
+            return
         if hasattr(self.get_window(), 'get_cursor'):
             self.get_window().set_cursor(self.old_cursor)
         else:
@@ -111,6 +120,8 @@ class GNUChessActivity(activity.Activity):
 
     def set_thinking_cursor(self):
         ''' Thinking, so set watch cursor. '''
+        if not hasattr(self, 'get_window'):
+            return
         if hasattr(self.get_window(), 'get_cursor'):
             self.old_cursor = self.get_window().get_cursor()
         self.get_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
@@ -124,45 +135,61 @@ class GNUChessActivity(activity.Activity):
         self.view_toolbar = gtk.Toolbar()
         self.adjust_toolbar = gtk.Toolbar()
         self.custom_toolbar = gtk.Toolbar()
-        toolbox = ToolbarBox()
 
-        activity_button = ActivityToolbarButton(self)
-        toolbox.toolbar.insert(activity_button, 0)
-        activity_button.show()
+        if _have_toolbox:
+            toolbox = ToolbarBox()
 
-        edit_toolbar_button = ToolbarButton(label=_("Edit"),
-                                            page=self.edit_toolbar,
-                                            icon_name='toolbar-edit')
-        self.edit_toolbar.show()
-        toolbox.toolbar.insert(edit_toolbar_button, -1)
-        edit_toolbar_button.show()
+            activity_button = ActivityToolbarButton(self)
+            toolbox.toolbar.insert(activity_button, 0)
+            activity_button.show()
 
-        view_toolbar_button = ToolbarButton(label=_("View"),
-                                            page=self.view_toolbar,
-                                            icon_name='toolbar-view')
-        self.view_toolbar.show()
-        toolbox.toolbar.insert(view_toolbar_button, -1)
-        view_toolbar_button.show()
+            edit_toolbar_button = ToolbarButton(label=_("Edit"),
+                                                page=self.edit_toolbar,
+                                                icon_name='toolbar-edit')
+            self.edit_toolbar.show()
+            toolbox.toolbar.insert(edit_toolbar_button, -1)
+            edit_toolbar_button.show()
+
+            view_toolbar_button = ToolbarButton(label=_("View"),
+                                                page=self.view_toolbar,
+                                                icon_name='toolbar-view')
+            self.view_toolbar.show()
+            toolbox.toolbar.insert(view_toolbar_button, -1)
+            view_toolbar_button.show()
             
-        adjust_toolbar_button = ToolbarButton(label=_('Adjust'),
-                                              page=self.adjust_toolbar,
-                                              icon_name='preferences-system')
-        self.adjust_toolbar.show()
-        toolbox.toolbar.insert(adjust_toolbar_button, -1)
-        adjust_toolbar_button.show()
+            adjust_toolbar_button = ToolbarButton(label=_('Adjust'),
+                                                  page=self.adjust_toolbar,
+                                                  icon_name=\
+                                                      'preferences-system')
+            self.adjust_toolbar.show()
+            toolbox.toolbar.insert(adjust_toolbar_button, -1)
+            adjust_toolbar_button.show()
 
-        custom_toolbar_button = ToolbarButton(label=_("Custom"),
-                                              page=self.custom_toolbar,
-                                              icon_name='view-source')
-        self.custom_toolbar.show()
-        toolbox.toolbar.insert(custom_toolbar_button, -1)
-        custom_toolbar_button.show()
+            custom_toolbar_button = ToolbarButton(label=_("Custom"),
+                                                  page=self.custom_toolbar,
+                                                  icon_name='view-source')
+            self.custom_toolbar.show()
+            toolbox.toolbar.insert(custom_toolbar_button, -1)
+            custom_toolbar_button.show()
 
-        self.set_toolbar_box(toolbox)
-        toolbox.show()
-        self.toolbar = toolbox.toolbar
+            self.set_toolbar_box(toolbox)
+            toolbox.show()
+            self.toolbar = toolbox.toolbar
 
-        adjust_toolbar_button.set_expanded(True)
+            adjust_toolbar_button.set_expanded(True)
+
+        else:
+            # Use pre-0.86 toolbar design
+            games_toolbar = gtk.Toolbar()
+            toolbox = activity.ActivityToolbox(self)
+            self.set_toolbox(toolbox)
+            toolbox.add_toolbar(_('Play'), self.adjust_toolbar)
+            toolbox.add_toolbar(_('Edit'), self.edit_toolbar)
+            toolbox.add_toolbar(_('View'), self.view_toolbar)
+            toolbox.add_toolbar(_('Custom'), self.custom_toolbar)
+            toolbox.show()
+            toolbox.set_current_toolbar(1)
+            self.toolbar = self.adjust_toolbar
 
         button_factory('edit-copy',
                        self.edit_toolbar,
@@ -274,11 +301,12 @@ class GNUChessActivity(activity.Activity):
         self.status = label_factory(self.toolbar, '')
         self.status.set_label(_("It is White's move."))
 
-        separator_factory(toolbox.toolbar, True, False)
-        stop_button = StopButton(self)
-        stop_button.props.accelerator = '<Ctrl>q'
-        toolbox.toolbar.insert(stop_button, -1)
-        stop_button.show()
+        if _have_toolbox:
+            separator_factory(toolbox.toolbar, True, False)
+            stop_button = StopButton(self)
+            stop_button.props.accelerator = '<Ctrl>q'
+            toolbox.toolbar.insert(stop_button, -1)
+            stop_button.show()
 
         button_factory('white-pawn',
                        self.custom_toolbar,
@@ -367,7 +395,7 @@ class GNUChessActivity(activity.Activity):
         return
 
     def _show_history_cb(self, button):
-        self._gnuchess.show_game_history()
+        self._gnuchess.show_game_history(self.tag_pairs())
         if self.showing_game_history:
             self.history_button.set_icon('checkerboard')
             self.history_button.set_tooltip(_('Show game board'))
@@ -378,7 +406,7 @@ class GNUChessActivity(activity.Activity):
 
     def _copy_cb(self, *args):
         clipboard = gtk.Clipboard()
-        clipboard.set_text(self._gnuchess.copy_game())
+        clipboard.set_text(self.tag_pairs + self._gnuchess.copy_game())
 
     def _paste_cb(self, *args):
         ''' Pasting '''
@@ -469,9 +497,38 @@ class GNUChessActivity(activity.Activity):
         ''' Start a new gnuchess. '''
         self._new_game_alert('new')
 
+    def tag_pairs(self):
+        ''' Tag paris must be ascii '''
+        if type(self.nick) == unicode:
+            nick = self.nick.encode('ascii', 'replace')
+        else:
+            nick = self.nick
+        if self.buddy is not None and type(self.buddy) == unicode:
+            buddy = self.buddy.encode('ascii', 'replace')
+        else:
+            buddy = self.buddy
+        if self.playing_white:
+            white = nick
+            if self.playing_robot:
+                black = 'gnuchess (%s)' % (self.playing_mode)
+            elif self._gnuchess.we_are_sharing and buddy is not None:
+                black = buddy
+            else:
+                black = '?'
+        else:
+            black = nick
+            if self.playing_robot:
+                white = 'gnuchess (%s)' % (self.playing_mode)
+            elif self._gnuchess.we_are_sharing and buddy is not None:
+                white = buddy
+            else:
+                white = '?'
+        return '[White "%s"]\n[Black "%s"]\n\n' % (white, black)
+
     def write_file(self, file_path):
         ''' Write the grid status to the Journal '''
         fd = open(file_path, 'w')
+        fd.write(self.tag_pairs())
         fd.write(self._gnuchess.copy_game())
         fd.close()
         # self.metadata['saved_game'] = json_dump(self._gnuchess.save_game())
@@ -704,6 +761,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
             'n': [self._receive_new_game, 'start a new game'],
             'm': [self._receive_move, 'make a move'],
             'r': [self._receive_restore, 'restore game state'],
+            'N': [self._receive_nick, 'receive nick from opponent'],
             }
 
     def event_received_cb(self, event_message):
@@ -723,6 +781,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         ''' Send a new game to joiner. '''
         if not self.initiating:
             return
+        self.send_nick()
         if self.playing_white:
             _logger.debug('send_new_game: B')
             self.send_event('n|B')
@@ -737,6 +796,14 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         _logger.debug('send_restore')
         self.send_event('r|%s' % (self._gnuchess.copy_game()))
 
+    def send_nick(self):
+        _logger.debug('send_nick')
+        self.send_event('r|%s' % (self.nick))
+
+    def _receive_nick(self, payload):
+        _logger.debug('received_nick %s' % (payload))
+        self.buddy = payload
+
     def _receive_restore(self, payload):
         ''' Get game state from sharer. '''
         _logger.debug('received_restore %s' % (payload))
@@ -750,6 +817,9 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
     def _receive_new_game(self, payload):
         ''' Sharer can start a new gnuchess. '''
         _logger.debug('received_new_game %s' % (payload))
+        if self.initializing:
+            return
+        self.send_nick()
         if payload == 'W':
             if not self.playing_white:
                 self.restoring = True
