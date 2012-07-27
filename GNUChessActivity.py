@@ -28,6 +28,8 @@ from sugar.graphics.objectchooser import ObjectChooser
 from sugar.datastore import datastore
 from sugar import mime
 from sugar.graphics.alert import ConfirmationAlert, NotifyAlert
+from sugar.graphics.icon import Icon
+from sugar.graphics.xocolor import XoColor
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
     radio_factory, entry_factory
@@ -281,6 +283,10 @@ class GNUChessActivity(activity.Activity):
                                           self._human_cb,
                                           group=self.robot_button,
                                           tooltip=_('Play against a person'))
+
+        separator_factory(self.adjust_toolbar, False, False)
+
+        self.opponent = label_factory(self.adjust_toolbar, '')
 
         self.robot_button.set_active(True)
 
@@ -640,8 +646,8 @@ class GNUChessActivity(activity.Activity):
             self.easy_button.set_active(True)
             self.playing_mode = 'easy'
         elif button == 'robot':
-            self.robot_button.set_active(False)
-            self.playing_human = False
+            self.human_button.set_active(True)
+            self.playing_robot = False
         elif button == 'human':
             self.robot_button.set_active(True)
             self.playing_robot = True
@@ -726,11 +732,11 @@ class GNUChessActivity(activity.Activity):
                 error_handler=self._list_tubes_error_cb)
 
         self._gnuchess.set_sharing(True)
-        if self.playing_robot:
-            self.restoring = True
-            self.human_button.set_active(True)
-            self.playing_robot = False
-            self.restoring = False
+        self.restoring = True
+        _logger.debug('............... setting human button to active')
+        self.playing_robot = False
+        self.human_button.set_active(True)
+        self.restoring = False
 
     def _list_tubes_reply_cb(self, tubes):
         ''' Reply to a list request. '''
@@ -758,6 +764,12 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
             self.chattube = ChatTube(tube_conn, self.initiating, \
                 self.event_received_cb)
 
+        # Now that we have a tube, send the nick to our opponent
+        if not self.initiating:
+            self.send_nick()
+            # And let the sharer know we've joined
+            self.send_join()
+
     def _setup_dispatch_table(self):
         ''' Associate tokens with commands. '''
         self._processing_methods = {
@@ -765,6 +777,8 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
             'm': [self._receive_move, 'make a move'],
             'r': [self._receive_restore, 'restore game state'],
             'N': [self._receive_nick, 'receive nick from opponent'],
+            'C': [self._receive_colors, 'receive colors from opponent'],
+            'j': [self._receive_join, 'receive new joiner'],
             }
 
     def event_received_cb(self, event_message):
@@ -799,13 +813,36 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         _logger.debug('send_restore')
         self.send_event('r|%s' % (self._gnuchess.copy_game()))
 
+    def send_join(self):
+        _logger.debug('send_join')
+        self.send_event('j|%s' % (self.nick))
+
     def send_nick(self):
         _logger.debug('send_nick')
         self.send_event('N|%s' % (self.nick))
+        self.send_event('C|%s,%s' % (self.colors[0], self.colors[1]))
+
+    def _receive_join(self, payload):
+        _logger.debug('received_join %s' % (payload))
+        if self.initiating:
+            self.send_new_game()
+            if self.game_data is not None:
+                self.send_restore()
 
     def _receive_nick(self, payload):
         _logger.debug('received_nick %s' % (payload))
         self.buddy = payload
+        self.opponent.set_label(self.buddy)
+        if self.initiating:
+            self.send_nick()
+
+    def _receive_colors(self, payload):
+        _logger.debug('received_colors %s' % (payload))
+        xocolors = XoColor(payload)
+        icon = Icon(icon_name='human', xo_color=xocolors)
+        icon.show()
+        self.human_button.set_icon_widget(icon)
+        self.human_button.show()
 
     def _receive_restore(self, payload):
         ''' Get game state from sharer. '''
@@ -828,13 +865,18 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         if payload == 'W':
             if not self.playing_white:
                 self.restoring = True
+                self.play_black_button.set_active(False)
                 self.play_white_button.set_active(True)
                 self.playing_white = True
         else:
             if self.playing_white:
                 self.restoring = True
+                self.play_white_button.set_active(False)
                 self.play_black_button.set_active(True)
                 self.playing_white = False
+        self.robot_button.set_active(False)
+        self.human_button.set_active(True)
+        self.playing_robot = False
         self.restoring = False
         self._gnuchess.set_sharing(True)
         self._gnuchess.new_game()
