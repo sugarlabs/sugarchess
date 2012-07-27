@@ -807,7 +807,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
     def _receive_restore(self, payload):
         ''' Get game state from sharer. '''
         _logger.debug('received_restore %s' % (payload))
-        self._gnuchess.restore(self._parse_move_list(payload))
+        self._gnuchess.restore_game(self._parse_move_list(payload))
 
     def _receive_move(self, payload):
         ''' Get a move from opponent. '''
@@ -817,7 +817,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
     def _receive_new_game(self, payload):
         ''' Sharer can start a new gnuchess. '''
         _logger.debug('received_new_game %s' % (payload))
-        if self.initializing:
+        if self.initiating:
             return
         self.send_nick()
         if payload == 'W':
