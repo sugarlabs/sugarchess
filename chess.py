@@ -1568,10 +1568,13 @@ Black's turn." % (move))
             w=self.scale, h=self.scale)
         self._reskin(piece, pixbuf)
 
-    def reskin_from_file(self, piece, file_path):
+    def reskin_from_file(self, piece, file_path, return_pixbuf=False):
+        _logger.debug('%s %s' % (piece, file_path))
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
             file_path, self.scale, self.scale)
         self._reskin(piece, pixbuf)
+        if return_pixbuf:
+            return pixbuf
 
     def _reskin(self, piece, pixbuf):
         DICT = {'white_pawn': WP, 'black_pawn': BP,

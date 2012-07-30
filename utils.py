@@ -10,6 +10,7 @@
 # Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
 import os
+import subprocess
 from StringIO import StringIO
 try:
     OLD_SUGAR_SYSTEM = False
@@ -89,3 +90,43 @@ def json_dump(data):
         _io = StringIO()
         jdump(data, _io)
         return _io.getvalue()
+
+
+def file_to_base64(activity, path):
+    base64 = os.path.join(get_path(activity, 'instance'), 'base64tmp')
+    cmd = 'base64 <' + path + ' >' + base64
+    subprocess.check_call(cmd, shell=True)
+    file_handle = open(base64, 'r')
+    data = file_handle.read()
+    file_handle.close()
+    os.remove(base64)
+    return data
+
+
+def pixbuf_to_base64(activity, pixbuf):
+    ''' Convert pixbuf to base64-encoded data '''
+    png_file = os.path.join(get_path(activity, 'instance'), 'imagetmp.png')
+    if pixbuf != None:
+        pixbuf.save(png_file, "png")
+    data = file_to_base64(activity, png_file)
+    os.remove(png_file)
+    return data
+
+
+def base64_to_file(activity, data, path):
+    base64 = os.path.join(get_path(activity, 'instance'), 'base64tmp')
+    file_handle = open(base64, 'w')
+    file_handle.write(data)
+    file_handle.close()
+    cmd = 'base64 -d <' + base64 + '>' + path
+    subprocess.check_call(cmd, shell=True)
+    os.remove(base64)
+
+
+def base64_to_pixbuf(activity, data, width=55, height=55):
+    ''' Convert base64-encoded data to a pixbuf '''
+    png_file = os.path.join(get_path(activity, 'instance'), 'imagetmp.png')
+    base64_to_file(activity, data, png_file)
+    pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(png_file, width, height)
+    os.remove(png_file)
+    return pixbuf
