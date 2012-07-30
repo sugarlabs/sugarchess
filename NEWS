@@ -1,5 +1,9 @@
+2
+
+ENHANCEMENT:
+* Optional use of Sugar colors for pieces
+
 1
 
 * New activity: simple Sugar interface to gnuchess. Note: requires a
   binary (currently not built for ARM).
-
