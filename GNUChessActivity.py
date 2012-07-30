@@ -80,6 +80,7 @@ class GNUChessActivity(activity.Activity):
         else:
             self.colors = ['#A0FFA0', '#FF8080']
         self.buddy = None
+        self.opponent_colors = None
 
         self.hardware = get_hardware()
         self._setup_toolbars()
@@ -106,10 +107,8 @@ class GNUChessActivity(activity.Activity):
         self._setup_presence_service()
 
         if self.game_data is not None:  # 'saved_game' in self.metadata:
-            _logger.debug('>>>>>>>>>>>>>>>>>>>>>> %s' % (str(self.game_data)))
             self._restore()
         else:
-            _logger.debug('>>>>>>>>>>>>>>>>>>>>>> new game')
             self._gnuchess.new_game()
         self._restoring = False
 
@@ -132,7 +131,6 @@ class GNUChessActivity(activity.Activity):
 
     def _setup_toolbars(self):
         ''' Setup the toolbars. '''
-
         self.max_participants = 2  # No sharing to begin with
 
         self.edit_toolbar = gtk.Toolbar()
@@ -238,6 +236,31 @@ class GNUChessActivity(activity.Activity):
         self.black_entry = entry_factory('',
                                          self.view_toolbar,
                                          tooltip=_("Black's move"))
+
+        separator_factory(self.view_toolbar, False, True)
+
+        skin_button1 = radio_factory('white-knight',
+                                    self.view_toolbar,
+                                    self.do_default_skin_cb,
+                                    tooltip=_('Default pieces'),
+                                    group=None)
+
+        skin_button2 = radio_factory('white-knight-sugar',
+                                    self.view_toolbar,
+                                    self.do_sugar_skin_cb,
+                                    tooltip=_('Sugar-style pieces'),
+                                    group=skin_button1)
+        xocolors = XoColor(self.colors)
+        icon = Icon(icon_name='white-knight-sugar', xo_color=xocolors)
+        icon.show()
+        skin_button2.set_icon_widget(icon)
+
+        self.skin_button3 = radio_factory('view-source',
+                                          self.view_toolbar,
+                                          self.do_custom_skin_cb,
+                                          tooltip=_('Custom pieces'),
+                                          group=skin_button1)
+        skin_button1.set_active(True)
 
         self.play_white_button = radio_factory('white-rook',
                                                self.adjust_toolbar,
@@ -388,10 +411,86 @@ class GNUChessActivity(activity.Activity):
                        cb_arg='black_king',
                        tooltip=_('Black King'))
 
+
+    def do_default_skin_cb(self, button=None):
+        self._gnuchess.reskin_from_file('black_king',
+                '%s/icons/black-king.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('black_queen',
+                '%s/icons/black-queen.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('black_bishop',
+                '%s/icons/black-bishop.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('black_knight',
+                '%s/icons/black-knight.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('black_rook',
+                '%s/icons/black-rook.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('black_pawn',
+                '%s/icons/black-pawn.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('white_king',
+                '%s/icons/white-king.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('white_queen',
+                '%s/icons/white-queen.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('white_bishop',
+                '%s/icons/white-bishop.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('white_knight',
+                '%s/icons/white-knight.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('white_rook',
+                '%s/icons/white-rook.svg' % (activity.get_bundle_path()))
+        self._gnuchess.reskin_from_file('white_pawn',
+                '%s/icons/white-pawn.svg' % (activity.get_bundle_path()))
+
+    def _black_peices(self, colors):
+        self._gnuchess.reskin_from_svg('black_king', colors)
+        self._gnuchess.reskin_from_svg('black_queen', colors)
+        self._gnuchess.reskin_from_svg('black_bishop', colors)
+        self._gnuchess.reskin_from_svg('black_knight', colors)
+        self._gnuchess.reskin_from_svg('black_rook', colors)
+        self._gnuchess.reskin_from_svg('black_pawn', colors)
+
+    def _white_peices(self, colors):
+        self._gnuchess.reskin_from_svg('white_king', colors)
+        self._gnuchess.reskin_from_svg('white_queen', colors)
+        self._gnuchess.reskin_from_svg('white_bishop', colors)
+        self._gnuchess.reskin_from_svg('white_knight', colors)
+        self._gnuchess.reskin_from_svg('white_rook', colors)
+        self._gnuchess.reskin_from_svg('white_pawn', colors)
+
+    def do_sugar_skin_cb(self, button=None):
+        colors = self.colors
+        if not self._gnuchess.we_are_sharing:
+            colors[1] = '#000000'
+            self._black_peices(colors)
+            colors[1] = '#ffffff'
+            self._white_peices(colors)
+        else:
+            if self.playing_white:
+                self._white_peices(colors)
+                if self.opponent_colors is not None:
+                    colors = self.opponent_colors
+                self._black_peices(colors)
+            else:
+                self._black_peices(colors)
+                if self.opponent_colors is not None:
+                    colors = self.opponent_colors
+                self._white_peices(colors)
+
+    def do_custom_skin_cb(self, button=None):
+        for piece in ['white_pawn', 'black_pawn',
+                      'white_rook', 'black_rook', 
+                      'white_knight', 'black_knight',
+                      'white_bishop', 'black_bishop', 
+                      'white_queen', 'black_queen',
+                      'white_king', 'black_king']:
+            if piece in self.metadata:
+                id = self.metadata[piece]
+                jobject = datastore.get(id)
+                if jobject is not None and jobject.file_path is not None:
+                    self._gnuchess.reskin_from_file(piece, jobject.file_path)
+        return
+
     def _reskin_cb(self, button, piece):
         id, file_path = self._choose_skin()
         if file_path is not None:
-            self._gnuchess.reskin(piece, file_path)
+            self._gnuchess.reskin_from_file(piece, file_path)
             self.metadata[piece] = str(id)
 
     def do_fullscreen_cb(self, button):
@@ -572,17 +671,7 @@ class GNUChessActivity(activity.Activity):
                 self.playing_robot = False
                 self.human_button.set_active(True)
         self._gnuchess.restore_game(self._parse_move_list(self.game_data))
-        for piece in ['white_pawn', 'black_pawn',
-                      'white_rook', 'black_rook', 
-                      'white_knight', 'black_knight',
-                      'white_bishop', 'black_bishop', 
-                      'white_queen', 'black_queen',
-                      'white_king', 'black_king']:
-            if piece in self.metadata:
-                id = self.metadata[piece]
-                jobject = datastore.get(id)
-                if jobject is not None and jobject.file_path is not None:
-                    self._gnuchess.reskin(piece, jobject.file_path)
+        self.do_custom_skin_cb()
 
     def _choose_skin(self):
         ''' Select a skin from the Journal '''
@@ -684,7 +773,6 @@ class GNUChessActivity(activity.Activity):
         alert.show()
 
     # Collaboration-related methods
-    # TODO: color peices with XO colors
 
     def _setup_presence_service(self):
         ''' Setup the Presence Service. '''
@@ -826,6 +914,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         _logger.debug('received_join %s' % (payload))
         if self.initiating:
             self.send_new_game()
+            _logger.debug(self.game_data)
             if self.game_data is not None:
                 self.send_restore()
 
@@ -838,6 +927,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def _receive_colors(self, payload):
         _logger.debug('received_colors %s' % (payload))
+        self.opponent_colors = payload
         xocolors = XoColor(payload)
         icon = Icon(icon_name='human', xo_color=xocolors)
         icon.show()

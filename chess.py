@@ -26,6 +26,8 @@ import logging
 _logger = logging.getLogger('gnuchess-activity')
 
 from sprites import Sprites, Sprite
+from piece import svg_header, svg_footer, svg_king, svg_queen, svg_bishop, \
+    svg_knight, svg_rook, svg_pawn
 
 ROBOT_MOVE = 'My move is : '
 TOP = 3
@@ -81,7 +83,7 @@ class Gnuchess():
 
         self._width = gtk.gdk.screen_width()
         self._height = gtk.gdk.screen_height()
-        self._scale = int((self._height - 55) / 10)
+        self.scale = int((self._height - 55) / 10)
         self.we_are_sharing = False
 
         self.move_list = []
@@ -1424,13 +1426,13 @@ Black's turn." % (move))
 
     def _xy_to_file_and_rank(self, pos):
         ''' calculate the board column and row for an xy position '''
-        xo = self._width - 8 * self._scale
+        xo = self._width - 8 * self.scale
         xo = int(xo / 2)
         x = pos[0] - xo
-        yo = int(self._scale / 2)
+        yo = int(self.scale / 2)
         y = yo
-        return ('%s%d' % (FILES[int((pos[0] - xo) / self._scale)],
-                8 - int((pos[1] - yo) / self._scale)))
+        return ('%s%d' % (FILES[int((pos[0] - xo) / self.scale)],
+                8 - int((pos[1] - yo) / self.scale)))
  
     def _expose_cb(self, win, event):
         self.do_expose_event(event)
@@ -1461,16 +1463,16 @@ Black's turn." % (move))
         black_bishops = 0
         black_queens = 0
         w, h = self.white[0].get_dimensions()
-        xo = self._width - 8 * self._scale
+        xo = self._width - 8 * self.scale
         xo = int(xo / 2)
-        yo = int(self._scale / 2)
+        yo = int(self.scale / 2)
         for i in range(17):  # extra queen
-            self.black[i].move((-self._scale, -self._scale))
-            self.white[i].move((-self._scale, -self._scale))
+            self.black[i].move((-self.scale, -self.scale))
+            self.white[i].move((-self.scale, -self.scale))
         k = 1
         for i in range(8):
             x = xo
-            y = yo + i * self._scale
+            y = yo + i * self.scale
             for j in range(8):
                 piece = board[k]
                 k += 2
@@ -1542,55 +1544,90 @@ Black's turn." % (move))
                             self.black[16].set_layer(MID)
                     elif piece == 'k':
                         self.black[4].move((x, y))
-                x += self._scale
+                x += self.scale
             x = xo
-            y += self._scale
+            y += self.scale
             k += 1
 
-    def reskin(self, piece, file_path):
+    def reskin_from_svg(self, piece, colors):
+        DICT = {'white_pawn': svg_pawn, 'black_pawn': svg_pawn,
+                'white_rook': svg_rook, 'black_rook': svg_rook,
+                'white_knight': svg_knight, 'black_knight': svg_knight,
+                'white_bishop': svg_bishop, 'black_bishop': svg_bishop,
+                'white_queen': svg_queen, 'black_queen': svg_queen,
+                'white_king': svg_king, 'black_king': svg_king}
+        pixbuf = svg_str_to_pixbuf(
+            svg_header(colors) + DICT[piece](colors[0]) + svg_footer(),
+            w=self.scale, h=self.scale)
+        self._reskin(piece, pixbuf)
+
+    def reskin_from_file(self, piece, file_path):
+        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
+            file_path, self.scale, self.scale)
+        self._reskin(piece, pixbuf)
+
+    def _reskin(self, piece, pixbuf):
         DICT = {'white_pawn': WP, 'black_pawn': BP,
                 'white_rook': WR, 'black_rook': BR,
                 'white_knight': WN, 'black_knight': BN,
                 'white_bishop': WB, 'black_bishop': BB,
                 'white_queen': WQ, 'black_queen': BQ,
                 'white_king': WK, 'black_king': BK}
-        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
-            file_path, self._scale, self._scale)
         self.skins[DICT[piece]] = pixbuf
         if piece == 'white_pawn':
             for i in range(8):
                 self.white[i + 8].set_image(pixbuf)
+                self.white[i + 8].set_layer(MID)
         elif piece == 'black_pawn':
             for i in range(8):
                 self.black[i + 8].set_image(pixbuf)
+                self.black[i + 8].set_layer(MID)
         elif piece == 'white_rook':
             self.white[0].set_image(pixbuf)
             self.white[7].set_image(pixbuf)
+            self.white[0].set_layer(MID)
+            self.white[7].set_layer(MID)
         elif piece == 'black_rook':
             self.black[0].set_image(pixbuf)
             self.black[7].set_image(pixbuf)
+            self.black[0].set_layer(MID)
+            self.black[7].set_layer(MID)
         elif piece == 'white_knight':
             self.white[1].set_image(pixbuf)
             self.white[6].set_image(pixbuf)
+            self.white[1].set_layer(MID)
+            self.white[6].set_layer(MID)
         elif piece == 'black_knight':
             self.black[1].set_image(pixbuf)
             self.black[6].set_image(pixbuf)
+            self.black[1].set_layer(MID)
+            self.black[6].set_layer(MID)
         elif piece == 'white_bishop':
             self.white[2].set_image(pixbuf)
             self.white[5].set_image(pixbuf)
+            self.white[2].set_layer(MID)
+            self.white[5].set_layer(MID)
         elif piece == 'black_bishop':
             self.black[2].set_image(pixbuf)
             self.black[5].set_image(pixbuf)
+            self.black[2].set_layer(MID)
+            self.black[5].set_layer(MID)
         elif piece == 'white_queen':
             self.white[3].set_image(pixbuf)
             self.white[16].set_image(pixbuf)
+            self.white[3].set_layer(MID)
+            self.white[16].set_layer(MID)
         elif piece == 'black_queen':
             self.black[3].set_image(pixbuf)
             self.black[16].set_image(pixbuf)
+            self.black[3].set_layer(MID)
+            self.black[16].set_layer(MID)
         elif piece == 'white_king':
             self.white[4].set_image(pixbuf)
+            self.white[4].set_layer(MID)
         elif piece == 'black_king':
             self.black[4].set_image(pixbuf)
+            self.black[4].set_layer(MID)
 
     def _generate_sprites(self, colors):
         if 'xo' in self._activity.hardware:
@@ -1610,13 +1647,13 @@ Black's turn." % (move))
         self.bg[1].move_relative((int(self._width / 3), 0))
         self.bg[2].move_relative((int(2 * self._width / 3), 0))
 
-        w = h = self._scale
+        w = h = self.scale
         self._squares.append(self._box(w, h, color='black'))
         self._squares.append(self._box(w, h, color='white'))
         self._squares.append(self._box(w, h, color=colors[0]))
-        xo = self._width - 8 * self._scale
+        xo = self._width - 8 * self.scale
         xo = int(xo / 2)
-        yo = int(self._scale / 2)
+        yo = int(self.scale / 2)
         y = yo
         for i in range(8):
             x = xo
@@ -1626,8 +1663,8 @@ Black's turn." % (move))
                            self._squares[black_or_white([i, j])]))
                 self._board[-1].type = None  # '%s%d' % (FILES[j], 8 - i)
                 self._board[-1].set_layer(BOT)
-                x += self._scale
-            y += self._scale
+                x += self.scale
+            y += self.scale
 
         self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
                 '%s/icons/white-pawn.svg' % (self._bundle_path), w, h))
@@ -1755,9 +1792,11 @@ Black's turn." % (move))
         return '</svg>\n'
 
 
-def svg_str_to_pixbuf(svg_string):
+def svg_str_to_pixbuf(svg_string, w=None, h=None):
     """ Load pixbuf from SVG string """
     pl = gtk.gdk.PixbufLoader('svg')
+    if w is not None:
+        pl.set_size(w, h)
     pl.write(svg_string)
     pl.close()
     pixbuf = pl.get_pixbuf()
