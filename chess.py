@@ -62,6 +62,7 @@ class Gnuchess():
                  colors=['#A0FFA0', '#FF8080']):
         self._activity = parent
         self._bundle_path = path
+        self._bin_path = 'bin/i686'
         self._colors = ['#FFFFFF']
         self._colors.append(colors[0])
         self._colors.append(colors[1])
@@ -112,11 +113,17 @@ class Gnuchess():
         self._sprites = Sprites(self._canvas)
         self._generate_sprites(colors)
 
+        p = subprocess.Popen(['uname', '-p'],
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT)
+        self._bin_path = 'bin/%s' % (p.communicate()[0].replace('\n', ''))
         self._all_clear()
 
     def move(self, my_move):
         ''' Send a command to gnuchess. '''
-        p = subprocess.Popen(['%s/bin/gnuchess' % (self._bundle_path)],
+        p = subprocess.Popen(['%s/%s/gnuchess' % (self._bundle_path,
+                                                   self._bin_path)],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
