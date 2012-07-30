@@ -1549,7 +1549,7 @@ Black's turn." % (move))
             y += self.scale
             k += 1
 
-    def reskin_from_svg(self, piece, colors):
+    def reskin_from_svg(self, piece, colors, bw='#ffffff'):
         DICT = {'white_pawn': svg_pawn, 'black_pawn': svg_pawn,
                 'white_rook': svg_rook, 'black_rook': svg_rook,
                 'white_knight': svg_knight, 'black_knight': svg_knight,
@@ -1557,7 +1557,7 @@ Black's turn." % (move))
                 'white_queen': svg_queen, 'black_queen': svg_queen,
                 'white_king': svg_king, 'black_king': svg_king}
         pixbuf = svg_str_to_pixbuf(
-            svg_header(colors) + DICT[piece](colors[0]) + svg_footer(),
+            svg_header(colors) + DICT[piece](bw) + svg_footer(),
             w=self.scale, h=self.scale)
         self._reskin(piece, pixbuf)
 

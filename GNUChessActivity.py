@@ -255,7 +255,7 @@ class GNUChessActivity(activity.Activity):
         icon.show()
         skin_button2.set_icon_widget(icon)
 
-        self.skin_button3 = radio_factory('view-source',
+        self.skin_button3 = radio_factory('white-knight-custom',
                                           self.view_toolbar,
                                           self.do_custom_skin_cb,
                                           tooltip=_('Custom pieces'),
@@ -439,27 +439,25 @@ class GNUChessActivity(activity.Activity):
                 '%s/icons/white-pawn.svg' % (activity.get_bundle_path()))
 
     def _black_peices(self, colors):
-        self._gnuchess.reskin_from_svg('black_king', colors)
-        self._gnuchess.reskin_from_svg('black_queen', colors)
-        self._gnuchess.reskin_from_svg('black_bishop', colors)
-        self._gnuchess.reskin_from_svg('black_knight', colors)
-        self._gnuchess.reskin_from_svg('black_rook', colors)
-        self._gnuchess.reskin_from_svg('black_pawn', colors)
+        self._gnuchess.reskin_from_svg('black_king', colors, bw='#000000')
+        self._gnuchess.reskin_from_svg('black_queen', colors, bw='#000000')
+        self._gnuchess.reskin_from_svg('black_bishop', colors, bw='#000000')
+        self._gnuchess.reskin_from_svg('black_knight', colors, bw='#000000')
+        self._gnuchess.reskin_from_svg('black_rook', colors, bw='#000000')
+        self._gnuchess.reskin_from_svg('black_pawn', colors, bw='#000000')
 
     def _white_peices(self, colors):
-        self._gnuchess.reskin_from_svg('white_king', colors)
-        self._gnuchess.reskin_from_svg('white_queen', colors)
-        self._gnuchess.reskin_from_svg('white_bishop', colors)
-        self._gnuchess.reskin_from_svg('white_knight', colors)
-        self._gnuchess.reskin_from_svg('white_rook', colors)
-        self._gnuchess.reskin_from_svg('white_pawn', colors)
+        self._gnuchess.reskin_from_svg('white_king', colors, bw='#ffffff')
+        self._gnuchess.reskin_from_svg('white_queen', colors, bw='#ffffff')
+        self._gnuchess.reskin_from_svg('white_bishop', colors, bw='#ffffff')
+        self._gnuchess.reskin_from_svg('white_knight', colors, bw='#ffffff')
+        self._gnuchess.reskin_from_svg('white_rook', colors, bw='#ffffff')
+        self._gnuchess.reskin_from_svg('white_pawn', colors, bw='#ffffff')
 
     def do_sugar_skin_cb(self, button=None):
         colors = self.colors
         if not self._gnuchess.we_are_sharing:
-            colors[1] = '#000000'
             self._black_peices(colors)
-            colors[1] = '#ffffff'
             self._white_peices(colors)
         else:
             if self.playing_white:
@@ -927,7 +925,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def _receive_colors(self, payload):
         _logger.debug('received_colors %s' % (payload))
-        self.opponent_colors = payload
+        self.opponent_colors = payload.split(',')
         xocolors = XoColor(payload)
         icon = Icon(icon_name='human', xo_color=xocolors)
         icon.show()
