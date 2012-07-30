@@ -33,7 +33,8 @@ from sugar.graphics.xocolor import XoColor
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
     radio_factory, entry_factory
-from utils import json_load, json_dump, get_hardware
+from utils import json_load, json_dump, get_hardware, \
+    pixbuf_to_base64, base64_to_pixbuf
 
 import telepathy
 import dbus
@@ -482,14 +483,23 @@ class GNUChessActivity(activity.Activity):
                 id = self.metadata[piece]
                 jobject = datastore.get(id)
                 if jobject is not None and jobject.file_path is not None:
-                    self._gnuchess.reskin_from_file(piece, jobject.file_path)
+                    if self._gnuchess.we_are_sharing and self.buddy is not None:
+                        pixbuf = self._gnuchess.reskin_from_file(
+                            piece, jobject.file_path, return_pixbuf= True)
+                        if 'white' in piece and self.playing_white:
+                            self.send_piece(piece, pixbuf)
+                        elif 'black' in piece and not self.playing_white:
+                            self.send_piece(piece, pixbuf)
+                    else:
+                        self._gnuchess.reskin_from_file(piece,
+                                                        jobject.file_path)
         return
 
     def _reskin_cb(self, button, piece):
-        id, file_path = self._choose_skin()
+        object_id, file_path = self._choose_skin()
         if file_path is not None:
             self._gnuchess.reskin_from_file(piece, file_path)
-            self.metadata[piece] = str(id)
+            self.metadata[piece] = str(object_id)
 
     def do_fullscreen_cb(self, button):
         ''' Hide the Sugar toolbars. '''
@@ -697,9 +707,11 @@ class GNUChessActivity(activity.Activity):
                         name = jobject.metadata['title']
                         mime_type = jobject.metadata['mime_type']
             finally:
+                jobject.destroy()
                 chooser.destroy()
                 del chooser
             if name is not None:
+                _logger.debug('foo: %s %s' % (str(jobject.object_id), jobject.file_path))
                 return jobject.object_id, jobject.file_path
         else:
             return None, None
@@ -865,6 +877,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
             'N': [self._receive_nick, 'receive nick from opponent'],
             'C': [self._receive_colors, 'receive colors from opponent'],
             'j': [self._receive_join, 'receive new joiner'],
+            'p': [self._receive_piece, 'receive new piece'],
             }
 
     def event_received_cb(self, event_message):
@@ -973,6 +986,32 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         ''' Send event through the tube. '''
         if hasattr(self, 'chattube') and self.chattube is not None:
             self.chattube.SendText(entry)
+
+    # sharing pieces
+
+    def send_piece(self, piece, pixbuf):
+        _logger.debug('send_piece %s' % (piece))
+        self.send_event('p|%s' % (self._dump(peice, pixbuf)))
+
+    def _receive_piece(self, payload):
+        piece, pixbuf = self._load(payload)
+        _logger.debug('received_piece %s' % (piece))
+        self._gnuchess.reskin(piece, pixbuf)
+
+    def _dump(self, piece, pixbuf):
+        ''' Dump data for sharing.'''
+        _logger.debug('dumping %s' % (piece))
+        data = [piece, pixbuf_to_base64(activity, pixbuf)]
+        return json_dump(data)
+
+    def _load(self, data):
+        ''' Load game data from the journal. '''
+        piece, pixbuf_data = json_load(data)
+        pixbuf = base64_to_pixbuf(activity,
+                                  pixbuf_data,
+                                  width=self._gnuchess.scale,
+                                  height=self._gnuchess.scale)
+        return piece, pixbuf
 
 
 class ChatTube(ExportedGObject):
