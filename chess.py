@@ -55,6 +55,8 @@ WK = 10
 BK = 11
 FILES = 'abcdefgh'
 RANKS = '12345678'
+BIN = {'i686': 'i686', 'i586': 'i686', 'armv7l': 'armv7l'}
+
 
 class Gnuchess():
 
@@ -117,7 +119,7 @@ class Gnuchess():
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
-        self._bin_path = 'bin/%s' % (p.communicate()[0].replace('\n', ''))
+        self._bin_path = 'bin/%s' % (BIN[p.communicate()[0].replace('\n', '')])
         self._all_clear()
 
     def move(self, my_move):
