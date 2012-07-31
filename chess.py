@@ -387,10 +387,10 @@ class Gnuchess():
     def _wait_your_turn(self):
         if self._activity.playing_white:
             self._activity.status.set_label(
-                _('White: please wait for your turn.'))
+                _('Please wait for your turn.'))
         else:
             self._activity.status.set_label(
-                _('Black: please wait for your turn.'))
+                _('Please wait for your turn.'))
 
     def _play_your_color(self):
         if self._activity.playing_white:
@@ -478,7 +478,7 @@ class Gnuchess():
 
         if self._activity.playing_robot and not self.checkmate:
             self._activity.set_thinking_cursor()
-            self._activity.status.set_label(_('Thinking'))
+            self._activity.status.set_label(_('Thinking...'))
             self._thinking = True
             gobject.timeout_add(500, self.move, ROBOT)
 
