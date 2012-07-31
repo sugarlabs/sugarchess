@@ -272,7 +272,7 @@ class Gnuchess():
 
     def restore_game(self, move_list):
         self.move_list = []
-        
+
         for move in move_list:
             self.move_list.append(str(move))
 
@@ -314,9 +314,9 @@ class Gnuchess():
                 if '31.' in self.game:
                     j = self.game.index('31.')
                     self.bg[1].set_label(self.game[i: j - 1])
-                    self.bg[2].set_label(self.game[j: ])
+                    self.bg[2].set_label(self.game[j:])
                 else:
-                    self.bg[1].set_label(self.game[i: ])
+                    self.bg[1].set_label(self.game[i:])
             else:
                 self.bg[0].set_label(self.game)
             self._activity.showing_game_history = True
@@ -348,7 +348,7 @@ class Gnuchess():
         spr = self._sprites.find_sprite((x, y))
         if spr == None or spr.type == None:
             return
-        
+
         if self._thinking:  # Robot is thinking or conjuring up a hint
             self._wait_your_turn()
             return
@@ -775,7 +775,7 @@ class Gnuchess():
     def _search_for_rook(
         self, piece, source_file, source_rank, capture_file, capture_rank):
         # Change rank
-        if len(self.move_list) % 2 == 1:  #        if piece in 'rq':
+        if len(self.move_list) % 2 == 1:
             for r in range(7 - RANKS.index(capture_rank)):
                 i = self._file_and_rank_to_index('%s%s' % (
                         capture_file, RANKS[RANKS.index(capture_rank) + r + 1]))
@@ -1437,7 +1437,7 @@ class Gnuchess():
         y = yo
         return ('%s%d' % (FILES[int((pos[0] - xo) / self.scale)],
                 8 - int((pos[1] - yo) / self.scale)))
- 
+
     def _expose_cb(self, win, event):
         self.do_expose_event(event)
 

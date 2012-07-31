@@ -159,7 +159,7 @@ class GNUChessActivity(activity.Activity):
             self.view_toolbar.show()
             toolbox.toolbar.insert(view_toolbar_button, -1)
             view_toolbar_button.show()
-            
+
             adjust_toolbar_button = ToolbarButton(label=_('Adjust'),
                                                   page=self.adjust_toolbar,
                                                   icon_name=\
@@ -412,7 +412,6 @@ class GNUChessActivity(activity.Activity):
                        cb_arg='black_king',
                        tooltip=_('Black King'))
 
-
     def do_default_skin_cb(self, button=None):
         self._gnuchess.reskin_from_file('black_king',
                 '%s/icons/black-king.svg' % (activity.get_bundle_path()))
@@ -474,9 +473,9 @@ class GNUChessActivity(activity.Activity):
 
     def do_custom_skin_cb(self, button=None):
         for piece in ['white_pawn', 'black_pawn',
-                      'white_rook', 'black_rook', 
+                      'white_rook', 'black_rook',
                       'white_knight', 'black_knight',
-                      'white_bishop', 'black_bishop', 
+                      'white_bishop', 'black_bishop',
                       'white_queen', 'black_queen',
                       'white_king', 'black_king']:
             if piece in self.metadata:
@@ -490,11 +489,11 @@ class GNUChessActivity(activity.Activity):
         if self._gnuchess.we_are_sharing and self.buddy is not None:
             if 'white' in piece and self.playing_white:
                 pixbuf = self._gnuchess.reskin_from_file(
-                    piece, file_path, return_pixbuf= True)
+                    piece, file_path, return_pixbuf=True)
                 self.send_piece(piece, pixbuf)
             elif 'black' in piece and not self.playing_white:
                 pixbuf = self._gnuchess.reskin_from_file(
-                    piece, file_path, return_pixbuf= True)
+                    piece, file_path, return_pixbuf=True)
                 self.send_piece(piece, pixbuf)
         else:
             self._gnuchess.reskin_from_file(piece, file_path)
@@ -534,7 +533,7 @@ class GNUChessActivity(activity.Activity):
         move_list = self._parse_move_list(clipboard.wait_for_text())
         if move_list is not None:
             self._gnuchess.restore_game(move_list)
- 
+
     def _parse_move_list(self, text):
         ''' Take a standard game description and return a move list '''
         # Assuming of form ... 1. e4 e6 2. ...
