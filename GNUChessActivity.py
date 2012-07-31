@@ -439,7 +439,7 @@ class GNUChessActivity(activity.Activity):
         self._gnuchess.reskin_from_file('white_pawn',
                 '%s/icons/white-pawn.svg' % (activity.get_bundle_path()))
 
-    def _black_peices(self, colors):
+    def _black_pieces(self, colors):
         self._gnuchess.reskin_from_svg('black_king', colors, bw='#000000')
         self._gnuchess.reskin_from_svg('black_queen', colors, bw='#000000')
         self._gnuchess.reskin_from_svg('black_bishop', colors, bw='#000000')
@@ -447,7 +447,7 @@ class GNUChessActivity(activity.Activity):
         self._gnuchess.reskin_from_svg('black_rook', colors, bw='#000000')
         self._gnuchess.reskin_from_svg('black_pawn', colors, bw='#000000')
 
-    def _white_peices(self, colors):
+    def _white_pieces(self, colors):
         self._gnuchess.reskin_from_svg('white_king', colors, bw='#ffffff')
         self._gnuchess.reskin_from_svg('white_queen', colors, bw='#ffffff')
         self._gnuchess.reskin_from_svg('white_bishop', colors, bw='#ffffff')
@@ -458,19 +458,19 @@ class GNUChessActivity(activity.Activity):
     def do_sugar_skin_cb(self, button=None):
         colors = self.colors
         if not self._gnuchess.we_are_sharing:
-            self._black_peices(colors)
-            self._white_peices(colors)
+            self._black_pieces(colors)
+            self._white_pieces(colors)
         else:
             if self.playing_white:
-                self._white_peices(colors)
+                self._white_pieces(colors)
                 if self.opponent_colors is not None:
                     colors = self.opponent_colors
-                self._black_peices(colors)
+                self._black_pieces(colors)
             else:
-                self._black_peices(colors)
+                self._black_pieces(colors)
                 if self.opponent_colors is not None:
                     colors = self.opponent_colors
-                self._white_peices(colors)
+                self._white_pieces(colors)
 
     def do_custom_skin_cb(self, button=None):
         for piece in ['white_pawn', 'black_pawn',
@@ -483,22 +483,29 @@ class GNUChessActivity(activity.Activity):
                 id = self.metadata[piece]
                 jobject = datastore.get(id)
                 if jobject is not None and jobject.file_path is not None:
-                    if self._gnuchess.we_are_sharing and self.buddy is not None:
-                        pixbuf = self._gnuchess.reskin_from_file(
-                            piece, jobject.file_path, return_pixbuf= True)
-                        if 'white' in piece and self.playing_white:
-                            self.send_piece(piece, pixbuf)
-                        elif 'black' in piece and not self.playing_white:
-                            self.send_piece(piece, pixbuf)
-                    else:
-                        self._gnuchess.reskin_from_file(piece,
-                                                        jobject.file_path)
+                    self._do_reskin(piece, jobject.file_path)
+
+    def _do_reskin(self, piece, file_path):
+        _logger.debug('%s %s %s' % (
+                piece, str(self._gnuchess.we_are_sharing),
+                str(self.buddy)))
+        if self._gnuchess.we_are_sharing and self.buddy is not None:
+            pixbuf = self._gnuchess.reskin_from_file(
+                piece, file_path, return_pixbuf= True)
+            if 'white' in piece and self.playing_white:
+                self.send_piece(piece, pixbuf)
+            elif 'black' in piece and not self.playing_white:
+                self.send_piece(piece, pixbuf)
+            else:
+                _logger.debug('skipping... opponent reskin')
+        else:
+            self._gnuchess.reskin_from_file(piece, file_path)
         return
 
     def _reskin_cb(self, button, piece):
         object_id, file_path = self._choose_skin()
         if file_path is not None:
-            self._gnuchess.reskin_from_file(piece, file_path)
+            self._do_reskin(piece, file_path)
             self.metadata[piece] = str(object_id)
 
     def do_fullscreen_cb(self, button):
@@ -991,7 +998,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def send_piece(self, piece, pixbuf):
         _logger.debug('send_piece %s' % (piece))
-        self.send_event('p|%s' % (self._dump(peice, pixbuf)))
+        self.send_event('p|%s' % (self._dump(piece, pixbuf)))
 
     def _receive_piece(self, payload):
         piece, pixbuf = self._load(payload)
