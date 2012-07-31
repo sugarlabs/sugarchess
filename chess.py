@@ -173,7 +173,6 @@ class Gnuchess():
 
     def _process_output(self, output, my_move=None, hint=False):
         ''' process output from gnuchess command '''
-        # _logger.debug(output)
         self.check = False
         self.checkmate = False
         if 'White   Black' in output:  # processing show game
@@ -1411,12 +1410,8 @@ class Gnuchess():
         if not self.we_are_sharing:
             return
         if self._activity.playing_white and len(self.move_list) % 2 == 0:
-            _logger.debug("received a remote move (%s) from Black but it is \
-White's turn." % (move))
             return
         elif not self._activity.playing_white and len(self.move_list) % 2 == 1:
-            _logger.debug("received a remote move (%s) from White but it is \
-Black's turn." % (move))
             return
         _logger.debug('Processing remote move (%s)' % (move))
         self.move(move)
@@ -1568,17 +1563,16 @@ Black's turn." % (move))
         pixbuf = svg_str_to_pixbuf(
             svg_header(colors) + DICT[piece](bw) + svg_footer(),
             w=self.scale, h=self.scale)
-        self._reskin(piece, pixbuf)
+        self.reskin(piece, pixbuf)
 
     def reskin_from_file(self, piece, file_path, return_pixbuf=False):
-        _logger.debug('%s %s' % (piece, file_path))
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
             file_path, self.scale, self.scale)
-        self._reskin(piece, pixbuf)
+        self.reskin(piece, pixbuf)
         if return_pixbuf:
             return pixbuf
 
-    def _reskin(self, piece, pixbuf):
+    def reskin(self, piece, pixbuf):
         DICT = {'white_pawn': WP, 'black_pawn': BP,
                 'white_rook': WR, 'black_rook': BR,
                 'white_knight': WN, 'black_knight': BN,

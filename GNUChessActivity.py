@@ -486,18 +486,16 @@ class GNUChessActivity(activity.Activity):
                     self._do_reskin(piece, jobject.file_path)
 
     def _do_reskin(self, piece, file_path):
-        _logger.debug('%s %s %s' % (
-                piece, str(self._gnuchess.we_are_sharing),
-                str(self.buddy)))
+        ''' If we are sharing, only reskin pieces of your color '''
         if self._gnuchess.we_are_sharing and self.buddy is not None:
-            pixbuf = self._gnuchess.reskin_from_file(
-                piece, file_path, return_pixbuf= True)
             if 'white' in piece and self.playing_white:
+                pixbuf = self._gnuchess.reskin_from_file(
+                    piece, file_path, return_pixbuf= True)
                 self.send_piece(piece, pixbuf)
             elif 'black' in piece and not self.playing_white:
+                pixbuf = self._gnuchess.reskin_from_file(
+                    piece, file_path, return_pixbuf= True)
                 self.send_piece(piece, pixbuf)
-            else:
-                _logger.debug('skipping... opponent reskin')
         else:
             self._gnuchess.reskin_from_file(piece, file_path)
         return
@@ -718,7 +716,6 @@ class GNUChessActivity(activity.Activity):
                 chooser.destroy()
                 del chooser
             if name is not None:
-                _logger.debug('foo: %s %s' % (str(jobject.object_id), jobject.file_path))
                 return jobject.object_id, jobject.file_path
         else:
             return None, None
@@ -838,7 +835,6 @@ class GNUChessActivity(activity.Activity):
 
         self._gnuchess.set_sharing(True)
         self.restoring = True
-        _logger.debug('............... setting human button to active')
         self.playing_robot = False
         self.human_button.set_active(True)
         self.restoring = False
@@ -896,8 +892,6 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         except ValueError:
             _logger.debug('Could not split event message %s' % (event_message))
             return
-        _logger.debug('%s: %s' % (self._processing_methods[command][1],
-                                  payload))
         self._processing_methods[command][0](payload)
 
     def send_new_game(self):
@@ -998,7 +992,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def send_piece(self, piece, pixbuf):
         _logger.debug('send_piece %s' % (piece))
-        self.send_event('p|%s' % (self._dump(piece, pixbuf)))
+        gobject.idle_add(self.send_event, 'p|%s' % (self._dump(piece, pixbuf)))
 
     def _receive_piece(self, payload):
         piece, pixbuf = self._load(payload)
