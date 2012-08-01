@@ -159,7 +159,7 @@ class GNUChessActivity(activity.Activity):
             self.view_toolbar.show()
             toolbox.toolbar.insert(view_toolbar_button, -1)
             view_toolbar_button.show()
-            
+
             adjust_toolbar_button = ToolbarButton(label=_('Adjust'),
                                                   page=self.adjust_toolbar,
                                                   icon_name=\
@@ -412,7 +412,6 @@ class GNUChessActivity(activity.Activity):
                        cb_arg='black_king',
                        tooltip=_('Black King'))
 
-
     def do_default_skin_cb(self, button=None):
         self._gnuchess.reskin_from_file('black_king',
                 '%s/icons/black-king.svg' % (activity.get_bundle_path()))
@@ -474,9 +473,9 @@ class GNUChessActivity(activity.Activity):
 
     def do_custom_skin_cb(self, button=None):
         for piece in ['white_pawn', 'black_pawn',
-                      'white_rook', 'black_rook', 
+                      'white_rook', 'black_rook',
                       'white_knight', 'black_knight',
-                      'white_bishop', 'black_bishop', 
+                      'white_bishop', 'black_bishop',
                       'white_queen', 'black_queen',
                       'white_king', 'black_king']:
             if piece in self.metadata:
@@ -486,18 +485,16 @@ class GNUChessActivity(activity.Activity):
                     self._do_reskin(piece, jobject.file_path)
 
     def _do_reskin(self, piece, file_path):
-        _logger.debug('%s %s %s' % (
-                piece, str(self._gnuchess.we_are_sharing),
-                str(self.buddy)))
+        ''' If we are sharing, only reskin pieces of your color '''
         if self._gnuchess.we_are_sharing and self.buddy is not None:
-            pixbuf = self._gnuchess.reskin_from_file(
-                piece, file_path, return_pixbuf= True)
             if 'white' in piece and self.playing_white:
+                pixbuf = self._gnuchess.reskin_from_file(
+                    piece, file_path, return_pixbuf=True)
                 self.send_piece(piece, pixbuf)
             elif 'black' in piece and not self.playing_white:
+                pixbuf = self._gnuchess.reskin_from_file(
+                    piece, file_path, return_pixbuf=True)
                 self.send_piece(piece, pixbuf)
-            else:
-                _logger.debug('skipping... opponent reskin')
         else:
             self._gnuchess.reskin_from_file(piece, file_path)
         return
@@ -536,7 +533,7 @@ class GNUChessActivity(activity.Activity):
         move_list = self._parse_move_list(clipboard.wait_for_text())
         if move_list is not None:
             self._gnuchess.restore_game(move_list)
- 
+
     def _parse_move_list(self, text):
         ''' Take a standard game description and return a move list '''
         # Assuming of form ... 1. e4 e6 2. ...
@@ -718,7 +715,6 @@ class GNUChessActivity(activity.Activity):
                 chooser.destroy()
                 del chooser
             if name is not None:
-                _logger.debug('foo: %s %s' % (str(jobject.object_id), jobject.file_path))
                 return jobject.object_id, jobject.file_path
         else:
             return None, None
@@ -838,7 +834,6 @@ class GNUChessActivity(activity.Activity):
 
         self._gnuchess.set_sharing(True)
         self.restoring = True
-        _logger.debug('............... setting human button to active')
         self.playing_robot = False
         self.human_button.set_active(True)
         self.restoring = False
@@ -896,8 +891,6 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         except ValueError:
             _logger.debug('Could not split event message %s' % (event_message))
             return
-        _logger.debug('%s: %s' % (self._processing_methods[command][1],
-                                  payload))
         self._processing_methods[command][0](payload)
 
     def send_new_game(self):
@@ -998,7 +991,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def send_piece(self, piece, pixbuf):
         _logger.debug('send_piece %s' % (piece))
-        self.send_event('p|%s' % (self._dump(piece, pixbuf)))
+        gobject.idle_add(self.send_event, 'p|%s' % (self._dump(piece, pixbuf)))
 
     def _receive_piece(self, payload):
         piece, pixbuf = self._load(payload)

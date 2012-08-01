@@ -10,6 +10,7 @@
 # Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
 import os
+import gtk
 import subprocess
 from StringIO import StringIO
 try:
@@ -34,7 +35,7 @@ UNKNOWN = 'unknown'
 
 
 def get_hardware():
-    """ Determine whether we are using XO 1.0, 1.5, or "unknown" hardware """
+    ''' Determine whether we are using XO 1.0, 1.5, or "unknown" hardware '''
     product = _get_dmi('product_name')
     if product is None:
         if os.path.exists('/sys/devices/platform/lis3lv02d/position'):
@@ -66,11 +67,10 @@ def _get_dmi(node):
 
 
 def json_load(text):
-    """ Load JSON data using what ever resources are available. """
+    ''' Load JSON data using what ever resources are available. '''
     if OLD_SUGAR_SYSTEM is True:
         listdata = json.read(text)
     else:
-        # strip out leading and trailing whitespace, nulls, and newlines
         io = StringIO(text)
         try:
             listdata = jload(io)
@@ -83,7 +83,7 @@ def json_load(text):
 
 
 def json_dump(data):
-    """ Save data using available JSON tools. """
+    ''' Save data using available JSON tools. '''
     if OLD_SUGAR_SYSTEM is True:
         return json.write(data)
     else:
@@ -92,7 +92,13 @@ def json_dump(data):
         return _io.getvalue()
 
 
+def get_path(activity, path):
+    ''' Find a Rainbow-approved place for temporary files. '''
+    return(os.path.join(activity.get_activity_root(), path))
+
+
 def file_to_base64(activity, path):
+    ''' Given a file, convert its contents to base64 '''
     base64 = os.path.join(get_path(activity, 'instance'), 'base64tmp')
     cmd = 'base64 <' + path + ' >' + base64
     subprocess.check_call(cmd, shell=True)
@@ -114,6 +120,7 @@ def pixbuf_to_base64(activity, pixbuf):
 
 
 def base64_to_file(activity, data, path):
+    ''' Given a file, convert its contents from base64 '''
     base64 = os.path.join(get_path(activity, 'instance'), 'base64tmp')
     file_handle = open(base64, 'w')
     file_handle.write(data)

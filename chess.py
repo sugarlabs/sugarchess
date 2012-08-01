@@ -173,7 +173,6 @@ class Gnuchess():
 
     def _process_output(self, output, my_move=None, hint=False):
         ''' process output from gnuchess command '''
-        # _logger.debug(output)
         self.check = False
         self.checkmate = False
         if 'White   Black' in output:  # processing show game
@@ -273,7 +272,7 @@ class Gnuchess():
 
     def restore_game(self, move_list):
         self.move_list = []
-        
+
         for move in move_list:
             self.move_list.append(str(move))
 
@@ -315,9 +314,9 @@ class Gnuchess():
                 if '31.' in self.game:
                     j = self.game.index('31.')
                     self.bg[1].set_label(self.game[i: j - 1])
-                    self.bg[2].set_label(self.game[j: ])
+                    self.bg[2].set_label(self.game[j:])
                 else:
-                    self.bg[1].set_label(self.game[i: ])
+                    self.bg[1].set_label(self.game[i:])
             else:
                 self.bg[0].set_label(self.game)
             self._activity.showing_game_history = True
@@ -349,7 +348,7 @@ class Gnuchess():
         spr = self._sprites.find_sprite((x, y))
         if spr == None or spr.type == None:
             return
-        
+
         if self._thinking:  # Robot is thinking or conjuring up a hint
             self._wait_your_turn()
             return
@@ -388,10 +387,10 @@ class Gnuchess():
     def _wait_your_turn(self):
         if self._activity.playing_white:
             self._activity.status.set_label(
-                _('White: please wait for your turn.'))
+                _('Please wait for your turn.'))
         else:
             self._activity.status.set_label(
-                _('Black: please wait for your turn.'))
+                _('Please wait for your turn.'))
 
     def _play_your_color(self):
         if self._activity.playing_white:
@@ -479,7 +478,7 @@ class Gnuchess():
 
         if self._activity.playing_robot and not self.checkmate:
             self._activity.set_thinking_cursor()
-            self._activity.status.set_label(_('Thinking'))
+            self._activity.status.set_label(_('Thinking...'))
             self._thinking = True
             gobject.timeout_add(500, self.move, ROBOT)
 
@@ -776,7 +775,7 @@ class Gnuchess():
     def _search_for_rook(
         self, piece, source_file, source_rank, capture_file, capture_rank):
         # Change rank
-        if len(self.move_list) % 2 == 1:  #        if piece in 'rq':
+        if len(self.move_list) % 2 == 1:
             for r in range(7 - RANKS.index(capture_rank)):
                 i = self._file_and_rank_to_index('%s%s' % (
                         capture_file, RANKS[RANKS.index(capture_rank) + r + 1]))
@@ -1411,12 +1410,8 @@ class Gnuchess():
         if not self.we_are_sharing:
             return
         if self._activity.playing_white and len(self.move_list) % 2 == 0:
-            _logger.debug("received a remote move (%s) from Black but it is \
-White's turn." % (move))
             return
         elif not self._activity.playing_white and len(self.move_list) % 2 == 1:
-            _logger.debug("received a remote move (%s) from White but it is \
-Black's turn." % (move))
             return
         _logger.debug('Processing remote move (%s)' % (move))
         self.move(move)
@@ -1442,7 +1437,7 @@ Black's turn." % (move))
         y = yo
         return ('%s%d' % (FILES[int((pos[0] - xo) / self.scale)],
                 8 - int((pos[1] - yo) / self.scale)))
- 
+
     def _expose_cb(self, win, event):
         self.do_expose_event(event)
 
@@ -1568,17 +1563,16 @@ Black's turn." % (move))
         pixbuf = svg_str_to_pixbuf(
             svg_header(colors) + DICT[piece](bw) + svg_footer(),
             w=self.scale, h=self.scale)
-        self._reskin(piece, pixbuf)
+        self.reskin(piece, pixbuf)
 
     def reskin_from_file(self, piece, file_path, return_pixbuf=False):
-        _logger.debug('%s %s' % (piece, file_path))
         pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
             file_path, self.scale, self.scale)
-        self._reskin(piece, pixbuf)
+        self.reskin(piece, pixbuf)
         if return_pixbuf:
             return pixbuf
 
-    def _reskin(self, piece, pixbuf):
+    def reskin(self, piece, pixbuf):
         DICT = {'white_pawn': WP, 'black_pawn': BP,
                 'white_rook': WR, 'black_rook': BR,
                 'white_knight': WN, 'black_knight': BN,
