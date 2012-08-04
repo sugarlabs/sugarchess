@@ -1,0 +1,246 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-07-30 17:42-0400\n"
+"PO-Revision-Date: 2012-08-04 07:04+0200\n"
+"Last-Translator: Aputsiaq Niels <aj@isit.gl>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Pootle 2.0.5\n"
+
+#: activity/activity.info:2
+msgid "SimpleGNUChess"
+msgstr "SimpleGNUChess"
+
+#: GNUChessActivity.py:149 GNUChessActivity.py:190
+msgid "Edit"
+msgstr "Redigér"
+
+#: GNUChessActivity.py:156 GNUChessActivity.py:191
+msgid "View"
+msgstr "Vis"
+
+#: GNUChessActivity.py:163
+msgid "Adjust"
+msgstr "Tilpas"
+
+#: GNUChessActivity.py:171 GNUChessActivity.py:192
+msgid "Custom"
+msgstr "Brugerdefineret"
+
+#: GNUChessActivity.py:189
+msgid "Play"
+msgstr "Spil"
+
+#: GNUChessActivity.py:200
+msgid "Copy"
+msgstr "Kopiér"
+
+#: GNUChessActivity.py:206
+msgid "Paste"
+msgstr "Indsæt"
+
+#: GNUChessActivity.py:212
+msgid "Fullscreen"
+msgstr "Fuldskærm"
+
+#: GNUChessActivity.py:218
+msgid "Play game history"
+msgstr "Afspil spilhistorik"
+
+#: GNUChessActivity.py:223 GNUChessActivity.py:519
+msgid "Show game history"
+msgstr "Vis spilhistorik"
+
+#: GNUChessActivity.py:228
+msgid "White: "
+msgstr "Hvid:"
+
+#: GNUChessActivity.py:231
+msgid "White's move"
+msgstr "Hvids træk"
+
+#: GNUChessActivity.py:236
+msgid "Black: "
+msgstr "Sort:"
+
+#: GNUChessActivity.py:239
+msgid "Black's move"
+msgstr "Sorts træk"
+
+#: GNUChessActivity.py:246
+msgid "Default pieces"
+msgstr "Standard-brikker"
+
+#: GNUChessActivity.py:252
+msgid "Sugar-style pieces"
+msgstr "Brikker i Sugar-stil"
+
+#: GNUChessActivity.py:262
+msgid "Custom pieces"
+msgstr "Brugerdefinerede brikker"
+
+#: GNUChessActivity.py:270
+msgid "Play White"
+msgstr "Spil hvid"
+
+#: GNUChessActivity.py:276
+msgid "Play Black"
+msgstr "Spil sort"
+
+#: GNUChessActivity.py:286
+msgid "Beginner"
+msgstr "Begynder"
+
+#: GNUChessActivity.py:292
+msgid "Expert"
+msgstr "Ekspert"
+
+#: GNUChessActivity.py:303
+msgid "Play against the computer"
+msgstr "Spil mod computeren"
+
+#: GNUChessActivity.py:309
+msgid "Play against a person"
+msgstr "Spil mod en person"
+
+#: GNUChessActivity.py:320
+msgid "New game"
+msgstr "Nyt spil"
+
+#: GNUChessActivity.py:325
+msgid "Undo"
+msgstr "Fortryd"
+
+#: GNUChessActivity.py:330
+msgid "Hint"
+msgstr "Hint"
+
+#: GNUChessActivity.py:334 chess.py:249
+msgid "It is White's move."
+msgstr "Det er hvids tur."
+
+#: GNUChessActivity.py:347
+msgid "White Pawn"
+msgstr "Hvid bonde"
+
+#: GNUChessActivity.py:353
+msgid "Black Pawn"
+msgstr "Sort bonde"
+
+#: GNUChessActivity.py:359
+msgid "White Rook"
+msgstr "Hvidt tårn"
+
+#: GNUChessActivity.py:365
+msgid "Black Rook"
+msgstr "Sort tårn"
+
+#: GNUChessActivity.py:371
+msgid "White Knight"
+msgstr "Hvid springer"
+
+#: GNUChessActivity.py:377
+msgid "Black Knight"
+msgstr "Sort springer"
+
+#: GNUChessActivity.py:383
+msgid "White Bishop"
+msgstr "Hvid løber"
+
+#: GNUChessActivity.py:389
+msgid "Black Bishop"
+msgstr "Sort løber"
+
+#: GNUChessActivity.py:395
+msgid "White Queen"
+msgstr "Hvid dronning"
+
+#: GNUChessActivity.py:401
+msgid "Black Queen"
+msgstr "Sort dronning"
+
+#: GNUChessActivity.py:407
+msgid "White King"
+msgstr "Hvid konge"
+
+#: GNUChessActivity.py:413
+msgid "Black King"
+msgstr "Sort konge"
+
+#: GNUChessActivity.py:516
+msgid "Show game board"
+msgstr "Vis bræt"
+
+#: GNUChessActivity.py:770
+msgid "Game in progress."
+msgstr "Spil er i gang."
+
+#: GNUChessActivity.py:771
+msgid "Do you want to start a new game?"
+msgstr "Vil du starte et nyt spil?"
+
+#: chess.py:191
+msgid "Illegal move"
+msgstr "Ulovligt træk"
+
+#: chess.py:238 chess.py:461 chess.py:468
+msgid "Check"
+msgstr "Skak"
+
+#: chess.py:240 chess.py:464 chess.py:470
+msgid "Checkmate"
+msgstr "Skakmat"
+
+#: chess.py:251
+msgid "It is Black's move."
+msgstr "Det er sorts tur."
+
+#: chess.py:283
+msgid "Black wins."
+msgstr "Sort vinder."
+
+#: chess.py:285
+msgid "White wins."
+msgstr "Hvid vinder."
+
+#: chess.py:289
+msgid "White's King is in check."
+msgstr "Hvid konge er i skak."
+
+#: chess.py:292
+msgid "Black's King is in check."
+msgstr "Sort konge er i skak."
+
+#: chess.py:389
+msgid "White: please wait for your turn."
+msgstr "Hvid: vent venligst til det er din tur."
+
+#: chess.py:392
+msgid "Black: please wait for your turn."
+msgstr "Sort: vent venligst til det er din tur."
+
+#: chess.py:396
+msgid "Please play White."
+msgstr "Spil venligst hvid."
+
+#: chess.py:398
+msgid "Please play Black."
+msgstr "Spil venligst sort."
+
+#: chess.py:480 chess.py:508
+msgid "Thinking"
+msgstr "Tænker"
+
+#: chess.py:505
+msgid "Please wait for your turn."
+msgstr "Vent venligst til det er din tur."
