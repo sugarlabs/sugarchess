@@ -33,6 +33,7 @@ ROBOT_MOVE = 'My move is : '
 TOP = 3
 MID = 2
 BOT = 1
+STATUS = 'status'
 ROBOT = 'robot'
 RESTORE = 'restore'
 REMOVE = 'remove'
@@ -108,6 +109,9 @@ class Gnuchess():
         self.black = []
         self._board = []
         self._squares = []
+        self._output = ''
+        self._before = []
+        self._after = []
 
         self.skins = []
 
@@ -162,6 +166,13 @@ class Gnuchess():
             cmd += '%sgo\nshow board\nquit\n' % (level)
             output = p.communicate(input=cmd)
             self._process_output(output[0], my_move='robot')
+        elif my_move == STATUS:  # reading board state
+            cmd = 'force manual\n'
+            for move in self.move_list:
+                cmd += '%s\n' % (move)
+            cmd += 'show board\nquit\n'
+            output = p.communicate(input=cmd)
+            self._process_output(output[0], my_move=STATUS)
         elif my_move is not None:  # human's move
             cmd = 'force manual\n'
             for move in self.move_list:
@@ -175,7 +186,10 @@ class Gnuchess():
         ''' process output from gnuchess command '''
         self.check = False
         self.checkmate = False
-        if 'White   Black' in output:  # processing show game
+        if my_move == STATUS:  # Just reading board state
+            self._output = output
+            return
+        elif 'White   Black' in output:  # processing show game
             target = 'White   Black'
             output = output[find(output, target):]
             self.game = output[:find(output, '\n\n')]
@@ -480,9 +494,57 @@ class Gnuchess():
             self._activity.set_thinking_cursor()
             self._activity.status.set_label(_('Thinking...'))
             self._thinking = True
-            gobject.timeout_add(500, self.move, ROBOT)
+            self._get_before()
+            gobject.timeout_add(500, self._robot_move)
 
         return True
+
+    def _robot_move(self):
+        self.move(ROBOT)
+        # Flash the squares of any piece that robot has moved
+        self._get_after()
+        pieces = []  # Array, since if could be a castling move
+        before = []
+        after = []
+        for i in range(64):
+            if self._before[i] != self._after[i]:
+                if self._activity.playing_white and \
+                   self._before[i] in 'prnbqk':
+                    pieces.append(self._before[i])
+                    before.append(i)
+                elif not self._activity.playing_white and \
+                     self._before[i] in 'PRNBQK':
+                    pieces.append(self._before[i])
+                    before.append(i)
+                if self._activity.playing_white and \
+                   self._after[i] in 'prnbqk':
+                    pieces.append(self._after[i])
+                    after.append(i)
+                elif not self._activity.playing_white and \
+                     self._after[i] in 'PRNBQK':
+                    pieces.append(self._after[i])
+                    after.append(i)
+        tiles = []
+        for i in range(len(before)):
+            tiles.append(self._index_to_file_and_rank(before[i]))
+            tiles.append(self._index_to_file_and_rank(after[i]))
+        self._flash_tile(tiles, flash_color=3)
+
+    def _get_before(self):
+        self.move(STATUS)
+        if self._activity.playing_white:
+            tmp = self._output.split('Black')
+        else:
+            tmp = self._output.split('White')
+        self._before = tmp[-2][-137:].split()
+
+    def _get_after(self):
+        self.move(STATUS)
+        if self._activity.playing_white:
+            tmp = self._output.split('White')
+        else:
+            tmp = self._output.split('Black')
+        self._after = tmp[-2][-137:].split()
 
     def undo(self):
         # TODO: Lock out while robot is playing
@@ -510,22 +572,22 @@ class Gnuchess():
         self._thinking = True
         gobject.timeout_add(500, self.move, HINT)
 
-    def _flash_tile(self, tiles):
+    def _flash_tile(self, tiles, flash_color=2):
         self._counter = 0
-        gobject.timeout_add(100, self._flasher, tiles)
+        gobject.timeout_add(100, self._flasher, tiles, flash_color)
         return
 
-    def _flasher(self, tiles):
+    def _flasher(self, tiles, flash_color):
         if self._counter < 9:
             self._counter += 1
             for tile in tiles:
                 i = self._file_and_rank_to_index(tile)
                 if self._counter % 2 == 0:
-                    self._board[i].set_image(self._squares[2])
+                    self._board[i].set_image(self._squares[flash_color])
                 else:
                     self._board[i].set_image(self._squares[black_or_white(i)])
                 self._board[i].set_layer(BOT)
-            gobject.timeout_add(200, self._flasher, tiles)
+            gobject.timeout_add(200, self._flasher, tiles, flash_color)
 
     def _parse_move(self, move):
         tiles = []
@@ -1390,6 +1452,21 @@ class Gnuchess():
                         return FILES[f], RANKS[r]
         return capture_file, capture_rank
 
+    def remote_move(self, move):
+        ''' Receive a move from a network '''
+        if not self.we_are_sharing:
+            return
+        if self._activity.playing_white and len(self.move_list) % 2 == 0:
+            return
+        elif not self._activity.playing_white and len(self.move_list) % 2 == 1:
+            return
+        _logger.debug('Processing remote move (%s)' % (move))
+        self.move(move)
+
+    def set_sharing(self, share=True):
+        _logger.debug('enabling sharing')
+        self.we_are_sharing = share
+
     def _find_piece_at_index(self, i):
         pos = self._index_to_xy(i)
         return self._find_piece_at_xy(pos)
@@ -1405,20 +1482,8 @@ class Gnuchess():
                 return b
         return None
 
-    def remote_move(self, move):
-        ''' Receive a move from a network '''
-        if not self.we_are_sharing:
-            return
-        if self._activity.playing_white and len(self.move_list) % 2 == 0:
-            return
-        elif not self._activity.playing_white and len(self.move_list) % 2 == 1:
-            return
-        _logger.debug('Processing remote move (%s)' % (move))
-        self.move(move)
-
-    def set_sharing(self, share=True):
-        _logger.debug('enabling sharing')
-        self.we_are_sharing = share
+    def _index_to_file_and_rank(self, i):
+        return '%s%s' % (FILES[i % 8], RANKS[7 - int(i / 8)])
 
     def _file_and_rank_to_index(self, file_and_rank):
         ''' calculate the tile index from the file and rank '''
@@ -1456,6 +1521,7 @@ class Gnuchess():
 
     def _load_board(self, board):
         ''' Load the board based on gnuchess board output '''
+        # _logger.debug(board)
         white_pawns = 0
         white_rooks = 0
         white_knights = 0
@@ -1657,6 +1723,7 @@ class Gnuchess():
         self._squares.append(self._box(w, h, color='black'))
         self._squares.append(self._box(w, h, color='white'))
         self._squares.append(self._box(w, h, color=colors[0]))
+        self._squares.append(self._box(w, h, color=colors[1]))
         xo = self._width - 8 * self.scale
         xo = int(xo / 2)
         yo = int(self.scale / 2)
