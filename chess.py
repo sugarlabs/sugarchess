@@ -1702,6 +1702,7 @@ class Gnuchess():
             self.black[4].set_layer(MID)
 
     def _generate_sprites(self, colors):
+
         if 'xo' in self._activity.hardware:
             fontsize = 24
         else:
@@ -1718,6 +1719,19 @@ class Gnuchess():
 
         self.bg[1].move_relative((int(self._width / 3), 0))
         self.bg[2].move_relative((int(2 * self._width / 3), 0))
+
+        xo = self._width - 8 * self.scale
+        xo = int(xo / 2)
+        yo = int(self.scale / 2)
+
+        self.rank = Sprite(self._sprites, xo - self.scale, yo,
+                           gtk.gdk.pixbuf_new_from_file_at_size(
+                '%s/images/rank.svg' % (self._bundle_path),
+                self.scale, 8 * self.scale))
+        self.file =  Sprite(self._sprites, xo, yo + int(self.scale * 8),
+                            gtk.gdk.pixbuf_new_from_file_at_size(
+                '%s/images/file.svg' % (self._bundle_path),
+                8 * self.scale, self.scale))
 
         w = h = self.scale
         self._squares.append(self._box(w, h, color='black'))
