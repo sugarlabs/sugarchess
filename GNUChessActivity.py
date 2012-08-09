@@ -525,7 +525,7 @@ class GNUChessActivity(activity.Activity):
 
     def _copy_cb(self, *args):
         clipboard = gtk.Clipboard()
-        clipboard.set_text(self.tag_pairs + self._gnuchess.copy_game())
+        clipboard.set_text(self.tag_pairs() + self._gnuchess.copy_game())
 
     def _paste_cb(self, *args):
         ''' Pasting '''
