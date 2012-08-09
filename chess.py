@@ -1728,10 +1728,12 @@ class Gnuchess():
                            gtk.gdk.pixbuf_new_from_file_at_size(
                 '%s/images/rank.svg' % (self._bundle_path),
                 self.scale, 8 * self.scale))
+        self.rank.set_layer(0)
         self.file =  Sprite(self._sprites, xo, yo + int(self.scale * 8),
                             gtk.gdk.pixbuf_new_from_file_at_size(
                 '%s/images/file.svg' % (self._bundle_path),
                 8 * self.scale, self.scale))
+        self.file.set_layer(0)
 
         w = h = self.scale
         self._squares.append(self._box(w, h, color='black'))
