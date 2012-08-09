@@ -7,242 +7,243 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-08-01 00:32-0400\n"
-"PO-Revision-Date: 2012-08-07 17:09+0200\n"
-"Last-Translator: Aputsiaq Niels <aj@isit.gl>\n"
+"PO-Revision-Date: 2012-08-06 17:55+0200\n"
+"Last-Translator: anush.mkrtchyan <anush.mkrtchyan@ca1492.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: da\n"
+"Language: hy\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Pootle 2.0.5\n"
 
+# GNU - Ազատ Օպերացոն Համակարգ
 #: activity/activity.info:2
 msgid "SimpleGNUChess"
-msgstr "SimpleGNUChess"
+msgstr "ՊարզGNUՇախմատ"
 
 #: GNUChessActivity.py:149 GNUChessActivity.py:190
 msgid "Edit"
-msgstr "Redigér"
+msgstr "Խմբագրել"
 
 #: GNUChessActivity.py:156 GNUChessActivity.py:191
 msgid "View"
-msgstr "Vis"
+msgstr "Տեսք"
 
 #: GNUChessActivity.py:163
 msgid "Adjust"
-msgstr "Tilpas"
+msgstr "Կարգավորել"
 
 #: GNUChessActivity.py:171 GNUChessActivity.py:192
 msgid "Custom"
-msgstr "Brugerdefineret"
+msgstr ""
 
 #: GNUChessActivity.py:189
 msgid "Play"
-msgstr "Spil"
+msgstr "Խաղալ"
 
 #: GNUChessActivity.py:200
 msgid "Copy"
-msgstr "Kopiér"
+msgstr "Պատճենել"
 
 #: GNUChessActivity.py:206
 msgid "Paste"
-msgstr "Indsæt"
+msgstr "փակցնել"
 
 #: GNUChessActivity.py:212
 msgid "Fullscreen"
-msgstr "Fuldskærm"
+msgstr "Էկրանի չափով"
 
 #: GNUChessActivity.py:218
 msgid "Play game history"
-msgstr "Afspil spilhistorik"
+msgstr ""
 
 #: GNUChessActivity.py:223 GNUChessActivity.py:523
 msgid "Show game history"
-msgstr "Vis spilhistorik"
+msgstr ""
 
 #: GNUChessActivity.py:228
 msgid "White: "
-msgstr "Hvid:"
+msgstr "Սպիտակ` "
 
 #: GNUChessActivity.py:231
 msgid "White's move"
-msgstr "Hvids træk"
+msgstr "Սպիտակի քայլը"
 
 #: GNUChessActivity.py:236
 msgid "Black: "
-msgstr "Sort:"
+msgstr "Սև` "
 
 #: GNUChessActivity.py:239
 msgid "Black's move"
-msgstr "Sorts træk"
+msgstr "Սևի քայլը"
 
 #: GNUChessActivity.py:246
 msgid "Default pieces"
-msgstr "Standard-brikker"
+msgstr ""
 
 #: GNUChessActivity.py:252
 msgid "Sugar-style pieces"
-msgstr "Brikker i Sugar-stil"
+msgstr "Շաքար-ոճի քարեր"
 
 #: GNUChessActivity.py:262
 msgid "Custom pieces"
-msgstr "Brugerdefinerede brikker"
+msgstr ""
 
 #: GNUChessActivity.py:270
 msgid "Play White"
-msgstr "Spil hvid"
+msgstr "Խաղալ Սպիտակ"
 
 #: GNUChessActivity.py:276
 msgid "Play Black"
-msgstr "Spil sort"
+msgstr "Խաղալ Սև"
 
 #: GNUChessActivity.py:286
 msgid "Beginner"
-msgstr "Begynder"
+msgstr "Սկսնակ"
 
 #: GNUChessActivity.py:292
 msgid "Expert"
-msgstr "Ekspert"
+msgstr "Մասնագետ"
 
 #: GNUChessActivity.py:303
 msgid "Play against the computer"
-msgstr "Spil mod computeren"
+msgstr "Խաղալ համակարգչի դեմ"
 
 #: GNUChessActivity.py:309
 msgid "Play against a person"
-msgstr "Spil mod en person"
+msgstr "Խաղալ մարդու դեմ"
 
 #: GNUChessActivity.py:320
 msgid "New game"
-msgstr "Nyt spil"
+msgstr "Նոր խաղ"
 
 #: GNUChessActivity.py:325
 msgid "Undo"
-msgstr "Fortryd"
+msgstr "Ետարկել"
 
 #: GNUChessActivity.py:330
 msgid "Hint"
-msgstr "Hint"
+msgstr "Ակնարկել"
 
 #: GNUChessActivity.py:334 chess.py:250
 msgid "It is White's move."
-msgstr "Det er hvids tur."
+msgstr "Սպիտակի քայլն է"
 
 #: GNUChessActivity.py:347
 msgid "White Pawn"
-msgstr "Hvid bonde"
+msgstr "Սպիտակ Զինվոր"
 
 #: GNUChessActivity.py:353
 msgid "Black Pawn"
-msgstr "Sort bonde"
+msgstr "Սև Զինվոր"
 
 #: GNUChessActivity.py:359
 msgid "White Rook"
-msgstr "Hvidt tårn"
+msgstr "Սպիտակ Նավակ"
 
 #: GNUChessActivity.py:365
 msgid "Black Rook"
-msgstr "Sort tårn"
+msgstr "Սև Նավակ"
 
 #: GNUChessActivity.py:371
 msgid "White Knight"
-msgstr "Hvid springer"
+msgstr "Սպիտակ Ձի"
 
 #: GNUChessActivity.py:377
 msgid "Black Knight"
-msgstr "Sort springer"
+msgstr "Սև Ձի"
 
 #: GNUChessActivity.py:383
 msgid "White Bishop"
-msgstr "Hvid løber"
+msgstr "Սպիտակ փիղ"
 
 #: GNUChessActivity.py:389
 msgid "Black Bishop"
-msgstr "Sort løber"
+msgstr "Սև փիղ"
 
 #: GNUChessActivity.py:395
 msgid "White Queen"
-msgstr "Hvid dronning"
+msgstr "Սպիտակ Թագուհի"
 
 #: GNUChessActivity.py:401
 msgid "Black Queen"
-msgstr "Sort dronning"
+msgstr "Սև Թագուհի"
 
 #: GNUChessActivity.py:407
 msgid "White King"
-msgstr "Hvid konge"
+msgstr "Սպիտակ Թագավոր"
 
 #: GNUChessActivity.py:413
 msgid "Black King"
-msgstr "Sort konge"
+msgstr "Սև Թագավոր"
 
 #: GNUChessActivity.py:520
 msgid "Show game board"
-msgstr "Vis bræt"
+msgstr "Ցուցադրել խաղի տախտակը"
 
 #: GNUChessActivity.py:773
 msgid "Game in progress."
-msgstr "Spil er i gang."
+msgstr "Խաղը ընթացքի մեջ է"
 
 #: GNUChessActivity.py:774
 msgid "Do you want to start a new game?"
-msgstr "Vil du starte et nyt spil?"
+msgstr "Ցանկանու՞մ եք սկսել նոր խաղ:"
 
 #: chess.py:192
 msgid "Illegal move"
-msgstr "Ulovligt træk"
+msgstr "Անօրինական քայլ"
 
 #: chess.py:239 chess.py:462 chess.py:469
 msgid "Check"
-msgstr "Skak"
+msgstr "Շախ"
 
 #: chess.py:241 chess.py:465 chess.py:471
 msgid "Checkmate"
-msgstr "Skakmat"
+msgstr "Մատ"
 
 #: chess.py:252
 msgid "It is Black's move."
-msgstr "Det er sorts tur."
+msgstr "Սևի քայլն է"
 
 #: chess.py:284
 msgid "Black wins."
-msgstr "Sort vinder."
+msgstr "Սևը հաղթում է"
 
 #: chess.py:286
 msgid "White wins."
-msgstr "Hvid vinder."
+msgstr "Սպիտակը հաղթում է"
 
 #: chess.py:290
 msgid "White's King is in check."
-msgstr "Hvid konge er i skak."
+msgstr "Սպիտակ Թագավորին շախ է հայտարարված"
 
 #: chess.py:293
 msgid "Black's King is in check."
-msgstr "Sort konge er i skak."
+msgstr "Սև թագավորին շախ է հայտարարված"
 
 #: chess.py:390 chess.py:393 chess.py:506
 msgid "Please wait for your turn."
-msgstr "Vent venligst til det er din tur."
+msgstr "Խնդրում եմ, սպասիր քո հերթին"
 
 #: chess.py:397
 msgid "Please play White."
-msgstr "Spil venligst hvid."
+msgstr "Խնդրում եմ, խաղա Սպիտակ"
 
 #: chess.py:399
 msgid "Please play Black."
-msgstr "Spil venligst sort."
+msgstr "Խնդրում եմ, խաղա Սև"
 
 #: chess.py:481
 msgid "Thinking..."
-msgstr "Tænker ..."
+msgstr ""
 
 #: chess.py:509
 msgid "Thinking"
-msgstr "Tænker"
+msgstr "Մտածում է"
 
 #~ msgid "White: please wait for your turn."
-#~ msgstr "Hvid: vent venligst til det er din tur."
+#~ msgstr "Սպիտակ. խնդրում եմ, սպասել քո հերթին"
 
 #~ msgid "Black: please wait for your turn."
-#~ msgstr "Sort: vent venligst til det er din tur."
+#~ msgstr "Սև. խնդրում եմ, սպասել քո հերթին"
