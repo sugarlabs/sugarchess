@@ -1,0 +1,248 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-08-01 00:32-0400\n"
+"PO-Revision-Date: 2012-08-06 02:36+0200\n"
+"Last-Translator: lite <litekok@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Pootle 2.0.5\n"
+
+#: activity/activity.info:2
+msgid "SimpleGNUChess"
+msgstr "GNU象棋"
+
+#: GNUChessActivity.py:149 GNUChessActivity.py:190
+msgid "Edit"
+msgstr "编辑"
+
+#: GNUChessActivity.py:156 GNUChessActivity.py:191
+msgid "View"
+msgstr "查看"
+
+#: GNUChessActivity.py:163
+msgid "Adjust"
+msgstr "调整"
+
+#: GNUChessActivity.py:171 GNUChessActivity.py:192
+msgid "Custom"
+msgstr "自定义"
+
+#: GNUChessActivity.py:189
+msgid "Play"
+msgstr "开始"
+
+#: GNUChessActivity.py:200
+msgid "Copy"
+msgstr "复制"
+
+#: GNUChessActivity.py:206
+msgid "Paste"
+msgstr "粘贴"
+
+#: GNUChessActivity.py:212
+msgid "Fullscreen"
+msgstr "全屏"
+
+#: GNUChessActivity.py:218
+msgid "Play game history"
+msgstr "播放游戏历史"
+
+#: GNUChessActivity.py:223 GNUChessActivity.py:523
+msgid "Show game history"
+msgstr "显示游戏历史"
+
+#: GNUChessActivity.py:228
+msgid "White: "
+msgstr "白方："
+
+#: GNUChessActivity.py:231
+msgid "White's move"
+msgstr "白方走"
+
+#: GNUChessActivity.py:236
+msgid "Black: "
+msgstr "黑方："
+
+#: GNUChessActivity.py:239
+msgid "Black's move"
+msgstr "黑方走"
+
+#: GNUChessActivity.py:246
+msgid "Default pieces"
+msgstr "缺省棋子"
+
+#: GNUChessActivity.py:252
+msgid "Sugar-style pieces"
+msgstr "Sugar风格棋子"
+
+#: GNUChessActivity.py:262
+msgid "Custom pieces"
+msgstr "自定义棋子"
+
+#: GNUChessActivity.py:270
+msgid "Play White"
+msgstr "白方先走"
+
+#: GNUChessActivity.py:276
+msgid "Play Black"
+msgstr "黑方先走"
+
+#: GNUChessActivity.py:286
+msgid "Beginner"
+msgstr "初学者"
+
+#: GNUChessActivity.py:292
+msgid "Expert"
+msgstr "专家"
+
+#: GNUChessActivity.py:303
+msgid "Play against the computer"
+msgstr "和电脑对战"
+
+#: GNUChessActivity.py:309
+msgid "Play against a person"
+msgstr "和玩家对战"
+
+#: GNUChessActivity.py:320
+msgid "New game"
+msgstr "新游戏"
+
+#: GNUChessActivity.py:325
+msgid "Undo"
+msgstr "撤销"
+
+#: GNUChessActivity.py:330
+msgid "Hint"
+msgstr "提示"
+
+#: GNUChessActivity.py:334 chess.py:250
+msgid "It is White's move."
+msgstr "白方走子。"
+
+#: GNUChessActivity.py:347
+msgid "White Pawn"
+msgstr "白方卒"
+
+#: GNUChessActivity.py:353
+msgid "Black Pawn"
+msgstr "黑方卒"
+
+#: GNUChessActivity.py:359
+msgid "White Rook"
+msgstr "白方车"
+
+#: GNUChessActivity.py:365
+msgid "Black Rook"
+msgstr "黑方车"
+
+#: GNUChessActivity.py:371
+msgid "White Knight"
+msgstr "白方马"
+
+#: GNUChessActivity.py:377
+msgid "Black Knight"
+msgstr "黑方马"
+
+#: GNUChessActivity.py:383
+msgid "White Bishop"
+msgstr "白方象"
+
+#: GNUChessActivity.py:389
+msgid "Black Bishop"
+msgstr "黑方象"
+
+#: GNUChessActivity.py:395
+msgid "White Queen"
+msgstr "白方后"
+
+#: GNUChessActivity.py:401
+msgid "Black Queen"
+msgstr "黑方后"
+
+#: GNUChessActivity.py:407
+msgid "White King"
+msgstr "白方王"
+
+#: GNUChessActivity.py:413
+msgid "Black King"
+msgstr "黑方王"
+
+#: GNUChessActivity.py:520
+msgid "Show game board"
+msgstr "显示棋盘"
+
+#: GNUChessActivity.py:773
+msgid "Game in progress."
+msgstr "比赛正在进行中。"
+
+#: GNUChessActivity.py:774
+msgid "Do you want to start a new game?"
+msgstr "你想开始一个新游戏？"
+
+#: chess.py:192
+msgid "Illegal move"
+msgstr "非法走子"
+
+#: chess.py:239 chess.py:462 chess.py:469
+msgid "Check"
+msgstr "将军"
+
+#: chess.py:241 chess.py:465 chess.py:471
+msgid "Checkmate"
+msgstr "将死"
+
+#: chess.py:252
+msgid "It is Black's move."
+msgstr "黑方走子。"
+
+#: chess.py:284
+msgid "Black wins."
+msgstr "黑方胜。"
+
+#: chess.py:286
+msgid "White wins."
+msgstr "白方胜。"
+
+#: chess.py:290
+msgid "White's King is in check."
+msgstr "白方被将军。"
+
+#: chess.py:293
+msgid "Black's King is in check."
+msgstr "黑方被将军。"
+
+#: chess.py:390 chess.py:393 chess.py:506
+msgid "Please wait for your turn."
+msgstr "请等待你的回合。"
+
+#: chess.py:397
+msgid "Please play White."
+msgstr "请白方先行。"
+
+#: chess.py:399
+msgid "Please play Black."
+msgstr "请黑方先行。"
+
+#: chess.py:481
+msgid "Thinking..."
+msgstr "思考中..."
+
+#: chess.py:509
+msgid "Thinking"
+msgstr "思考中"
+
+#~ msgid "White: please wait for your turn."
+#~ msgstr "白方：请等待你的回合。"
+
+#~ msgid "Black: please wait for your turn."
+#~ msgstr "黑方：请等待你的回合。"
