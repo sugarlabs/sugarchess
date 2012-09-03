@@ -243,7 +243,7 @@ class Gnuchess():
         while find(output, target) > 0:
             output = output[find(output, target):]
             output = output[find(output, '\n'):]
-        if len(output) < 136:
+        if len(output) < 136 or output[0:3] == 'GNU':
             self._activity.status.set_label('???')
         else:
             self._load_board(output)
@@ -468,6 +468,9 @@ class Gnuchess():
         # Get game notation from last move to share and to check for
         # check, checkmate
         self.move(GAME)
+        if self.game == '':
+            _logger.debug('bad move: reseting')
+            return True
         last_move = self.game.split()[-1]
         if self.we_are_sharing:
             self._activity.send_event('m|%s' % (last_move))
