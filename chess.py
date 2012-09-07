@@ -373,7 +373,7 @@ class Gnuchess():
                 return
             elif self._activity.playing_white and \
                  len(self.move_list) % 2 == 1:
-                self._wait_your_turn()
+                self._wait_your_turn() 
                 return
 
         # Only play your color
@@ -493,6 +493,17 @@ class Gnuchess():
                 self._flash_tile([self._xy_to_file_and_rank(
                             self.black[4].get_xy())])
 
+        # Check to see if it is the robot's turn
+        if self._activity.playing_robot and \
+           self._activity.playing_white and \
+           len(self.move_list) % 2 == 0:
+            _logger.debug("not the robot's turn")
+            return True
+        if self._activity.playing_robot and \
+           not self._activity.playing_white and \
+           len(self.move_list) % 2 == 1:
+            _logger.debug("not the robot's turn")
+            return True
         if self._activity.playing_robot and not self.checkmate:
             self._activity.set_thinking_cursor()
             self._activity.status.set_label(_('Thinking...'))
