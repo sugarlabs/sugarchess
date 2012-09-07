@@ -592,7 +592,9 @@ class Gnuchess():
         return
 
     def _flasher(self, tiles, flash_color):
-        if self._counter < 9:
+        # flash length (must be odd in order to guarentee that the
+        # original color is restored)
+        if self._counter < 13:
             self._counter += 1
             for tile in tiles:
                 i = self._file_and_rank_to_index(tile)
