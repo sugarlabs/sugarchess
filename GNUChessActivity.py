@@ -132,7 +132,7 @@ class GNUChessActivity(activity.Activity):
 
     def _setup_toolbars(self):
         ''' Setup the toolbars. '''
-        self.max_participants = 2  # No sharing to begin with
+        self.max_participants = 2
 
         self.edit_toolbar = gtk.Toolbar()
         self.view_toolbar = gtk.Toolbar()
