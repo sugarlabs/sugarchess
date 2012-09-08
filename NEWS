@@ -1,3 +1,13 @@
+5
+
+ENHANCEMENT:
+* New translations
+* Longer flash to indicate robot moves
+
+BUG FIX:
+* Don't reload board after illegal move
+* Don't let robot play after aborted move
+
 4
 
 ENHANCEMENT:
