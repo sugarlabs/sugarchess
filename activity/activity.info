@@ -1,9 +1,10 @@
 [Activity]
 name = SimpleGNUChess
-activity_version = 5
+activity_version = 6
 license = GPLv3
 bundle_id = org.sugarlabs.GNUChessActivity
 exec = sugar-activity GNUChessActivity.GNUChessActivity
 icon = activity-gnuchess
 show_launcher = yes
 mime_types = application/x-chess-pgn;text/plain
+summary = a Sugar interface to the gnuchess program
