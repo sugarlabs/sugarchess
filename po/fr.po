@@ -19,7 +19,7 @@ msgstr ""
 
 #: activity/activity.info:2
 msgid "SimpleGNUChess"
-msgstr ""
+msgstr "SimpleGNUChess"
 
 #: GNUChessActivity.py:149 GNUChessActivity.py:190
 msgid "Edit"
@@ -27,15 +27,15 @@ msgstr "Éditer"
 
 #: GNUChessActivity.py:156 GNUChessActivity.py:191
 msgid "View"
-msgstr ""
+msgstr "Voir"
 
 #: GNUChessActivity.py:163
 msgid "Adjust"
-msgstr ""
+msgstr "Ajuster"
 
 #: GNUChessActivity.py:171 GNUChessActivity.py:192
 msgid "Custom"
-msgstr ""
+msgstr "Adapter"
 
 #: GNUChessActivity.py:189
 msgid "Play"
@@ -55,67 +55,67 @@ msgstr "Plein écran"
 
 #: GNUChessActivity.py:218
 msgid "Play game history"
-msgstr ""
+msgstr "Rejouer l'historique de la partie"
 
 #: GNUChessActivity.py:223 GNUChessActivity.py:523
 msgid "Show game history"
-msgstr ""
+msgstr "Voir l'historique de la partie"
 
 #: GNUChessActivity.py:228
 msgid "White: "
-msgstr ""
+msgstr "Blanc: "
 
 #: GNUChessActivity.py:231
 msgid "White's move"
-msgstr ""
+msgstr "Coup blanc"
 
 #: GNUChessActivity.py:236
 msgid "Black: "
-msgstr ""
+msgstr "Noir: "
 
 #: GNUChessActivity.py:239
 msgid "Black's move"
-msgstr ""
+msgstr "Coup noir"
 
 #: GNUChessActivity.py:246
 msgid "Default pieces"
-msgstr ""
+msgstr "Pièces par défaut"
 
 #: GNUChessActivity.py:252
 msgid "Sugar-style pieces"
-msgstr ""
+msgstr "Pièces style \"Sugar\""
 
 #: GNUChessActivity.py:262
 msgid "Custom pieces"
-msgstr ""
+msgstr "Pièces personnalisées"
 
 #: GNUChessActivity.py:270
 msgid "Play White"
-msgstr ""
+msgstr "Jouer avec les blancs"
 
 #: GNUChessActivity.py:276
 msgid "Play Black"
-msgstr ""
+msgstr "Jouer avec les noirs"
 
 #: GNUChessActivity.py:286
 msgid "Beginner"
-msgstr ""
+msgstr "Débutant"
 
 #: GNUChessActivity.py:292
 msgid "Expert"
-msgstr ""
+msgstr "Expert"
 
 #: GNUChessActivity.py:303
 msgid "Play against the computer"
-msgstr ""
+msgstr "Jouer contre l'ordinateur"
 
 #: GNUChessActivity.py:309
 msgid "Play against a person"
-msgstr ""
+msgstr "Jouer contre une personne"
 
 #: GNUChessActivity.py:320
 msgid "New game"
-msgstr ""
+msgstr "Nouvelle partie"
 
 #: GNUChessActivity.py:325
 msgid "Undo"
@@ -123,120 +123,120 @@ msgstr "Défaire"
 
 #: GNUChessActivity.py:330
 msgid "Hint"
-msgstr ""
+msgstr "Conseil"
 
 #: GNUChessActivity.py:334 chess.py:250
 msgid "It is White's move."
-msgstr ""
+msgstr "À Blanc de jouer."
 
 #: GNUChessActivity.py:347
 msgid "White Pawn"
-msgstr ""
+msgstr "Pion blanc"
 
 #: GNUChessActivity.py:353
 msgid "Black Pawn"
-msgstr ""
+msgstr "Pion noir"
 
 #: GNUChessActivity.py:359
 msgid "White Rook"
-msgstr ""
+msgstr "Tour blanche"
 
 #: GNUChessActivity.py:365
 msgid "Black Rook"
-msgstr ""
+msgstr "Tour noire"
 
 #: GNUChessActivity.py:371
 msgid "White Knight"
-msgstr ""
+msgstr "Cavalier blanc"
 
 #: GNUChessActivity.py:377
 msgid "Black Knight"
-msgstr ""
+msgstr "Cavalier noir"
 
 #: GNUChessActivity.py:383
 msgid "White Bishop"
-msgstr ""
+msgstr "Fou blanc"
 
 #: GNUChessActivity.py:389
 msgid "Black Bishop"
-msgstr ""
+msgstr "Fou noir"
 
 #: GNUChessActivity.py:395
 msgid "White Queen"
-msgstr ""
+msgstr "Reine blanche"
 
 #: GNUChessActivity.py:401
 msgid "Black Queen"
-msgstr ""
+msgstr "Reine noire"
 
 #: GNUChessActivity.py:407
 msgid "White King"
-msgstr ""
+msgstr "Roi blanc"
 
 #: GNUChessActivity.py:413
 msgid "Black King"
-msgstr ""
+msgstr "Roi noir"
 
 #: GNUChessActivity.py:520
 msgid "Show game board"
-msgstr ""
+msgstr "Voir l'échiquier"
 
 #: GNUChessActivity.py:773
 msgid "Game in progress."
-msgstr ""
+msgstr "Partie en cours."
 
 #: GNUChessActivity.py:774
 msgid "Do you want to start a new game?"
-msgstr ""
+msgstr "Voulez-vous démarrer une nouvelle partie ?"
 
 #: chess.py:192
 msgid "Illegal move"
-msgstr ""
+msgstr "Coup impossible"
 
 #: chess.py:239 chess.py:462 chess.py:469
 msgid "Check"
-msgstr ""
+msgstr "Échec"
 
 #: chess.py:241 chess.py:465 chess.py:471
 msgid "Checkmate"
-msgstr ""
+msgstr "Échec et mat"
 
 #: chess.py:252
 msgid "It is Black's move."
-msgstr ""
+msgstr "A Noir de jouer."
 
 #: chess.py:284
 msgid "Black wins."
-msgstr ""
+msgstr "Noir gagne."
 
 #: chess.py:286
 msgid "White wins."
-msgstr ""
+msgstr "Blanc gagne."
 
 #: chess.py:290
 msgid "White's King is in check."
-msgstr ""
+msgstr "Le roi Blanc est en échec."
 
 #: chess.py:293
 msgid "Black's King is in check."
-msgstr ""
+msgstr "Le roi Noir est en échec."
 
 #: chess.py:390 chess.py:393 chess.py:506
 msgid "Please wait for your turn."
-msgstr ""
+msgstr "Merci d'attendre votre tour."
 
 #: chess.py:397
 msgid "Please play White."
-msgstr ""
+msgstr "Jouez Blanc s'il vous plaît."
 
 #: chess.py:399
 msgid "Please play Black."
-msgstr ""
+msgstr "Jouez Noir s'il vous plaît."
 
 #: chess.py:481
 msgid "Thinking..."
-msgstr ""
+msgstr "En réflexion..."
 
 #: chess.py:509
 msgid "Thinking"
-msgstr ""
+msgstr "En réflexion"

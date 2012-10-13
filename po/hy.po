@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-08-01 00:32-0400\n"
-"PO-Revision-Date: 2012-08-06 17:55+0200\n"
+"PO-Revision-Date: 2012-08-29 20:48+0200\n"
 "Last-Translator: anush.mkrtchyan <anush.mkrtchyan@ca1492.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: hy\n"
@@ -55,12 +55,13 @@ msgid "Fullscreen"
 msgstr "Էկրանի չափով"
 
 #: GNUChessActivity.py:218
+#, fuzzy
 msgid "Play game history"
-msgstr ""
+msgstr "Ցուցադրել խաղի պատմությունը"
 
 #: GNUChessActivity.py:223 GNUChessActivity.py:523
 msgid "Show game history"
-msgstr ""
+msgstr "Ցուցադրել խաղի պատմությունը"
 
 #: GNUChessActivity.py:228
 msgid "White: "
@@ -80,11 +81,11 @@ msgstr "Սևի քայլը"
 
 #: GNUChessActivity.py:246
 msgid "Default pieces"
-msgstr ""
+msgstr "Պակաս խաղաքարեր"
 
 #: GNUChessActivity.py:252
 msgid "Sugar-style pieces"
-msgstr "Շաքար-ոճի քարեր"
+msgstr "Շաքար-ոճի խաղաքարեր"
 
 #: GNUChessActivity.py:262
 msgid "Custom pieces"
