@@ -2,24 +2,24 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-08-01 00:32-0400\n"
-"PO-Revision-Date: 2012-09-21 23:22+0200\n"
-"Last-Translator: hariru <hariruroa@gmail.com>\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: mi\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Pootle 2.0.5\n"
+"X-Generator: Translate Toolkit 1.7.0\n"
 
 #: activity/activity.info:2
 msgid "SimpleGNUChess"
-msgstr "WhaikīngiGNUMataiti"
+msgstr ""
 
 #: GNUChessActivity.py:149 GNUChessActivity.py:190
 msgid "Edit"
@@ -55,67 +55,70 @@ msgstr "Matakatoa"
 
 #: GNUChessActivity.py:218
 msgid "Play game history"
-msgstr "Hītori pūrei tākaro"
+msgstr ""
 
 #: GNUChessActivity.py:223 GNUChessActivity.py:523
 msgid "Show game history"
-msgstr "Whakaatu hītori tākaro"
+msgstr ""
 
 #: GNUChessActivity.py:228
 msgid "White: "
-msgstr "Mā:"
+msgstr ""
 
 #: GNUChessActivity.py:231
 msgid "White's move"
-msgstr "Te wā o Mā"
+msgstr ""
 
 #: GNUChessActivity.py:236
 msgid "Black: "
-msgstr "Pango:"
+msgstr ""
 
 #: GNUChessActivity.py:239
 msgid "Black's move"
-msgstr "Te wā o Pango"
+msgstr ""
 
 #: GNUChessActivity.py:246
 msgid "Default pieces"
-msgstr "Pīhi taunoa"
+msgstr ""
 
 #: GNUChessActivity.py:252
 msgid "Sugar-style pieces"
-msgstr "Pīhi āhua-Sugar"
+msgstr ""
 
 #: GNUChessActivity.py:262
 msgid "Custom pieces"
-msgstr "Pīhi ritenga"
+msgstr ""
 
 #: GNUChessActivity.py:270
 msgid "Play White"
-msgstr "Tākaro Mā"
+msgstr ""
 
 #: GNUChessActivity.py:276
 msgid "Play Black"
-msgstr "Tākaro Pango"
+msgstr ""
 
 #: GNUChessActivity.py:286
+#, fuzzy
 msgid "Beginner"
-msgstr "Tauhou"
+msgstr "tauhou"
 
 #: GNUChessActivity.py:292
+#, fuzzy
 msgid "Expert"
-msgstr "Tohunga"
+msgstr "tohunga"
 
 #: GNUChessActivity.py:303
+#, fuzzy
 msgid "Play against the computer"
 msgstr "Tākaro me te rorohiko"
 
 #: GNUChessActivity.py:309
 msgid "Play against a person"
-msgstr "Tākaro me tētahi tangata"
+msgstr ""
 
 #: GNUChessActivity.py:320
 msgid "New game"
-msgstr "Tākaro hōu"
+msgstr ""
 
 #: GNUChessActivity.py:325
 msgid "Undo"
@@ -123,120 +126,121 @@ msgstr "Wete"
 
 #: GNUChessActivity.py:330
 msgid "Hint"
-msgstr "Tīwhiri"
+msgstr ""
 
 #: GNUChessActivity.py:334 chess.py:250
 msgid "It is White's move."
-msgstr "Kei a Mā te wā."
+msgstr ""
 
 #: GNUChessActivity.py:347
 msgid "White Pawn"
-msgstr "Kaihāpai-ō Mā"
+msgstr ""
 
 #: GNUChessActivity.py:353
 msgid "Black Pawn"
-msgstr "Kaihāpai-ō Pango"
+msgstr ""
 
 #: GNUChessActivity.py:359
 msgid "White Rook"
-msgstr "Pā Tūwatawata Mā"
+msgstr ""
 
 #: GNUChessActivity.py:365
 msgid "Black Rook"
-msgstr "Pā Tūwatawata Pango"
+msgstr ""
 
 #: GNUChessActivity.py:371
 msgid "White Knight"
-msgstr "Toa Mā"
+msgstr ""
 
 #: GNUChessActivity.py:377
 msgid "Black Knight"
-msgstr "Toa Pango"
+msgstr ""
 
 #: GNUChessActivity.py:383
 msgid "White Bishop"
-msgstr "Pīhopa Mā"
+msgstr ""
 
 #: GNUChessActivity.py:389
 msgid "Black Bishop"
-msgstr "Pīhopa Pango"
+msgstr ""
 
 #: GNUChessActivity.py:395
 msgid "White Queen"
-msgstr "Kūini Mā"
+msgstr ""
 
 #: GNUChessActivity.py:401
 msgid "Black Queen"
-msgstr "Kūini Pango"
+msgstr ""
 
 #: GNUChessActivity.py:407
 msgid "White King"
-msgstr "Kīngi Mā"
+msgstr ""
 
 #: GNUChessActivity.py:413
 msgid "Black King"
-msgstr "Kīngi Pango"
+msgstr ""
 
 #: GNUChessActivity.py:520
 msgid "Show game board"
-msgstr "Whakaatu papa tākaro"
+msgstr ""
 
 #: GNUChessActivity.py:773
 msgid "Game in progress."
-msgstr "E haere ana te tākaro."
+msgstr ""
 
 #: GNUChessActivity.py:774
 msgid "Do you want to start a new game?"
-msgstr "E hiahia ana koe ki te tīmata i tētahi tākaro hōu?"
+msgstr ""
 
 #: chess.py:192
 msgid "Illegal move"
-msgstr "Nekehanga hē"
+msgstr ""
 
 #: chess.py:239 chess.py:462 chess.py:469
 msgid "Check"
-msgstr "Tieke"
+msgstr ""
 
 #: chess.py:241 chess.py:465 chess.py:471
 msgid "Checkmate"
-msgstr "Whakamīere"
+msgstr ""
 
 #: chess.py:252
 msgid "It is Black's move."
-msgstr "Kei a Pango te wā."
+msgstr ""
 
 #: chess.py:284
 msgid "Black wins."
-msgstr "Ka toa a Pango."
+msgstr ""
 
 #: chess.py:286
 msgid "White wins."
-msgstr "Ka toa a Mā."
+msgstr ""
 
 #: chess.py:290
 msgid "White's King is in check."
-msgstr "Kua tieke te Kīngi Mā."
+msgstr ""
 
 #: chess.py:293
 msgid "Black's King is in check."
-msgstr "Kua tieke te Kīngi Pango."
+msgstr ""
 
 #: chess.py:390 chess.py:393 chess.py:506
 msgid "Please wait for your turn."
-msgstr "Taihoa koa, kia tae ki tō wā."
+msgstr ""
 
 #: chess.py:397
 msgid "Please play White."
-msgstr "Tākaro koa Mā."
+msgstr ""
 
 #: chess.py:399
 msgid "Please play Black."
-msgstr "Tākaro koa Pango."
+msgstr ""
 
 #: chess.py:481
 msgid "Thinking..."
-msgstr "Whakaaro ana..."
+msgstr ""
 
 #: chess.py:509
+#, fuzzy
 msgid "Thinking"
-msgstr "Whakaaro ana"
+msgstr "Kemokemo"

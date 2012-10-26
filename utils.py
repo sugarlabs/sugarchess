@@ -1,4 +1,5 @@
 #Copyright (c) 2011 Walter Bender
+#Copyright (c) 2012 Ignacio Rodriguez
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,7 +11,7 @@
 # Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
 import os
-import gtk
+from gi.repository import GdkPixbuf
 import subprocess
 from StringIO import StringIO
 try:
@@ -134,6 +135,6 @@ def base64_to_pixbuf(activity, data, width=55, height=55):
     ''' Convert base64-encoded data to a pixbuf '''
     png_file = os.path.join(get_path(activity, 'instance'), 'imagetmp.png')
     base64_to_file(activity, data, png_file)
-    pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(png_file, width, height)
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(png_file, width, height)
     os.remove(png_file)
     return pixbuf

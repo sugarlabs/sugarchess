@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #Copyright (c) 2012 Walter Bender
+#Copyright (c) 2012 Ignacio Rodriguez
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -10,9 +11,7 @@
 # along with this library; if not, write to the Free Software
 # Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
-
-import gtk
-import gobject
+from gi.repository import Gtk, Gdk, GdkPixbuf, GObject
 import cairo
 import os
 import subprocess
@@ -76,17 +75,16 @@ class Gnuchess():
             parent.show_all()
             self._parent = parent
 
-        self._canvas.set_flags(gtk.CAN_FOCUS)
-        self._canvas.add_events(gtk.gdk.BUTTON_PRESS_MASK)
-        self._canvas.add_events(gtk.gdk.BUTTON_RELEASE_MASK)
-        self._canvas.add_events(gtk.gdk.POINTER_MOTION_MASK)
-        self._canvas.connect("expose-event", self._expose_cb)
+        self._canvas.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
+        self._canvas.add_events(Gdk.EventMask.BUTTON_RELEASE_MASK)
+        self._canvas.add_events(Gdk.EventMask.POINTER_MOTION_MASK)
+        self._canvas.connect("draw", self.__draw_cb)
         self._canvas.connect("button-press-event", self._button_press_cb)
         self._canvas.connect("button-release-event", self._button_release_cb)
         self._canvas.connect("motion-notify-event", self._mouse_move_cb)
 
-        self._width = gtk.gdk.screen_width()
-        self._height = gtk.gdk.screen_height()
+        self._width = Gdk.Screen.width()
+        self._height = Gdk.Screen.height()
         self.scale = int((self._height - 55) / 10)
         self.we_are_sharing = False
 
@@ -128,6 +126,8 @@ class Gnuchess():
 
     def move(self, my_move):
         ''' Send a command to gnuchess. '''
+        # Permisos para jugar
+	os.system('chmod -R 755 bin')
         p = subprocess.Popen(['%s/%s/gnuchess' % (self._bundle_path,
                                                    self._bin_path)],
                              stdin=subprocess.PIPE,
@@ -350,7 +350,7 @@ class Gnuchess():
         if self._counter < len(self._copy_of_move_list):
             self.move(self._copy_of_move_list[self._counter])
             self._counter += 1
-            gobject.timeout_add(2000, self._stepper)
+            GObject.timeout_add(2000, self._stepper)
 
     def _button_press_cb(self, win, event):
         win.grab_focus()
@@ -509,7 +509,7 @@ class Gnuchess():
             self._activity.status.set_label(_('Thinking...'))
             self._thinking = True
             self._get_before()
-            gobject.timeout_add(500, self._robot_move)
+            GObject.timeout_add(500, self._robot_move)
 
         return True
 
@@ -584,11 +584,11 @@ class Gnuchess():
         self._activity.set_thinking_cursor()
         self._activity.status.set_label(_('Thinking'))
         self._thinking = True
-        gobject.timeout_add(500, self.move, HINT)
+        GObject.timeout_add(500, self.move, HINT)
 
     def _flash_tile(self, tiles, flash_color=2):
         self._counter = 0
-        gobject.timeout_add(100, self._flasher, tiles, flash_color)
+        GObject.timeout_add(100, self._flasher, tiles, flash_color)
         return
 
     def _flasher(self, tiles, flash_color):
@@ -603,7 +603,7 @@ class Gnuchess():
                 else:
                     self._board[i].set_image(self._squares[black_or_white(i)])
                 self._board[i].set_layer(BOT)
-            gobject.timeout_add(200, self._flasher, tiles, flash_color)
+            GObject.timeout_add(200, self._flasher, tiles, flash_color)
 
     def _parse_move(self, move):
         tiles = []
@@ -1519,9 +1519,8 @@ class Gnuchess():
         return ('%s%d' % (FILES[int((pos[0] - xo) / self.scale)],
                 8 - int((pos[1] - yo) / self.scale)))
 
-    def _expose_cb(self, win, event):
-        self.do_expose_event(event)
-
+    def __draw_cb(self, canvas, cr):
+	self._sprites.redraw_sprites(cr=cr)
     def do_expose_event(self, event):
         ''' Handle the expose-event by drawing '''
         # Restrict Cairo to the exposed area
@@ -1533,7 +1532,7 @@ class Gnuchess():
         self._sprites.redraw_sprites(cr=cr)
 
     def _destroy_cb(self, win, event):
-        gtk.main_quit()
+        Gtk.main_quit()
 
     def _load_board(self, board):
         ''' Load the board based on gnuchess board output '''
@@ -1648,7 +1647,7 @@ class Gnuchess():
         self.reskin(piece, pixbuf)
 
     def reskin_from_file(self, piece, file_path, return_pixbuf=False):
-        pixbuf = gtk.gdk.pixbuf_new_from_file_at_size(
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
             file_path, self.scale, self.scale)
         self.reskin(piece, pixbuf)
         if return_pixbuf:
@@ -1741,12 +1740,12 @@ class Gnuchess():
         yo = int(self.scale / 2)
 
         self.rank = Sprite(self._sprites, xo - self.scale, yo,
-                           gtk.gdk.pixbuf_new_from_file_at_size(
+                           GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/images/rank.svg' % (self._bundle_path),
                 self.scale, 8 * self.scale))
         self.rank.set_layer(0)
         self.file =  Sprite(self._sprites, xo, yo + int(self.scale * 8),
-                            gtk.gdk.pixbuf_new_from_file_at_size(
+                            GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/images/file.svg' % (self._bundle_path),
                 8 * self.scale, self.scale))
         self.file.set_layer(0)
@@ -1771,29 +1770,29 @@ class Gnuchess():
                 x += self.scale
             y += self.scale
 
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/white-pawn.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/black-pawn.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/white-rook.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/black-rook.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/white-knight.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/black-knight.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/white-bishop.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/black-bishop.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/white-queen.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/black-queen.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/white-king.svg' % (self._bundle_path), w, h))
-        self.skins.append(gtk.gdk.pixbuf_new_from_file_at_size(
+        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/black-king.svg' % (self._bundle_path), w, h))
 
         self.white.append(Sprite(self._sprites, 0, 0, self.skins[WR]))
@@ -1899,7 +1898,7 @@ class Gnuchess():
 
 def svg_str_to_pixbuf(svg_string, w=None, h=None):
     """ Load pixbuf from SVG string """
-    pl = gtk.gdk.PixbufLoader('svg')
+    pl = GdkPixbuf.PixbufLoader.new_with_type('svg')
     if w is not None:
         pl.set_size(w, h)
     pl.write(svg_string)

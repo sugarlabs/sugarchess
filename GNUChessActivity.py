@@ -1,4 +1,5 @@
 #Copyright (c) 2012 Walter Bender
+#Copyright (c) 2012 Ignacio Rodriguez
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -9,27 +10,20 @@
 # along with this library; if not, write to the Free Software
 # Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
+from gi.repository import Gtk, Gdk, GObject
 
-import gtk
-import gobject
-
-from sugar.activity import activity
-from sugar import profile
-try:
-    from sugar.graphics.toolbarbox import ToolbarBox
-    _have_toolbox = True
-except ImportError:
-    _have_toolbox = False
-if _have_toolbox:
-    from sugar.activity.widgets import ActivityToolbarButton
-    from sugar.activity.widgets import StopButton
-    from sugar.graphics.toolbarbox import ToolbarButton
-from sugar.graphics.objectchooser import ObjectChooser
-from sugar.datastore import datastore
-from sugar import mime
-from sugar.graphics.alert import ConfirmationAlert, NotifyAlert
-from sugar.graphics.icon import Icon
-from sugar.graphics.xocolor import XoColor
+from sugar3.activity import activity
+from sugar3 import profile
+from sugar3.graphics.toolbarbox import ToolbarBox
+from sugar3.activity.widgets import ActivityToolbarButton
+from sugar3.activity.widgets import StopButton
+from sugar3.graphics.toolbarbox import ToolbarButton
+from sugar3.graphics.objectchooser import ObjectChooser
+from sugar3.datastore import datastore
+from sugar3 import mime
+from sugar3.graphics.alert import ConfirmationAlert, NotifyAlert
+from sugar3.graphics.icon import Icon
+from sugar3.graphics.xocolor import XoColor
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
     radio_factory, entry_factory
@@ -40,8 +34,8 @@ import telepathy
 import dbus
 from dbus.service import signal
 from dbus.gobject_service import ExportedGObject
-from sugar.presence import presenceservice
-from sugar.presence.tubeconn import TubeConnection
+from sugar3.presence import presenceservice
+from sugar3.presence.tubeconn import TubeConnection
 
 from gettext import gettext as _
 
@@ -88,9 +82,9 @@ class GNUChessActivity(activity.Activity):
         self._setup_dispatch_table()
 
         # Create a canvas
-        canvas = gtk.DrawingArea()
-        canvas.set_size_request(gtk.gdk.screen_width(), \
-                                gtk.gdk.screen_height())
+        canvas = Gtk.DrawingArea()
+        canvas.set_size_request(Gdk.Screen.width(), \
+                                Gdk.Screen.height())
         self.set_canvas(canvas)
         canvas.show()
         self.show_all()
@@ -120,7 +114,8 @@ class GNUChessActivity(activity.Activity):
         if hasattr(self.get_window(), 'get_cursor'):
             self.get_window().set_cursor(self.old_cursor)
         else:
-            self.get_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.LEFT_PTR))
+	    Left = Gdk.Cursor(Gdk.CursorType.LEFT_PTR)
+            self.get_window().set_cursor(Left)
 
     def set_thinking_cursor(self):
         ''' Thinking, so set watch cursor. '''
@@ -128,71 +123,57 @@ class GNUChessActivity(activity.Activity):
             return
         if hasattr(self.get_window(), 'get_cursor'):
             self.old_cursor = self.get_window().get_cursor()
-        self.get_window().set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
+	Watch = Gdk.Cursor(Gdk.CursorType.WATCH)
+        self.get_window().set_cursor(Watch)
 
     def _setup_toolbars(self):
         ''' Setup the toolbars. '''
         self.max_participants = 2
 
-        self.edit_toolbar = gtk.Toolbar()
-        self.view_toolbar = gtk.Toolbar()
-        self.adjust_toolbar = gtk.Toolbar()
-        self.custom_toolbar = gtk.Toolbar()
+        self.edit_toolbar = Gtk.Toolbar()
+        self.view_toolbar = Gtk.Toolbar()
+        self.adjust_toolbar = Gtk.Toolbar()
+        self.custom_toolbar = Gtk.Toolbar()
 
-        if _have_toolbox:
-            toolbox = ToolbarBox()
+        toolbox = ToolbarBox()
 
-            activity_button = ActivityToolbarButton(self)
-            toolbox.toolbar.insert(activity_button, 0)
-            activity_button.show()
+        activity_button = ActivityToolbarButton(self)
+        toolbox.toolbar.insert(activity_button, 0)
+        activity_button.show()
 
-            edit_toolbar_button = ToolbarButton(label=_("Edit"),
-                                                page=self.edit_toolbar,
-                                                icon_name='toolbar-edit')
-            self.edit_toolbar.show()
-            toolbox.toolbar.insert(edit_toolbar_button, -1)
-            edit_toolbar_button.show()
+        edit_toolbar_button = ToolbarButton(label=_("Edit"),
+                                            page=self.edit_toolbar,
+                                            icon_name='toolbar-edit')
+        self.edit_toolbar.show()
+        toolbox.toolbar.insert(edit_toolbar_button, -1)
+        edit_toolbar_button.show()
 
-            view_toolbar_button = ToolbarButton(label=_("View"),
-                                                page=self.view_toolbar,
-                                                icon_name='toolbar-view')
-            self.view_toolbar.show()
-            toolbox.toolbar.insert(view_toolbar_button, -1)
-            view_toolbar_button.show()
+        view_toolbar_button = ToolbarButton(label=_("View"),
+                                            page=self.view_toolbar,
+                                            icon_name='toolbar-view')
+        self.view_toolbar.show()
+        toolbox.toolbar.insert(view_toolbar_button, -1)
+        view_toolbar_button.show()
 
-            adjust_toolbar_button = ToolbarButton(label=_('Adjust'),
-                                                  page=self.adjust_toolbar,
-                                                  icon_name=\
-                                                      'preferences-system')
-            self.adjust_toolbar.show()
-            toolbox.toolbar.insert(adjust_toolbar_button, -1)
-            adjust_toolbar_button.show()
+        adjust_toolbar_button = ToolbarButton(label=_('Adjust'),
+                                              page=self.adjust_toolbar,
+                                              icon_name='preferences-system')
+        self.adjust_toolbar.show()
+        toolbox.toolbar.insert(adjust_toolbar_button, -1)
+        adjust_toolbar_button.show()
 
-            custom_toolbar_button = ToolbarButton(label=_("Custom"),
-                                                  page=self.custom_toolbar,
-                                                  icon_name='view-source')
-            self.custom_toolbar.show()
-            toolbox.toolbar.insert(custom_toolbar_button, -1)
-            custom_toolbar_button.show()
+        custom_toolbar_button = ToolbarButton(label=_("Custom"),
+                                              page=self.custom_toolbar,
+                                              icon_name='view-source')
+        self.custom_toolbar.show()
+        toolbox.toolbar.insert(custom_toolbar_button, -1)
+        custom_toolbar_button.show()
 
-            self.set_toolbar_box(toolbox)
-            toolbox.show()
-            self.toolbar = toolbox.toolbar
+        self.set_toolbar_box(toolbox)
+        toolbox.show()
+        self.toolbar = toolbox.toolbar
 
-            adjust_toolbar_button.set_expanded(True)
-
-        else:
-            # Use pre-0.86 toolbar design
-            games_toolbar = gtk.Toolbar()
-            toolbox = activity.ActivityToolbox(self)
-            self.set_toolbox(toolbox)
-            toolbox.add_toolbar(_('Play'), self.adjust_toolbar)
-            toolbox.add_toolbar(_('Edit'), self.edit_toolbar)
-            toolbox.add_toolbar(_('View'), self.view_toolbar)
-            toolbox.add_toolbar(_('Custom'), self.custom_toolbar)
-            toolbox.show()
-            toolbox.set_current_toolbar(1)
-            self.toolbar = self.adjust_toolbar
+        adjust_toolbar_button.set_expanded(True)
 
         button_factory('edit-copy',
                        self.edit_toolbar,
@@ -333,12 +314,11 @@ class GNUChessActivity(activity.Activity):
         self.status = label_factory(self.toolbar, '')
         self.status.set_label(_("It is White's move."))
 
-        if _have_toolbox:
-            separator_factory(toolbox.toolbar, True, False)
-            stop_button = StopButton(self)
-            stop_button.props.accelerator = '<Ctrl>q'
-            toolbox.toolbar.insert(stop_button, -1)
-            stop_button.show()
+        separator_factory(toolbox.toolbar, True, False)
+        stop_button = StopButton(self)
+        stop_button.props.accelerator = '<Ctrl>q'
+        toolbox.toolbar.insert(stop_button, -1)
+        stop_button.show()
 
         button_factory('white-pawn',
                        self.custom_toolbar,
@@ -524,12 +504,12 @@ class GNUChessActivity(activity.Activity):
         return
 
     def _copy_cb(self, *args):
-        clipboard = gtk.Clipboard()
+        clipboard = Gtk.Clipboard()
         clipboard.set_text(self.tag_pairs() + self._gnuchess.copy_game())
 
     def _paste_cb(self, *args):
         ''' Pasting '''
-        clipboard = gtk.Clipboard()
+        clipboard = Gtk.Clipboard()
         move_list = self._parse_move_list(clipboard.wait_for_text())
         if move_list is not None:
             self._gnuchess.restore_game(move_list)
@@ -701,11 +681,11 @@ class GNUChessActivity(activity.Activity):
                 chooser = ObjectChooser(parent=self, what_filter=None)
             except TypeError:
                 chooser = ObjectChooser(None, activity,
-                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT)
+                    Gtk.DialogType.MODAL | Gtk.DialogType.DESTROY_WITH_PARENT)
         if chooser is not None:
             try:
                 result = chooser.run()
-                if result == gtk.RESPONSE_ACCEPT:
+                if result == Gtk.Responsetype.ACCEPT:
                     jobject = chooser.get_selected_object()
                     if jobject and jobject.file_path:
                         name = jobject.metadata['title']
@@ -774,9 +754,9 @@ class GNUChessActivity(activity.Activity):
         alert.props.msg = _('Do you want to start a new game?')
 
         def _new_game_alert_response_cb(alert, response_id, self, button):
-            if response_id is gtk.RESPONSE_OK:
+            if response_id is Gtk.ResponseType.OK:
                 self._take_button_action(button)
-            elif response_id is gtk.RESPONSE_CANCEL:
+            elif response_id is Gtk.ResponseType.CANCEL:
                 self._no_action(button)
             self._restoring = False
             self.remove_alert(alert)
@@ -991,7 +971,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def send_piece(self, piece, pixbuf):
         _logger.debug('send_piece %s' % (piece))
-        gobject.idle_add(self.send_event, 'p|%s' % (self._dump(piece, pixbuf)))
+        GObject.idle_add(self.send_event, 'p|%s' % (self._dump(piece, pixbuf)))
 
     def _receive_piece(self, payload):
         piece, pixbuf = self._load(payload)
