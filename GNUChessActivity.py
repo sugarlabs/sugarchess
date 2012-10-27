@@ -89,11 +89,7 @@ class GNUChessActivity(activity.Activity):
         canvas.show()
         self.show_all()
 
-        if hasattr(self, 'get_window') and \
-           hasattr(self.get_window(), 'get_cursor'):
-            self.old_cursor = self.get_window().get_cursor()
-        else:
-            self.old_cursor = None
+        self.old_cursor = self.get_window().get_cursor()
 
         self._gnuchess = Gnuchess(canvas,
                                   parent=self,
@@ -109,20 +105,11 @@ class GNUChessActivity(activity.Activity):
 
     def restore_cursor(self):
         ''' No longer thinking, so restore standard cursor. '''
-        if not hasattr(self, 'get_window'):
-            return
-        if hasattr(self.get_window(), 'get_cursor'):
-            self.get_window().set_cursor(self.old_cursor)
-        else:
-	    Left = Gdk.Cursor(Gdk.CursorType.LEFT_PTR)
-            self.get_window().set_cursor(Left)
+        self.get_window().set_cursor(self.old_cursor)
 
     def set_thinking_cursor(self):
         ''' Thinking, so set watch cursor. '''
-        if not hasattr(self, 'get_window'):
-            return
-        if hasattr(self.get_window(), 'get_cursor'):
-            self.old_cursor = self.get_window().get_cursor()
+        self.old_cursor = self.get_window().get_cursor()
 	Watch = Gdk.Cursor(Gdk.CursorType.WATCH)
         self.get_window().set_cursor(Watch)
 
@@ -311,7 +298,7 @@ class GNUChessActivity(activity.Activity):
                        tooltip=_('Hint'))
 
         separator_factory(self.toolbar, False, False)
-        self.status = label_factory(self.toolbar, '')
+        self.status = label_factory(self.toolbar, '', width=150)
         self.status.set_label(_("It is White's move."))
 
         separator_factory(toolbox.toolbar, True, False)
