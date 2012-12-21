@@ -26,7 +26,7 @@ from sugar3.graphics.icon import Icon
 from sugar3.graphics.xocolor import XoColor
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
-    radio_factory, entry_factory
+    radio_factory, entry_factory, toggle_factory
 from utils import json_load, json_dump, get_hardware, \
     pixbuf_to_base64, base64_to_pixbuf
 
@@ -276,9 +276,18 @@ class GNUChessActivity(activity.Activity):
                                           group=self.robot_button,
                                           tooltip=_('Play against a person'))
 
-        separator_factory(self.adjust_toolbar, False, False)
+        separator_factory(self.adjust_toolbar, False, True)
 
-        self.opponent = label_factory(self.adjust_toolbar, '')
+        self.timer_off_button = toggle_factory('human',
+                                               self._toggle_timer,
+                                               self.adjust_toolbar,
+                                               tooltip=_('Toggle Timer'))
+
+        self.timer = entry_factory('0',
+                                   self.adjust_toolbar,
+                                   tooltip=_("Timer (no of seconds)"),
+                                   max=4)
+        self.timer.hide()
 
         self.robot_button.set_active(True)
 
@@ -465,6 +474,9 @@ class GNUChessActivity(activity.Activity):
         else:
             self._gnuchess.reskin_from_file(piece, file_path)
         return
+
+    def _toggle_timer(self, widget):
+        self.timer.show()
 
     def _reskin_cb(self, button, piece):
         object_id, file_path = self._choose_skin()
