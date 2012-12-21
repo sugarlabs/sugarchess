@@ -1,3 +1,13 @@
+9
+
+ENHANCEMENT:
+* Add game timer (Aneesh Dogra)
+* Add support for x86_64
+* New translations
+
+BUG FIX:
+* Don't allow move while board is flashing
+
 7
 
 ENHANCEMENT:
