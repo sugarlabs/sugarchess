@@ -98,6 +98,7 @@ class Gnuchess():
         self._last_piece_played = [None, (0, 0)]
 
         self._thinking = False
+        self._flashing = False
         self._move = 0
         self._counter = 0
         self.check = False
@@ -363,7 +364,8 @@ class Gnuchess():
         if spr == None or spr.type == None:
             return
 
-        if self._thinking:  # Robot is thinking or conjuring up a hint
+        if self._thinking or self._flashing:
+            # Robot is thinking or conjuring up a hint
             self._wait_your_turn()
             return
         elif self.we_are_sharing:
@@ -588,6 +590,7 @@ class Gnuchess():
 
     def _flash_tile(self, tiles, flash_color=2):
         self._counter = 0
+        self._flashing = True
         GObject.timeout_add(100, self._flasher, tiles, flash_color)
         return
 
@@ -604,6 +607,8 @@ class Gnuchess():
                     self._board[i].set_image(self._squares[black_or_white(i)])
                 self._board[i].set_layer(BOT)
             GObject.timeout_add(200, self._flasher, tiles, flash_color)
+        else:
+            self._flashing = False
 
     def _parse_move(self, move):
         tiles = []
