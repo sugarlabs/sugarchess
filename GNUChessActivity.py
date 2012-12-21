@@ -1,5 +1,6 @@
 #Copyright (c) 2012 Walter Bender
 #Copyright (c) 2012 Ignacio Rodriguez
+#Copyright (c) 2012 Aneesh Dogra <lionaneesh@gmail.com>
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -403,7 +404,7 @@ class GNUChessActivity(activity.Activity):
     def save_time(self, widget):
         # If time_interval is invalid and we really need to change it
         if self.time_interval == None:
-            if self.timer.get_text().isdigit() and
+            if self.timer.get_text().isdigit() and \
                 (int(self.timer.get_text()) >= 1):
                 a = self.timer.get_text()
                 self.time_interval = copy.copy(int(a))
