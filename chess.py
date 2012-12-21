@@ -259,7 +259,8 @@ class Gnuchess():
                 self._flash_tile([self._xy_to_file_and_rank(
                             self.black[4].get_xy())])
         else:
-            if self._activity.time_interval != None:
+            if self._activity.time_interval and \
+               (self._activity.time_interval >= 0):
                 self._activity.stopwatch(self._activity.time_interval,
                                          self._activity.alert_time)
 
@@ -429,7 +430,6 @@ class Gnuchess():
         self._dragpos = [x, y]
         self._total_drag[0] += dx
         self._total_drag[1] += dy
-        self._activity.timer.set_sensitive(False)
         return True
 
     def _button_release_cb(self, win, event):

@@ -490,7 +490,10 @@ class GNUChessActivity(activity.Activity):
         return
 
     def set_timer_cb(self, widget):
-        if widget.get_active() > 0:
+        game_already_started = 0
+        if self.time_interval != None:
+            game_already_started = 1
+        if widget.get_active() >= 0:
             timer_type = widget.get_active_text()
             if timer_type == _('Lightning: 30 seconds'):
                 self.time_interval = 30
@@ -499,9 +502,16 @@ class GNUChessActivity(activity.Activity):
             elif timer_type == _('Tournament: 10 minutes'):
                 self.time_interval = 10 * 60
             else:
-                return
-            widget.set_sensitive(False)
-            self._gnuchess.new_game()
+                self.time_interval = -1
+
+            if game_already_started:
+                self.alert_reset(timer_type)
+                if self.time_interval and self.time_interval == -1:
+                    self.stopwatch(self.time_interval, self.alert_time)
+                else:
+                    GObject.source_remove(self.stopwatch_timer)
+            else:
+                self._gnuchess.new_game()
 
     def _reskin_cb(self, button, piece):
         object_id, file_path = self._choose_skin()
@@ -691,7 +701,7 @@ class GNUChessActivity(activity.Activity):
         if 'timer_mode' in self.metadata:
             self.timer.set_active(self.time_list.index(
                                     self.metadata['timer_mode']))
-            self.timer.set_sensitive(False)
+
 
         self._gnuchess.restore_game(self._parse_move_list(self.game_data))
         self.do_custom_skin_cb()
@@ -939,6 +949,17 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         alert = NotifyAlert()
         alert.props.title = _('Time Up!')
         alert.props.msg = _('Your time is up.')
+        alert.connect('response', _alert_response_cb)
+        alert.show()
+        self.add_alert(alert)
+
+    def alert_reset(self, mode):
+        def _alert_response_cb(alert, response_id):
+            self.remove_alert(alert)
+
+        alert = NotifyAlert()
+        alert.props.title = _('Time Reset')
+        alert.props.msg = _('The timer mode was reset to %s' % mode)
         alert.connect('response', _alert_response_cb)
         alert.show()
         self.add_alert(alert)
