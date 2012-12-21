@@ -285,12 +285,12 @@ class GNUChessActivity(activity.Activity):
 
         separator_factory(self.adjust_toolbar, False, True)
 
-        time_list = [_('Disabled'),
-                     _('Lightning: 30 seconds'),
-                     _('Blitz: 3 minutes'),
-                     _('Tournament: 10 minutes')]
+        self.time_list = [_('Disabled'),
+                          _('Lightning: 30 seconds'),
+                          _('Blitz: 3 minutes'),
+                          _('Tournament: 10 minutes')]
         self.timer = Gtk.ComboBoxText()
-        for t in time_list:
+        for t in self.time_list:
             self.timer.append_text(t)
         self.timer.set_tooltip_text(_('Timer'))
         self.timer.set_active(0)
@@ -498,6 +498,10 @@ class GNUChessActivity(activity.Activity):
                 self.time_interval = 3 * 60
             elif timer_type == _('Tournament: 10 minutes'):
                 self.time_interval = 10 * 60
+            else:
+                return
+            widget.set_sensitive(False)
+            self._gnuchess.new_game()
 
     def _reskin_cb(self, button, piece):
         object_id, file_path = self._choose_skin()
@@ -661,6 +665,8 @@ class GNUChessActivity(activity.Activity):
         else:
             self.metadata['playing_robot'] = 'False'
 
+        self.metadata['timer_mode'] = self.timer.get_active_text()
+
     def read_file(self, file_path):
         ''' Read project file on relaunch '''
         fd = open(file_path, 'r')
@@ -682,6 +688,11 @@ class GNUChessActivity(activity.Activity):
             if self.metadata['playing_robot'] == 'False':
                 self.playing_robot = False
                 self.human_button.set_active(True)
+        if 'timer_mode' in self.metadata:
+            self.timer.set_active(self.time_list.index(
+                                    self.metadata['timer_mode']))
+            self.timer.set_sensitive(False)
+
         self._gnuchess.restore_game(self._parse_move_list(self.game_data))
         self.do_custom_skin_cb()
 
