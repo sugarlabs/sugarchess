@@ -34,7 +34,6 @@ from utils import json_load, json_dump, get_hardware, \
 import copy
 import telepathy
 import dbus
-import threading
 from dbus.service import signal
 from dbus.gobject_service import ExportedGObject
 from sugar3.presence import presenceservice
@@ -935,11 +934,10 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
 
     def stopwatch(self, time, alert_callback):
         if self.stopwatch_running:
-            self.stopwatch_timer.cancel()
+            GObject.source_remove(self.stopwatch_timer)
             time = self.time_interval
-        self.stopwatch_timer = threading.Timer(time, alert_callback)
+        self.stopwatch_timer = GObject.timeout_add(time * 1000, alert_callback)
         self.stopwatch_running = True
-        self.stopwatch_timer.start()
 
     def _receive_join(self, payload):
         _logger.debug('received_join %s' % (payload))
