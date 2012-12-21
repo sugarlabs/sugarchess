@@ -30,8 +30,10 @@ from toolbar_utils import button_factory, label_factory, separator_factory, \
 from utils import json_load, json_dump, get_hardware, \
     pixbuf_to_base64, base64_to_pixbuf
 
+import copy
 import telepathy
 import dbus
+import threading
 from dbus.service import signal
 from dbus.gobject_service import ExportedGObject
 from sugar3.presence import presenceservice
@@ -49,6 +51,34 @@ SERVICE = 'org.sugarlabs.GNUChessActivity'
 IFACE = SERVICE
 PATH = '/org/augarlabs/GNUChessActivity'
 
+class TimerUpdateThread(threading.Thread):
+    """Thread that updates timer GtkEntry every 'interval' seconds"""
+    
+    def __init__(self, timer, interval=1):
+        threading.Thread.__init__(self)
+        self._finished = threading.Event()
+        self._interval = interval
+        self.timer = timer
+    
+    def shutdown(self):
+        """Stop this thread"""
+        self._finished.set()
+    
+    def run(self):
+        while 1:
+            # sleep for interval or until shutdown
+            self._finished.wait(self._interval)
+
+            if self._finished.isSet(): return
+            self.task()
+
+    
+    def task(self):
+        if self.timer.get_text().isdigit() and (int(self.timer.get_text()) >= 1):
+            self.timer.set_text(str(int(self.timer.get_text()) - 1))
+        else:
+            self.timer.set_text('0')
+            self.shutdown()
 
 class GNUChessActivity(activity.Activity):
     ''' Gnuchess interface from Sugar '''
@@ -96,6 +126,8 @@ class GNUChessActivity(activity.Activity):
                                   path=activity.get_bundle_path(),
                                   colors=self.colors)
         self._setup_presence_service()
+        self.stopwatch_running = False
+        self.time_interval = 0
 
         if self.game_data is not None:  # 'saved_game' in self.metadata:
             self._restore()
@@ -276,6 +308,10 @@ class GNUChessActivity(activity.Activity):
                                           group=self.robot_button,
                                           tooltip=_('Play against a person'))
 
+        separator_factory(self.adjust_toolbar, False, False)
+
+        self.opponent = label_factory(self.adjust_toolbar, '')
+
         separator_factory(self.adjust_toolbar, False, True)
 
         self.timer_off_button = toggle_factory('human',
@@ -283,11 +319,16 @@ class GNUChessActivity(activity.Activity):
                                                self.adjust_toolbar,
                                                tooltip=_('Toggle Timer'))
 
-        self.timer = entry_factory('0',
-                                   self.adjust_toolbar,
-                                   tooltip=_("Timer (no of seconds)"),
-                                   max=4)
-        self.timer.hide()
+        self.timer = Gtk.Entry()
+        self.timer.set_sensitive(False) 
+        self.timer.set_text('0')
+        self.timer.set_max_length(4)
+        self.timer.set_tooltip_text(_("Timer (no of seconds)"))
+        self.timer.connect('changed', self.save_time)
+        toolitem = Gtk.ToolItem()
+        toolitem.add(self.timer)
+        self.adjust_toolbar.insert(toolitem, -1)
+        toolitem.show_all()
 
         self.robot_button.set_active(True)
 
@@ -380,13 +421,20 @@ class GNUChessActivity(activity.Activity):
                        self.custom_toolbar,
                        self._reskin_cb,
                        cb_arg='white_king',
-                       tooltip=_('White King'))
+                       tooltip=_('Whitdde King'))
 
         button_factory('black-king',
                        self.custom_toolbar,
                        self._reskin_cb,
                        cb_arg='black_king',
                        tooltip=_('Black King'))
+
+    def save_time(self, widget):
+        if self.timer.get_text().isdigit() and int(self.timer.get_text()) >= 1:
+            a = self.timer.get_text()
+            self.time_interval = copy.copy(int(a))
+        else:
+            self.timer.set_text('0')
 
     def do_default_skin_cb(self, button=None):
         self._gnuchess.reskin_from_file('black_king',
@@ -476,7 +524,10 @@ class GNUChessActivity(activity.Activity):
         return
 
     def _toggle_timer(self, widget):
-        self.timer.show()
+        if widget.get_active():
+            self.timer.set_sensitive(True)
+        else:
+            self.timer.set_sensitive(False)
 
     def _reskin_cb(self, button, piece):
         object_id, file_path = self._choose_skin()
@@ -899,6 +950,28 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         _logger.debug('send_nick')
         self.send_event('N|%s' % (self.nick))
         self.send_event('C|%s,%s' % (self.colors[0], self.colors[1]))
+
+    def alert_time(self):
+        def _alert_response_cb(alert, response_id):
+            self.remove_alert(alert)
+
+        alert = NotifyAlert()
+        alert.props.title = _('Time Up!')
+        alert.props.msg = _('Your time is up.')
+        alert.connect('response', _alert_response_cb)
+        alert.show()
+        self.add_alert(alert)
+
+    def stopwatch(self, time, alert_callback):
+        if self.stopwatch_running:
+            self.stopwatch_timer.cancel()
+            self.timer.set_text(str(self.time_interval))
+            time = self.time_interval
+        self.stopwatch_timer = threading.Timer(time, alert_callback)
+
+        self.stopwatch_running     = True
+
+        self.stopwatch_timer.start()
 
     def _receive_join(self, payload):
         _logger.debug('received_join %s' % (payload))
