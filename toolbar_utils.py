@@ -18,6 +18,7 @@ from sugar3.graphics.radiotoolbutton import RadioToolButton
 from sugar3.graphics.toolbutton import ToolButton
 from sugar3.graphics.combobox import ComboBox
 from sugar3.graphics.toolcombobox import ToolComboBox
+from sugar3.graphics.toggletoolbutton import ToggleToolButton
 
 
 def combo_factory(combo_array, toolbar, callback, cb_arg=None,
@@ -120,6 +121,18 @@ def label_factory(toolbar, label_text, width=None):
     toolitem.show()
     return label
 
+def toggle_factory(icon_name, callback, toolbar, tooltip=None):
+    ''' add a toggle button to a toolbar'''
+    
+    t_button = ToggleToolButton(icon_name)
+    t_button.connect('toggled', callback)
+    if tooltip:
+        t_button.set_tooltip(tooltip)
+    if hasattr(toolbar, 'insert'):  # the main toolbar
+        toolbar.insert(t_button, -1)
+    else:  # or a secondary toolbar
+        toolbar.props.page.insert(t_button, -1)
+    t_button.show()
 
 def separator_factory(toolbar, expand=False, visible=True):
     ''' add a separator to a toolbar '''

@@ -1,5 +1,6 @@
 #Copyright (c) 2012 Walter Bender
 #Copyright (c) 2012 Ignacio Rodriguez
+#Copyright (c) 2012 Aneesh Dogra <lionaneesh@gmail.com>
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,10 +27,11 @@ from sugar3.graphics.icon import Icon
 from sugar3.graphics.xocolor import XoColor
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
-    radio_factory, entry_factory
+    radio_factory, entry_factory, combo_factory
 from utils import json_load, json_dump, get_hardware, \
     pixbuf_to_base64, base64_to_pixbuf
 
+import copy
 import telepathy
 import dbus
 from dbus.service import signal
@@ -48,7 +50,6 @@ _logger = logging.getLogger('gnuchess-activity')
 SERVICE = 'org.sugarlabs.GNUChessActivity'
 IFACE = SERVICE
 PATH = '/org/augarlabs/GNUChessActivity'
-
 
 class GNUChessActivity(activity.Activity):
     ''' Gnuchess interface from Sugar '''
@@ -96,6 +97,8 @@ class GNUChessActivity(activity.Activity):
                                   path=activity.get_bundle_path(),
                                   colors=self.colors)
         self._setup_presence_service()
+        self.stopwatch_running = False
+        self.time_interval = None
 
         if self.game_data is not None:  # 'saved_game' in self.metadata:
             self._restore()
@@ -280,6 +283,26 @@ class GNUChessActivity(activity.Activity):
 
         self.opponent = label_factory(self.adjust_toolbar, '')
 
+        separator_factory(self.adjust_toolbar, False, True)
+
+        self.time_list = [_('Disabled'),
+                          _('Lightning: 30 seconds'),
+                          _('Blitz: 3 minutes'),
+                          _('Tournament: 10 minutes')]
+        self.timer = Gtk.ComboBoxText()
+        for t in self.time_list:
+            self.timer.append_text(t)
+        self.timer.set_tooltip_text(_('Timer'))
+        self.timer.set_active(0)
+        self.timer.connect("changed", self.set_timer_cb)
+
+        toolitem = Gtk.ToolItem()
+        toolitem.add(self.timer)
+        self.adjust_toolbar.insert(toolitem, -1)
+        toolitem.show()
+        self.timer.show()
+        self.timer.set_sensitive(True)
+
         self.robot_button.set_active(True)
 
         button_factory('new-game',
@@ -371,7 +394,7 @@ class GNUChessActivity(activity.Activity):
                        self.custom_toolbar,
                        self._reskin_cb,
                        cb_arg='white_king',
-                       tooltip=_('White King'))
+                       tooltip=_('Whitdde King'))
 
         button_factory('black-king',
                        self.custom_toolbar,
@@ -465,6 +488,30 @@ class GNUChessActivity(activity.Activity):
         else:
             self._gnuchess.reskin_from_file(piece, file_path)
         return
+
+    def set_timer_cb(self, widget):
+        game_already_started = 0
+        if self.time_interval != None:
+            game_already_started = 1
+        if widget.get_active() >= 0:
+            timer_type = widget.get_active_text()
+            if timer_type == _('Lightning: 30 seconds'):
+                self.time_interval = 30
+            elif timer_type == _('Blitz: 3 minutes'):
+                self.time_interval = 3 * 60
+            elif timer_type == _('Tournament: 10 minutes'):
+                self.time_interval = 10 * 60
+            else:
+                self.time_interval = -1
+
+            if game_already_started:
+                self.alert_reset(timer_type)
+                if self.time_interval and self.time_interval == -1:
+                    self.stopwatch(self.time_interval, self.alert_time)
+                else:
+                    GObject.source_remove(self.stopwatch_timer)
+            else:
+                self._gnuchess.new_game()
 
     def _reskin_cb(self, button, piece):
         object_id, file_path = self._choose_skin()
@@ -628,6 +675,8 @@ class GNUChessActivity(activity.Activity):
         else:
             self.metadata['playing_robot'] = 'False'
 
+        self.metadata['timer_mode'] = self.timer.get_active_text()
+
     def read_file(self, file_path):
         ''' Read project file on relaunch '''
         fd = open(file_path, 'r')
@@ -649,6 +698,11 @@ class GNUChessActivity(activity.Activity):
             if self.metadata['playing_robot'] == 'False':
                 self.playing_robot = False
                 self.human_button.set_active(True)
+        if 'timer_mode' in self.metadata:
+            self.timer.set_active(self.time_list.index(
+                                    self.metadata['timer_mode']))
+
+
         self._gnuchess.restore_game(self._parse_move_list(self.game_data))
         self.do_custom_skin_cb()
 
@@ -887,6 +941,35 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
         _logger.debug('send_nick')
         self.send_event('N|%s' % (self.nick))
         self.send_event('C|%s,%s' % (self.colors[0], self.colors[1]))
+
+    def alert_time(self):
+        def _alert_response_cb(alert, response_id):
+            self.remove_alert(alert)
+
+        alert = NotifyAlert()
+        alert.props.title = _('Time Up!')
+        alert.props.msg = _('Your time is up.')
+        alert.connect('response', _alert_response_cb)
+        alert.show()
+        self.add_alert(alert)
+
+    def alert_reset(self, mode):
+        def _alert_response_cb(alert, response_id):
+            self.remove_alert(alert)
+
+        alert = NotifyAlert()
+        alert.props.title = _('Time Reset')
+        alert.props.msg = _('The timer mode was reset to %s' % mode)
+        alert.connect('response', _alert_response_cb)
+        alert.show()
+        self.add_alert(alert)
+
+    def stopwatch(self, time, alert_callback):
+        if self.stopwatch_running:
+            GObject.source_remove(self.stopwatch_timer)
+            time = self.time_interval
+        self.stopwatch_timer = GObject.timeout_add(time * 1000, alert_callback)
+        self.stopwatch_running = True
 
     def _receive_join(self, payload):
         _logger.debug('received_join %s' % (payload))

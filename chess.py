@@ -134,7 +134,6 @@ class Gnuchess():
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
-
         if my_move == HINT:
             level = 'hard\nbook on\n'  # may as well get a good hint
         elif self._activity.playing_mode == 'easy':
@@ -261,6 +260,11 @@ class Gnuchess():
                 self._flash_tile([self._xy_to_file_and_rank(
                             self.black[4].get_xy())])
         else:
+            if self._activity.time_interval and \
+               (self._activity.time_interval >= 0):
+                self._activity.stopwatch(self._activity.time_interval,
+                                         self._activity.alert_time)
+
             if len(self.move_list) % 2 == 0:
                 self._activity.status.set_label(_("It is White's move."))
             else:
