@@ -51,35 +51,6 @@ SERVICE = 'org.sugarlabs.GNUChessActivity'
 IFACE = SERVICE
 PATH = '/org/augarlabs/GNUChessActivity'
 
-class TimerUpdateThread(threading.Thread):
-    """Thread that updates timer GtkEntry every 'interval' seconds"""
-    
-    def __init__(self, timer, interval=1):
-        threading.Thread.__init__(self)
-        self._finished = threading.Event()
-        self._interval = interval
-        self.timer = timer
-    
-    def shutdown(self):
-        """Stop this thread"""
-        self._finished.set()
-    
-    def run(self):
-        while 1:
-            # sleep for interval or until shutdown
-            self._finished.wait(self._interval)
-
-            if self._finished.isSet(): return
-            self.task()
-
-    
-    def task(self):
-        if self.timer.get_text().isdigit() and (int(self.timer.get_text()) >= 1):
-            self.timer.set_text(str(int(self.timer.get_text()) - 1))
-        else:
-            self.timer.set_text('0')
-            self.shutdown()
-
 class GNUChessActivity(activity.Activity):
     ''' Gnuchess interface from Sugar '''
 
@@ -127,7 +98,7 @@ class GNUChessActivity(activity.Activity):
                                   colors=self.colors)
         self._setup_presence_service()
         self.stopwatch_running = False
-        self.time_interval = 0
+        self.time_interval = None
 
         if self.game_data is not None:  # 'saved_game' in self.metadata:
             self._restore()
@@ -430,11 +401,14 @@ class GNUChessActivity(activity.Activity):
                        tooltip=_('Black King'))
 
     def save_time(self, widget):
-        if self.timer.get_text().isdigit() and int(self.timer.get_text()) >= 1:
-            a = self.timer.get_text()
-            self.time_interval = copy.copy(int(a))
-        else:
-            self.timer.set_text('0')
+        # If time_interval is invalid and we really need to change it
+        if self.time_interval == None:
+            if self.timer.get_text().isdigit() and
+                (int(self.timer.get_text()) >= 1):
+                a = self.timer.get_text()
+                self.time_interval = copy.copy(int(a))
+            else:
+                self.timer.set_text('0')
 
     def do_default_skin_cb(self, button=None):
         self._gnuchess.reskin_from_file('black_king',
@@ -528,6 +502,8 @@ class GNUChessActivity(activity.Activity):
             self.timer.set_sensitive(True)
         else:
             self.timer.set_sensitive(False)
+            self.timer.set_text('0')
+            self.time_interval = None
 
     def _reskin_cb(self, button, piece):
         object_id, file_path = self._choose_skin()
@@ -968,9 +944,7 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
             self.timer.set_text(str(self.time_interval))
             time = self.time_interval
         self.stopwatch_timer = threading.Timer(time, alert_callback)
-
-        self.stopwatch_running     = True
-
+        self.stopwatch_running = True
         self.stopwatch_timer.start()
 
     def _receive_join(self, payload):
