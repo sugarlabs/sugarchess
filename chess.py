@@ -133,8 +133,6 @@ class Gnuchess():
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
-        self._activity.timer.set_sensitive(False)
-
         if my_move == HINT:
             level = 'hard\nbook on\n'  # may as well get a good hint
         elif self._activity.playing_mode == 'easy':
@@ -261,8 +259,7 @@ class Gnuchess():
                 self._flash_tile([self._xy_to_file_and_rank(
                             self.black[4].get_xy())])
         else:
-            if self._activity.timer.get_text().isdigit() and \
-               (self._activity.time_interval >= 2):
+            if self._activity.time_interval != None:
                 self._activity.stopwatch(self._activity.time_interval,
                                          self._activity.alert_time)
 
@@ -432,6 +429,7 @@ class Gnuchess():
         self._dragpos = [x, y]
         self._total_drag[0] += dx
         self._total_drag[1] += dy
+        self._activity.timer.set_sensitive(False)
         return True
 
     def _button_release_cb(self, win, event):

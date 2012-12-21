@@ -27,7 +27,7 @@ from sugar3.graphics.icon import Icon
 from sugar3.graphics.xocolor import XoColor
 
 from toolbar_utils import button_factory, label_factory, separator_factory, \
-    radio_factory, entry_factory, toggle_factory
+    radio_factory, entry_factory, combo_factory
 from utils import json_load, json_dump, get_hardware, \
     pixbuf_to_base64, base64_to_pixbuf
 
@@ -286,21 +286,23 @@ class GNUChessActivity(activity.Activity):
 
         separator_factory(self.adjust_toolbar, False, True)
 
-        self.timer_off_button = toggle_factory('human',
-                                               self._toggle_timer,
-                                               self.adjust_toolbar,
-                                               tooltip=_('Toggle Timer'))
+        time_list = [_('Disabled'),
+                     _('Lightning: 30 seconds'),
+                     _('Blitz: 3 minutes'),
+                     _('Tournament: 10 minutes')]
+        self.timer = Gtk.ComboBoxText()
+        for t in time_list:
+            self.timer.append_text(t)
+        self.timer.set_tooltip_text(_('Timer'))
+        self.timer.set_active(0)
+        self.timer.connect("changed", self.set_timer_cb)
 
-        self.timer = Gtk.Entry()
-        self.timer.set_sensitive(False) 
-        self.timer.set_text('0')
-        self.timer.set_max_length(4)
-        self.timer.set_tooltip_text(_("Timer (no of seconds)"))
-        self.timer.connect('changed', self.save_time)
         toolitem = Gtk.ToolItem()
         toolitem.add(self.timer)
         self.adjust_toolbar.insert(toolitem, -1)
-        toolitem.show_all()
+        toolitem.show()
+        self.timer.show()
+        self.timer.set_sensitive(True)
 
         self.robot_button.set_active(True)
 
@@ -401,16 +403,6 @@ class GNUChessActivity(activity.Activity):
                        cb_arg='black_king',
                        tooltip=_('Black King'))
 
-    def save_time(self, widget):
-        # If time_interval is invalid and we really need to change it
-        if self.time_interval == None:
-            if self.timer.get_text().isdigit() and \
-                (int(self.timer.get_text()) >= 1):
-                a = self.timer.get_text()
-                self.time_interval = copy.copy(int(a))
-            else:
-                self.timer.set_text('0')
-
     def do_default_skin_cb(self, button=None):
         self._gnuchess.reskin_from_file('black_king',
                 '%s/icons/black-king.svg' % (activity.get_bundle_path()))
@@ -498,13 +490,15 @@ class GNUChessActivity(activity.Activity):
             self._gnuchess.reskin_from_file(piece, file_path)
         return
 
-    def _toggle_timer(self, widget):
-        if widget.get_active():
-            self.timer.set_sensitive(True)
-        else:
-            self.timer.set_sensitive(False)
-            self.timer.set_text('0')
-            self.time_interval = None
+    def set_timer_cb(self, widget):
+        if widget.get_active() > 0:
+            timer_type = widget.get_active_text()
+            if timer_type == _('Lightning: 30 seconds'):
+                self.time_interval = 30
+            elif timer_type == _('Blitz: 3 minutes'):
+                self.time_interval = 3 * 60
+            elif timer_type == _('Tournament: 10 minutes'):
+                self.time_interval = 10 * 60
 
     def _reskin_cb(self, button, piece):
         object_id, file_path = self._choose_skin()
@@ -942,7 +936,6 @@ params=%r state=%d' % (id, initiator, type, service, params, state))
     def stopwatch(self, time, alert_callback):
         if self.stopwatch_running:
             self.stopwatch_timer.cancel()
-            self.timer.set_text(str(self.time_interval))
             time = self.time_interval
         self.stopwatch_timer = threading.Timer(time, alert_callback)
         self.stopwatch_running = True
