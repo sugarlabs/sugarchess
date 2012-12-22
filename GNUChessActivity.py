@@ -286,9 +286,9 @@ class GNUChessActivity(activity.Activity):
         separator_factory(self.adjust_toolbar, False, True)
 
         self.time_list = [_('Disabled'),
-                          _('Lightning: 30 seconds'),
-                          _('Blitz: 3 minutes'),
-                          _('Tournament: 10 minutes')]
+                          _('Lightning: %d seconds') % (30),
+                          _('Blitz: %d minutes') % (3),
+                          _('Tournament: %d minutes') % (10)]
         self.timer = Gtk.ComboBoxText()
         for t in self.time_list:
             self.timer.append_text(t)
@@ -394,7 +394,7 @@ class GNUChessActivity(activity.Activity):
                        self.custom_toolbar,
                        self._reskin_cb,
                        cb_arg='white_king',
-                       tooltip=_('Whitdde King'))
+                       tooltip=_('White King'))
 
         button_factory('black-king',
                        self.custom_toolbar,
@@ -495,11 +495,11 @@ class GNUChessActivity(activity.Activity):
             game_already_started = 1
         if widget.get_active() >= 0:
             timer_type = widget.get_active_text()
-            if timer_type == _('Lightning: 30 seconds'):
+            if timer_type == _('Lightning: %d seconds') % (30):
                 self.time_interval = 30
-            elif timer_type == _('Blitz: 3 minutes'):
+            elif timer_type == _('Blitz: %d minutes') % (3):
                 self.time_interval = 3 * 60
-            elif timer_type == _('Tournament: 10 minutes'):
+            elif timer_type == _('Tournament: %d minutes') % (10):
                 self.time_interval = 10 * 60
             else:
                 self.time_interval = -1
