@@ -55,7 +55,7 @@ WK = 10
 BK = 11
 FILES = 'abcdefgh'
 RANKS = '12345678'
-BIN = {'i686': 'i686', 'i586': 'i686', 'armv7l': 'armv7l'}
+BIN = {'i686': 'i686', 'i586': 'i686', 'armv7l': 'armv7l', 'x86_64': 'x86_64'}
 
 
 class Gnuchess():
