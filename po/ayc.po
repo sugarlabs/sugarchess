@@ -1,0 +1,283 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-12-22 09:59-0500\n"
+"PO-Revision-Date: 2013-03-12 22:53+0200\n"
+"Last-Translator: Chris <cjl@laptop.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ayc\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Pootle 2.0.5\n"
+
+#. TRANS: "name" option from activity.info file
+msgid "SimpleGNUChess"
+msgstr "Ajedrez anataña"
+
+#. TRANS: "summary" option from activity.info file
+#. TRANS: "description" option from activity.info file
+msgid "a Sugar interface to the gnuchess program"
+msgstr "gnuchess wakichatataki interfaz Sugar wakichäwi"
+
+#: GNUChessActivity.py:134
+msgid "Edit"
+msgstr "Chiqachaña"
+
+#: GNUChessActivity.py:141
+msgid "View"
+msgstr "Uñjaña"
+
+#: GNUChessActivity.py:148
+msgid "Adjust"
+msgstr "Askichaña"
+
+#: GNUChessActivity.py:155
+msgid "Custom"
+msgstr "Jaqichjata"
+
+#: GNUChessActivity.py:171
+msgid "Copy"
+msgstr "Apaqaña"
+
+#: GNUChessActivity.py:177
+msgid "Paste"
+msgstr "Lip'iyaña"
+
+#: GNUChessActivity.py:183
+msgid "Fullscreen"
+msgstr "Maypacha uñtäwi"
+
+#: GNUChessActivity.py:189
+msgid "Play game history"
+msgstr "Anataña uñstäwipa nakhtayäwi"
+
+#: GNUChessActivity.py:194 GNUChessActivity.py:537
+msgid "Show game history"
+msgstr "Anataña uñstäwipa uñachayaña"
+
+#: GNUChessActivity.py:199
+msgid "White: "
+msgstr "Janq'unaka: "
+
+#: GNUChessActivity.py:202
+msgid "White's move"
+msgstr "Janq'unaka sartäwipa"
+
+#: GNUChessActivity.py:207
+msgid "Black: "
+msgstr "Laramanaka: "
+
+#: GNUChessActivity.py:210
+msgid "Black's move"
+msgstr "Laramanakana sartäwipa"
+
+#: GNUChessActivity.py:217
+msgid "Default pieces"
+msgstr "Pantjatata utjirinaka"
+
+#: GNUChessActivity.py:223
+msgid "Sugar-style pieces"
+msgstr "Sugar kasta utjirinaka"
+
+#: GNUChessActivity.py:233
+msgid "Custom pieces"
+msgstr "Jaqichjata utjirinaka"
+
+#: GNUChessActivity.py:241
+msgid "Play White"
+msgstr "Janq'unakawa anatañapa"
+
+#: GNUChessActivity.py:247
+msgid "Play Black"
+msgstr "Laramanakawa anatañapa"
+
+#: GNUChessActivity.py:257
+msgid "Beginner"
+msgstr "Chijnuqiri"
+
+#: GNUChessActivity.py:263
+msgid "Expert"
+msgstr "Yatiñani"
+
+#: GNUChessActivity.py:274
+msgid "Play against the computer"
+msgstr "Computadora anatañaru atipañataki anataña"
+
+#: GNUChessActivity.py:280
+msgid "Play against a person"
+msgstr "Yaqha jaqiru atipañataki anataña"
+
+#: GNUChessActivity.py:288
+msgid "Disabled"
+msgstr "Sayt'ayata"
+
+#: GNUChessActivity.py:289 GNUChessActivity.py:498
+#, python-format
+msgid "Lightning: %d seconds"
+msgstr "Maya akatjama: %d payïrinaka"
+
+#: GNUChessActivity.py:290 GNUChessActivity.py:500
+#, python-format
+msgid "Blitz: %d minutes"
+msgstr "Pachata q'axchasïwi: %d pacha t'ijt'a"
+
+#: GNUChessActivity.py:291 GNUChessActivity.py:502
+#, python-format
+msgid "Tournament: %d minutes"
+msgstr "Anatäwi: %d pacha t'ijtäwinaka"
+
+#: GNUChessActivity.py:295
+msgid "Timer"
+msgstr "Pacha chimpu"
+
+#: GNUChessActivity.py:311
+msgid "New game"
+msgstr "Machaqa anataña"
+
+#: GNUChessActivity.py:316
+msgid "Undo"
+msgstr "Jarjaña"
+
+#: GNUChessActivity.py:321
+msgid "Hint"
+msgstr "Iwxa"
+
+#: GNUChessActivity.py:325 chess.py:269
+msgid "It is White's move."
+msgstr "Akawa janq'unakana saräwinakapa"
+
+#: GNUChessActivity.py:337
+msgid "White Pawn"
+msgstr "Janq'u sayt'asiri"
+
+#: GNUChessActivity.py:343
+msgid "Black Pawn"
+msgstr "Larama sayt'asiri"
+
+#: GNUChessActivity.py:349
+msgid "White Rook"
+msgstr "Janq'u saysta"
+
+#: GNUChessActivity.py:355
+msgid "Black Rook"
+msgstr "Larama saysta"
+
+#: GNUChessActivity.py:361
+msgid "White Knight"
+msgstr "Janq'u kawallu"
+
+#: GNUChessActivity.py:367
+msgid "Black Knight"
+msgstr "Larama kawallu"
+
+#: GNUChessActivity.py:373
+msgid "White Bishop"
+msgstr "Janq'u Alfil sayt'asiri"
+
+#: GNUChessActivity.py:379
+msgid "Black Bishop"
+msgstr "Larama Alfil sayt'asiri"
+
+#: GNUChessActivity.py:385
+msgid "White Queen"
+msgstr "Janq'u Reina sayt'asiri"
+
+#: GNUChessActivity.py:391
+msgid "Black Queen"
+msgstr "Larama Reina sayt'asiri"
+
+#: GNUChessActivity.py:397
+msgid "White King"
+msgstr "Janq'u Rey sayt'asiri"
+
+#: GNUChessActivity.py:403
+msgid "Black King"
+msgstr "Larama Rey sayt'asiri"
+
+#: GNUChessActivity.py:534
+msgid "Show game board"
+msgstr "Anatäwi qillqaqaña uñachayaña"
+
+#: GNUChessActivity.py:794
+msgid "Game in progress."
+msgstr "Anataña apäwi"
+
+#: GNUChessActivity.py:795
+msgid "Do you want to start a new game?"
+msgstr "Machaqa anataña qalltaña muntati?"
+
+#: GNUChessActivity.py:950
+msgid "Time Up!"
+msgstr "¡Pacha tukuta!"
+
+#: GNUChessActivity.py:951
+msgid "Your time is up."
+msgstr "Pachama tukuyxiwa"
+
+#: GNUChessActivity.py:961
+msgid "Time Reset"
+msgstr "Pacha mayampi qalltaña"
+
+#: GNUChessActivity.py:962
+#, python-format
+msgid "The timer mode was reset to %s"
+msgstr "Pachanchiri wakichatampixa maya qalltiwa %s"
+
+#: chess.py:206
+msgid "Illegal move"
+msgstr "Jani chiqaparu unxtayaña"
+
+#: chess.py:253 chess.py:485 chess.py:492
+msgid "Check"
+msgstr "Jaque anatiri"
+
+#: chess.py:255 chess.py:488 chess.py:494
+msgid "Checkmate"
+msgstr "Anataña tukuyaña"
+
+#: chess.py:271
+msgid "It is Black's move."
+msgstr "Larama anatirinakana sartäwipa"
+
+#: chess.py:303
+msgid "Black wins."
+msgstr "Laramanakawa atipi"
+
+#: chess.py:305
+msgid "White wins."
+msgstr "Janq'unakawa atipi"
+
+#: chess.py:309
+msgid "White's King is in check."
+msgstr "Janq'u Rey sayt'asiri jiwirjamawa"
+
+#: chess.py:312
+msgid "Black's King is in check."
+msgstr "Larama Rey sayt'asiri jiwirjamawa"
+
+#: chess.py:410 chess.py:413 chess.py:588
+msgid "Please wait for your turn."
+msgstr "Mira suma, suyt'asma."
+
+#: chess.py:417
+msgid "Please play White."
+msgstr "Mira suma, janq'unakampi anatma."
+
+#: chess.py:419
+msgid "Please play Black."
+msgstr "Mira suma, laramanakampi anatma."
+
+#: chess.py:515
+msgid "Thinking..."
+msgstr "Amuyaski..."
+
+#: chess.py:591
+msgid "Thinking"
+msgstr "Amuyaski..."
