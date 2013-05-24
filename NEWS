@@ -1,6 +1,11 @@
-9
+11
 
 ENHANCEMENT:
+* New translations
+
+9
+
+ENHANCEMENTS:
 * Add game timer (Aneesh Dogra)
 * Add support for x86_64
 * New translations
@@ -15,13 +20,13 @@ ENHANCEMENT:
 
 6
 
-ENHANCEMENT:
+ENHANCEMENTS:
 * New translations
 * Added summary string to activity.info file
 
 5
 
-ENHANCEMENT:
+ENHANCEMENTS:
 * New translations
 * Longer flash to indicate robot moves
 
@@ -31,7 +36,7 @@ BUG FIX:
 
 4
 
-ENHANCEMENT:
+ENHANCEMENTS:
 * New translations (es, da)
 * Highlight robot moves
 * Label rank and file
