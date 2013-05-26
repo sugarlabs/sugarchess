@@ -286,8 +286,11 @@ class GNUChessActivity(activity.Activity):
         separator_factory(self.adjust_toolbar, False, True)
 
         self.time_list = [_('Disabled'),
+                          #TRANS: Lightning chess 30 seconds between moves
                           _('Lightning: %d seconds') % (30),
+                          #TRANS: Blitz chess 3 minutes between moves
                           _('Blitz: %d minutes') % (3),
+                          #TRANS: Tournament chess 10 minutes between moves
                           _('Tournament: %d minutes') % (10)]
         self.timer = Gtk.ComboBoxText()
         for t in self.time_list:
