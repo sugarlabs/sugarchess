@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-10-30 00:32-0400\n"
-"PO-Revision-Date: 2012-11-10 15:53+0200\n"
+"POT-Creation-Date: 2012-12-22 09:59-0500\n"
+"PO-Revision-Date: 2013-02-10 22:30+0200\n"
 "Last-Translator: whe <heppew@yahoo.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nl\n"
@@ -26,219 +26,259 @@ msgstr "SimpleGNUChess"
 msgid "a Sugar interface to the gnuchess program"
 msgstr "een Sugar interface naar het gnuschaak programma"
 
-#: GNUChessActivity.py:131
+#: GNUChessActivity.py:134
 msgid "Edit"
 msgstr "Bewerk"
 
-#: GNUChessActivity.py:138
+#: GNUChessActivity.py:141
 msgid "View"
 msgstr "Bekijk"
 
-#: GNUChessActivity.py:145
+#: GNUChessActivity.py:148
 msgid "Adjust"
 msgstr "Aanpassen"
 
-#: GNUChessActivity.py:152
+#: GNUChessActivity.py:155
 msgid "Custom"
 msgstr "Aangepast"
 
-#: GNUChessActivity.py:168
+#: GNUChessActivity.py:171
 msgid "Copy"
 msgstr "Kopieer"
 
-#: GNUChessActivity.py:174
+#: GNUChessActivity.py:177
 msgid "Paste"
 msgstr "Plak"
 
-#: GNUChessActivity.py:180
+#: GNUChessActivity.py:183
 msgid "Fullscreen"
 msgstr "Volledig scherm"
 
-#: GNUChessActivity.py:186
+#: GNUChessActivity.py:189
 msgid "Play game history"
 msgstr "Speel spel historie"
 
-#: GNUChessActivity.py:191 GNUChessActivity.py:490
+#: GNUChessActivity.py:194 GNUChessActivity.py:537
 msgid "Show game history"
 msgstr "Toon spel historie"
 
-#: GNUChessActivity.py:196
+#: GNUChessActivity.py:199
 msgid "White: "
 msgstr "Wit: "
 
-#: GNUChessActivity.py:199
+#: GNUChessActivity.py:202
 msgid "White's move"
 msgstr "Wit's zet"
 
-#: GNUChessActivity.py:204
+#: GNUChessActivity.py:207
 msgid "Black: "
 msgstr "Zwart: "
 
-#: GNUChessActivity.py:207
+#: GNUChessActivity.py:210
 msgid "Black's move"
 msgstr "Zwart's zet"
 
-#: GNUChessActivity.py:214
+#: GNUChessActivity.py:217
 msgid "Default pieces"
 msgstr "Standaard stukken"
 
-#: GNUChessActivity.py:220
+#: GNUChessActivity.py:223
 msgid "Sugar-style pieces"
 msgstr "Sugar-stijl stukken"
 
-#: GNUChessActivity.py:230
+#: GNUChessActivity.py:233
 msgid "Custom pieces"
 msgstr "Aangepaste stukken"
 
-#: GNUChessActivity.py:238
+#: GNUChessActivity.py:241
 msgid "Play White"
 msgstr "Speel Wit"
 
-#: GNUChessActivity.py:244
+#: GNUChessActivity.py:247
 msgid "Play Black"
 msgstr "Speel Zwart"
 
-#: GNUChessActivity.py:254
+#: GNUChessActivity.py:257
 msgid "Beginner"
 msgstr "Beginner"
 
-#: GNUChessActivity.py:260
+#: GNUChessActivity.py:263
 msgid "Expert"
 msgstr "Expert"
 
-#: GNUChessActivity.py:271
+#: GNUChessActivity.py:274
 msgid "Play against the computer"
 msgstr "Speel tegen computer"
 
-#: GNUChessActivity.py:277
+#: GNUChessActivity.py:280
 msgid "Play against a person"
 msgstr "Speel tegen perzoon"
 
 #: GNUChessActivity.py:288
+msgid "Disabled"
+msgstr "Uitgeschakeld"
+
+#: GNUChessActivity.py:289 GNUChessActivity.py:498
+#, python-format
+msgid "Lightning: %d seconds"
+msgstr "Bliksem: %d seconden"
+
+#: GNUChessActivity.py:290 GNUChessActivity.py:500
+#, python-format
+msgid "Blitz: %d minutes"
+msgstr "Bliksem: %d minuten"
+
+#: GNUChessActivity.py:291 GNUChessActivity.py:502
+#, python-format
+msgid "Tournament: %d minutes"
+msgstr "Tournooi: %d minuten"
+
+#: GNUChessActivity.py:295
+msgid "Timer"
+msgstr "Timer"
+
+#: GNUChessActivity.py:311
 msgid "New game"
 msgstr "Nieuw spel"
 
-#: GNUChessActivity.py:293
+#: GNUChessActivity.py:316
 msgid "Undo"
 msgstr "Ongedaan maken"
 
-#: GNUChessActivity.py:298
+#: GNUChessActivity.py:321
 msgid "Hint"
 msgstr "Hint"
 
-#: GNUChessActivity.py:302 chess.py:264
+#: GNUChessActivity.py:325 chess.py:269
 msgid "It is White's move."
 msgstr "Wit is aan zet."
 
-#: GNUChessActivity.py:314
+#: GNUChessActivity.py:337
 msgid "White Pawn"
 msgstr "Witte Pion"
 
-#: GNUChessActivity.py:320
+#: GNUChessActivity.py:343
 msgid "Black Pawn"
 msgstr "Zwarte Pion"
 
-#: GNUChessActivity.py:326
+#: GNUChessActivity.py:349
 msgid "White Rook"
 msgstr "Witte Toren"
 
-#: GNUChessActivity.py:332
+#: GNUChessActivity.py:355
 msgid "Black Rook"
 msgstr "Zwarte Toren"
 
-#: GNUChessActivity.py:338
+#: GNUChessActivity.py:361
 msgid "White Knight"
 msgstr "Wit Paard"
 
-#: GNUChessActivity.py:344
+#: GNUChessActivity.py:367
 msgid "Black Knight"
 msgstr "Zwart Paard"
 
-#: GNUChessActivity.py:350
+#: GNUChessActivity.py:373
 msgid "White Bishop"
 msgstr "Witte Loper"
 
-#: GNUChessActivity.py:356
+#: GNUChessActivity.py:379
 msgid "Black Bishop"
 msgstr "Zwarte Loper"
 
-#: GNUChessActivity.py:362
+#: GNUChessActivity.py:385
 msgid "White Queen"
 msgstr "Witte Koningin"
 
-#: GNUChessActivity.py:368
+#: GNUChessActivity.py:391
 msgid "Black Queen"
 msgstr "Zwarte koningin"
 
-#: GNUChessActivity.py:374
+#: GNUChessActivity.py:397
 msgid "White King"
 msgstr "Witte Koning"
 
-#: GNUChessActivity.py:380
+#: GNUChessActivity.py:403
 msgid "Black King"
 msgstr "Zwarte Koning"
 
-#: GNUChessActivity.py:487
+#: GNUChessActivity.py:534
 msgid "Show game board"
 msgstr "Toon spelbord"
 
-#: GNUChessActivity.py:740
+#: GNUChessActivity.py:794
 msgid "Game in progress."
 msgstr "Spel bezig."
 
-#: GNUChessActivity.py:741
+#: GNUChessActivity.py:795
 msgid "Do you want to start a new game?"
 msgstr "Wil je een nieuw spel starten?"
+
+#: GNUChessActivity.py:950
+msgid "Time Up!"
+msgstr "Tijd Over!"
+
+#: GNUChessActivity.py:951
+msgid "Your time is up."
+msgstr "Je tijd is over."
+
+#: GNUChessActivity.py:961
+msgid "Time Reset"
+msgstr "Tijd Reset"
+
+#: GNUChessActivity.py:962
+#, python-format
+msgid "The timer mode was reset to %s"
+msgstr "De timer modus is gereset naar %s"
 
 #: chess.py:206
 msgid "Illegal move"
 msgstr "Ongeldige zet"
 
-#: chess.py:253 chess.py:479 chess.py:486
+#: chess.py:253 chess.py:485 chess.py:492
 msgid "Check"
 msgstr "Schaak"
 
-#: chess.py:255 chess.py:482 chess.py:488
+#: chess.py:255 chess.py:488 chess.py:494
 msgid "Checkmate"
 msgstr "Schaakmat"
 
-#: chess.py:266
+#: chess.py:271
 msgid "It is Black's move."
 msgstr "Zwart is aan zet."
 
-#: chess.py:298
+#: chess.py:303
 msgid "Black wins."
 msgstr "Zwart wint."
 
-#: chess.py:300
+#: chess.py:305
 msgid "White wins."
 msgstr "Wit wint."
 
-#: chess.py:304
+#: chess.py:309
 msgid "White's King is in check."
 msgstr "Witte Koning staat schaak."
 
-#: chess.py:307
+#: chess.py:312
 msgid "Black's King is in check."
 msgstr "Zwarte koning staat schaak."
 
-#: chess.py:404 chess.py:407 chess.py:582
+#: chess.py:410 chess.py:413 chess.py:588
 msgid "Please wait for your turn."
 msgstr "Wacht op je beurt."
 
-#: chess.py:411
+#: chess.py:417
 msgid "Please play White."
 msgstr "Speel Wit."
 
-#: chess.py:413
+#: chess.py:419
 msgid "Please play Black."
 msgstr "Speel Zwart."
 
-#: chess.py:509
+#: chess.py:515
 msgid "Thinking..."
 msgstr "Nadenken..."
 
-#: chess.py:585
+#: chess.py:591
 msgid "Thinking"
 msgstr "Nadenken"
 
