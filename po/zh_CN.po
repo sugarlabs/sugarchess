@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-08-01 00:32-0400\n"
-"PO-Revision-Date: 2012-08-06 02:36+0200\n"
+"POT-Creation-Date: 2012-12-22 09:59-0500\n"
+"PO-Revision-Date: 2012-12-24 20:34+0200\n"
 "Last-Translator: lite <litekok@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: zh_CN\n"
@@ -17,229 +17,273 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.0.5\n"
 
-#: activity/activity.info:2
+#. TRANS: "name" option from activity.info file
 msgid "SimpleGNUChess"
 msgstr "GNU象棋"
 
-#: GNUChessActivity.py:149 GNUChessActivity.py:190
+#. TRANS: "summary" option from activity.info file
+#. TRANS: "description" option from activity.info file
+msgid "a Sugar interface to the gnuchess program"
+msgstr "一个GNU象棋程序的Sugar接口"
+
+#: GNUChessActivity.py:134
 msgid "Edit"
 msgstr "编辑"
 
-#: GNUChessActivity.py:156 GNUChessActivity.py:191
+#: GNUChessActivity.py:141
 msgid "View"
 msgstr "查看"
 
-#: GNUChessActivity.py:163
+#: GNUChessActivity.py:148
 msgid "Adjust"
 msgstr "调整"
 
-#: GNUChessActivity.py:171 GNUChessActivity.py:192
+#: GNUChessActivity.py:155
 msgid "Custom"
 msgstr "自定义"
 
-#: GNUChessActivity.py:189
-msgid "Play"
-msgstr "开始"
-
-#: GNUChessActivity.py:200
+#: GNUChessActivity.py:171
 msgid "Copy"
 msgstr "复制"
 
-#: GNUChessActivity.py:206
+#: GNUChessActivity.py:177
 msgid "Paste"
 msgstr "粘贴"
 
-#: GNUChessActivity.py:212
+#: GNUChessActivity.py:183
 msgid "Fullscreen"
 msgstr "全屏"
 
-#: GNUChessActivity.py:218
+#: GNUChessActivity.py:189
 msgid "Play game history"
 msgstr "播放游戏历史"
 
-#: GNUChessActivity.py:223 GNUChessActivity.py:523
+#: GNUChessActivity.py:194 GNUChessActivity.py:537
 msgid "Show game history"
 msgstr "显示游戏历史"
 
-#: GNUChessActivity.py:228
+#: GNUChessActivity.py:199
 msgid "White: "
 msgstr "白方："
 
-#: GNUChessActivity.py:231
+#: GNUChessActivity.py:202
 msgid "White's move"
 msgstr "白方走"
 
-#: GNUChessActivity.py:236
+#: GNUChessActivity.py:207
 msgid "Black: "
 msgstr "黑方："
 
-#: GNUChessActivity.py:239
+#: GNUChessActivity.py:210
 msgid "Black's move"
 msgstr "黑方走"
 
-#: GNUChessActivity.py:246
+#: GNUChessActivity.py:217
 msgid "Default pieces"
 msgstr "缺省棋子"
 
-#: GNUChessActivity.py:252
+#: GNUChessActivity.py:223
 msgid "Sugar-style pieces"
 msgstr "Sugar风格棋子"
 
-#: GNUChessActivity.py:262
+#: GNUChessActivity.py:233
 msgid "Custom pieces"
 msgstr "自定义棋子"
 
-#: GNUChessActivity.py:270
+#: GNUChessActivity.py:241
 msgid "Play White"
 msgstr "白方先走"
 
-#: GNUChessActivity.py:276
+#: GNUChessActivity.py:247
 msgid "Play Black"
 msgstr "黑方先走"
 
-#: GNUChessActivity.py:286
+#: GNUChessActivity.py:257
 msgid "Beginner"
 msgstr "初学者"
 
-#: GNUChessActivity.py:292
+#: GNUChessActivity.py:263
 msgid "Expert"
 msgstr "专家"
 
-#: GNUChessActivity.py:303
+#: GNUChessActivity.py:274
 msgid "Play against the computer"
 msgstr "和电脑对战"
 
-#: GNUChessActivity.py:309
+#: GNUChessActivity.py:280
 msgid "Play against a person"
 msgstr "和玩家对战"
 
-#: GNUChessActivity.py:320
+#: GNUChessActivity.py:288
+msgid "Disabled"
+msgstr "禁用"
+
+#: GNUChessActivity.py:289 GNUChessActivity.py:498
+#, python-format
+msgid "Lightning: %d seconds"
+msgstr "光速：%d 秒"
+
+#: GNUChessActivity.py:290 GNUChessActivity.py:500
+#, python-format
+msgid "Blitz: %d minutes"
+msgstr "闪电战：%d 分钟"
+
+#: GNUChessActivity.py:291 GNUChessActivity.py:502
+#, python-format
+msgid "Tournament: %d minutes"
+msgstr "比赛：%d 分钟"
+
+#: GNUChessActivity.py:295
+msgid "Timer"
+msgstr "定时器"
+
+#: GNUChessActivity.py:311
 msgid "New game"
 msgstr "新游戏"
 
-#: GNUChessActivity.py:325
+#: GNUChessActivity.py:316
 msgid "Undo"
 msgstr "撤销"
 
-#: GNUChessActivity.py:330
+#: GNUChessActivity.py:321
 msgid "Hint"
 msgstr "提示"
 
-#: GNUChessActivity.py:334 chess.py:250
+#: GNUChessActivity.py:325 chess.py:269
 msgid "It is White's move."
 msgstr "白方走子。"
 
-#: GNUChessActivity.py:347
+#: GNUChessActivity.py:337
 msgid "White Pawn"
 msgstr "白方卒"
 
-#: GNUChessActivity.py:353
+#: GNUChessActivity.py:343
 msgid "Black Pawn"
 msgstr "黑方卒"
 
-#: GNUChessActivity.py:359
+#: GNUChessActivity.py:349
 msgid "White Rook"
 msgstr "白方车"
 
-#: GNUChessActivity.py:365
+#: GNUChessActivity.py:355
 msgid "Black Rook"
 msgstr "黑方车"
 
-#: GNUChessActivity.py:371
+#: GNUChessActivity.py:361
 msgid "White Knight"
 msgstr "白方马"
 
-#: GNUChessActivity.py:377
+#: GNUChessActivity.py:367
 msgid "Black Knight"
 msgstr "黑方马"
 
-#: GNUChessActivity.py:383
+#: GNUChessActivity.py:373
 msgid "White Bishop"
 msgstr "白方象"
 
-#: GNUChessActivity.py:389
+#: GNUChessActivity.py:379
 msgid "Black Bishop"
 msgstr "黑方象"
 
-#: GNUChessActivity.py:395
+#: GNUChessActivity.py:385
 msgid "White Queen"
 msgstr "白方后"
 
-#: GNUChessActivity.py:401
+#: GNUChessActivity.py:391
 msgid "Black Queen"
 msgstr "黑方后"
 
-#: GNUChessActivity.py:407
+#: GNUChessActivity.py:397
 msgid "White King"
 msgstr "白方王"
 
-#: GNUChessActivity.py:413
+#: GNUChessActivity.py:403
 msgid "Black King"
 msgstr "黑方王"
 
-#: GNUChessActivity.py:520
+#: GNUChessActivity.py:534
 msgid "Show game board"
 msgstr "显示棋盘"
 
-#: GNUChessActivity.py:773
+#: GNUChessActivity.py:794
 msgid "Game in progress."
 msgstr "比赛正在进行中。"
 
-#: GNUChessActivity.py:774
+#: GNUChessActivity.py:795
 msgid "Do you want to start a new game?"
 msgstr "你想开始一个新游戏？"
 
-#: chess.py:192
+#: GNUChessActivity.py:950
+msgid "Time Up!"
+msgstr "时间已到！"
+
+#: GNUChessActivity.py:951
+msgid "Your time is up."
+msgstr "你的时间已到。"
+
+#: GNUChessActivity.py:961
+msgid "Time Reset"
+msgstr "时间复位"
+
+#: GNUChessActivity.py:962
+#, python-format
+msgid "The timer mode was reset to %s"
+msgstr "定时器模式复位到 %s"
+
+#: chess.py:206
 msgid "Illegal move"
 msgstr "非法走子"
 
-#: chess.py:239 chess.py:462 chess.py:469
+#: chess.py:253 chess.py:485 chess.py:492
 msgid "Check"
 msgstr "将军"
 
-#: chess.py:241 chess.py:465 chess.py:471
+#: chess.py:255 chess.py:488 chess.py:494
 msgid "Checkmate"
 msgstr "将死"
 
-#: chess.py:252
+#: chess.py:271
 msgid "It is Black's move."
 msgstr "黑方走子。"
 
-#: chess.py:284
+#: chess.py:303
 msgid "Black wins."
 msgstr "黑方胜。"
 
-#: chess.py:286
+#: chess.py:305
 msgid "White wins."
 msgstr "白方胜。"
 
-#: chess.py:290
+#: chess.py:309
 msgid "White's King is in check."
 msgstr "白方被将军。"
 
-#: chess.py:293
+#: chess.py:312
 msgid "Black's King is in check."
 msgstr "黑方被将军。"
 
-#: chess.py:390 chess.py:393 chess.py:506
+#: chess.py:410 chess.py:413 chess.py:588
 msgid "Please wait for your turn."
 msgstr "请等待你的回合。"
 
-#: chess.py:397
+#: chess.py:417
 msgid "Please play White."
 msgstr "请白方先行。"
 
-#: chess.py:399
+#: chess.py:419
 msgid "Please play Black."
 msgstr "请黑方先行。"
 
-#: chess.py:481
+#: chess.py:515
 msgid "Thinking..."
 msgstr "思考中..."
 
-#: chess.py:509
+#: chess.py:591
 msgid "Thinking"
 msgstr "思考中"
+
+#~ msgid "Play"
+#~ msgstr "开始"
 
 #~ msgid "White: please wait for your turn."
 #~ msgstr "白方：请等待你的回合。"
