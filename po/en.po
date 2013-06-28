@@ -119,17 +119,20 @@ msgid "Disabled"
 msgstr "Disabled"
 
 #: GNUChessActivity.py:289 GNUChessActivity.py:498
-#, python-format, 
+#, python-format
+#, python-format,
 msgid "Lightning: %d seconds"
 msgstr "Lightning: %d seconds"
 
 #: GNUChessActivity.py:290 GNUChessActivity.py:500
-#, python-format, 
+#, python-format
+#, python-format,
 msgid "Blitz: %d minutes"
 msgstr "Blitz: %d minutes"
 
 #: GNUChessActivity.py:291 GNUChessActivity.py:502
-#, python-format, 
+#, python-format
+#, python-format,
 msgid "Tournament: %d minutes"
 msgstr "Tournament: %d minutes"
 
