@@ -1,0 +1,283 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-12-22 09:59-0500\n"
+"PO-Revision-Date: 2014-05-14 04:18+0200\n"
+"Last-Translator: Chris <cjl@laptop.org>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: pbs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Pootle 2.0.5\n"
+
+#. TRANS: "name" option from activity.info file
+msgid "SimpleGNUChess"
+msgstr "Ajedrez"
+
+#. TRANS: "summary" option from activity.info file
+#. TRANS: "description" option from activity.info file
+msgid "a Sugar interface to the gnuchess program"
+msgstr "una interfaz Sugar para el programa gnuchess"
+
+#: GNUChessActivity.py:134
+msgid "Edit"
+msgstr "Malejeiñ"
+
+#: GNUChessActivity.py:141
+msgid "View"
+msgstr "Manú"
+
+#: GNUChessActivity.py:148
+msgid "Adjust"
+msgstr "makjaik"
+
+#: GNUChessActivity.py:155
+msgid "Custom"
+msgstr "matsjau liji vupaí"
+
+#: GNUChessActivity.py:171
+msgid "Copy"
+msgstr "Make'eik"
+
+#: GNUChessActivity.py:177
+msgid "Paste"
+msgstr "Makua'al"
+
+#: GNUChessActivity.py:183
+msgid "Fullscreen"
+msgstr "Nak'uju'ly"
+
+#: GNUChessActivity.py:189
+msgid "Play game history"
+msgstr "Maleiñ re vud-ua vanjiang ne namjeng"
+
+#: GNUChessActivity.py:194 GNUChessActivity.py:537
+msgid "Show game history"
+msgstr "Ma'u'up re vud-ua vanjiang ne namjeng"
+
+#: GNUChessActivity.py:199
+msgid "White: "
+msgstr "Kad-ua "
+
+#: GNUChessActivity.py:202
+msgid "White's move"
+msgstr "Maka'aut re kad-ua"
+
+#: GNUChessActivity.py:207
+msgid "Black: "
+msgstr "Lumvú "
+
+#: GNUChessActivity.py:210
+msgid "Black's move"
+msgstr "Tikjia'aut pu lumvú"
+
+#: GNUChessActivity.py:217
+msgid "Default pieces"
+msgstr "Piezas por defecto"
+
+#: GNUChessActivity.py:223
+msgid "Sugar-style pieces"
+msgstr "Piezas estilo Sugar"
+
+#: GNUChessActivity.py:233
+msgid "Custom pieces"
+msgstr "Vasajaik k'ua liji vupaí"
+
+#: GNUChessActivity.py:241
+msgid "Play White"
+msgstr "Limjient kad-uat"
+
+#: GNUChessActivity.py:247
+msgid "Play Black"
+msgstr "Limjient lumvú"
+
+#: GNUChessActivity.py:257
+msgid "Beginner"
+msgstr "kad-ep luju'u"
+
+#: GNUChessActivity.py:263
+msgid "Expert"
+msgstr "majau luju'u"
+
+#: GNUChessActivity.py:274
+msgid "Play against the computer"
+msgstr "Limjieí ne nak'ujuly' nde'ets kily'e"
+
+#: GNUChessActivity.py:280
+msgid "Play against a person"
+msgstr "Limjieí nda lee"
+
+#: GNUChessActivity.py:288
+msgid "Disabled"
+msgstr "Deshabilitado"
+
+#: GNUChessActivity.py:289 GNUChessActivity.py:498
+#, python-format
+msgid "Lightning: %d seconds"
+msgstr "Ágil: %d segundos"
+
+#: GNUChessActivity.py:290 GNUChessActivity.py:500
+#, python-format
+msgid "Blitz: %d minutes"
+msgstr "Likjiuat :%d chich'i rabe'en"
+
+#: GNUChessActivity.py:291 GNUChessActivity.py:502
+#, python-format
+msgid "Tournament: %d minutes"
+msgstr "Torneo: %d chich'i rabe'en"
+
+#: GNUChessActivity.py:295
+msgid "Timer"
+msgstr "ndasau' mapá"
+
+#: GNUChessActivity.py:311
+msgid "New game"
+msgstr "Viñkjiu namjeng"
+
+#: GNUChessActivity.py:316
+msgid "Undo"
+msgstr "Majuàt"
+
+#: GNUChessActivity.py:321
+msgid "Hint"
+msgstr "Xily'ajau"
+
+#: GNUChessActivity.py:325 chess.py:269
+msgid "It is White's move."
+msgstr "nanji vat'ei tikjia'aut pu kad-uat"
+
+#: GNUChessActivity.py:337
+msgid "White Pawn"
+msgstr "Nkjué kad-ua"
+
+#: GNUChessActivity.py:343
+msgid "Black Pawn"
+msgstr "Nkjué numvú"
+
+#: GNUChessActivity.py:349
+msgid "White Rook"
+msgstr "Torre Blanca"
+
+#: GNUChessActivity.py:355
+msgid "Black Rook"
+msgstr "Torre Numvú"
+
+#: GNUChessActivity.py:361
+msgid "White Knight"
+msgstr "Ngubajal' kad-ua"
+
+#: GNUChessActivity.py:367
+msgid "Black Knight"
+msgstr "Ngubajal' numvú"
+
+#: GNUChessActivity.py:373
+msgid "White Bishop"
+msgstr "Alfil kad-ua"
+
+#: GNUChessActivity.py:379
+msgid "Black Bishop"
+msgstr "Alfil Numvú"
+
+#: GNUChessActivity.py:385
+msgid "White Queen"
+msgstr "Chigui' kad-ua"
+
+#: GNUChessActivity.py:391
+msgid "Black Queen"
+msgstr "Chigui' numvú"
+
+#: GNUChessActivity.py:397
+msgid "White King"
+msgstr "Chigui' kiuang kad-ua"
+
+#: GNUChessActivity.py:403
+msgid "Black King"
+msgstr "chigui' kiuang numvú"
+
+#: GNUChessActivity.py:534
+msgid "Show game board"
+msgstr "Ma'u'up nde'ets namjeng"
+
+#: GNUChessActivity.py:794
+msgid "Game in progress."
+msgstr "Namjeng vud-ua"
+
+#: GNUChessActivity.py:795
+msgid "Do you want to start a new game?"
+msgstr "Kimieng napup nda namjeng viñkjiu?"
+
+#: GNUChessActivity.py:950
+msgid "Time Up!"
+msgstr "¡Tijiap ndaljung!"
+
+#: GNUChessActivity.py:951
+msgid "Your time is up."
+msgstr "Pu tijiap se tumei ndaljung"
+
+#: GNUChessActivity.py:961
+msgid "Time Reset"
+msgstr "Kue'e mapup tijiap'"
+
+#: GNUChessActivity.py:962
+#, python-format
+msgid "The timer mode was reset to %s"
+msgstr "Pu vakja ne ndasau' mapá kue'e ndutsjau ne %s"
+
+#: chess.py:206
+msgid "Illegal move"
+msgstr "Maka'aut nip mvajaú"
+
+#: chess.py:253 chess.py:485 chess.py:492
+msgid "Check"
+msgstr "Jaque"
+
+#: chess.py:255 chess.py:488 chess.py:494
+msgid "Checkmate"
+msgstr "Jaque mate"
+
+#: chess.py:271
+msgid "It is Black's move."
+msgstr "nanji ne lu'uei lukua'aut pu lumvú."
+
+#: chess.py:303
+msgid "Black wins."
+msgstr "L'eje' pu lumvú"
+
+#: chess.py:305
+msgid "White wins."
+msgstr "L'eje' pu kad-aut"
+
+#: chess.py:309
+msgid "White's King is in check."
+msgstr "Chigui' kad-ua mejeu ne jaque"
+
+#: chess.py:312
+msgid "Black's King is in check."
+msgstr "Chigui' numvú mejeu navu jaque"
+
+#: chess.py:410 chess.py:413 chess.py:588
+msgid "Please wait for your turn."
+msgstr "Vichjaut majau, viet se latejeuk"
+
+#: chess.py:417
+msgid "Please play White."
+msgstr "Vichjaut majau, tamjent kad-ua"
+
+#: chess.py:419
+msgid "Please play Black."
+msgstr "Vichjaut majau, tamjet lumvú"
+
+#: chess.py:515
+msgid "Thinking..."
+msgstr "Ligyajau"
+
+#: chess.py:591
+msgid "Thinking"
+msgstr "ligyajau"
