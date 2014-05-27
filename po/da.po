@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-12-22 09:59-0500\n"
-"PO-Revision-Date: 2013-01-23 13:51+0200\n"
-"Last-Translator: Aputsiaq Niels <aj@isit.gl>\n"
+"PO-Revision-Date: 2014-05-28 00:48+0200\n"
+"Last-Translator: Chris <cjl@laptop.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: da\n"
 "MIME-Version: 1.0\n"
@@ -64,7 +64,7 @@ msgstr "Vis spilhistorik"
 
 #: GNUChessActivity.py:199
 msgid "White: "
-msgstr "Hvid:"
+msgstr "Hvid: "
 
 #: GNUChessActivity.py:202
 msgid "White's move"
@@ -72,7 +72,7 @@ msgstr "Hvids træk"
 
 #: GNUChessActivity.py:207
 msgid "Black: "
-msgstr "Sort:"
+msgstr "Sort: "
 
 #: GNUChessActivity.py:210
 msgid "Black's move"
