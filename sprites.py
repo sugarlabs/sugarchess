@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #Copyright (c) 2007-8, Playful Invention Company.
-#Copyright (c) 2008-11 Walter Bender
+#Copyright (c) 2008-14 Walter Bender
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy
 #of this software and associated documentation files (the "Software"), to deal
@@ -88,7 +88,8 @@ class Sprites:
     def __init__(self, widget):
         ''' Initialize an empty array of sprites '''
         self.cr = None
-        self.widget = widget
+        self._widget = widget
+        self._delay = False
         self.list = []
 
     def set_cairo_context(self, cr):
@@ -151,6 +152,18 @@ class Sprites:
                 if intersection.width > 0 or intersection.height > 0:
                     spr.draw(cr=cr)
 
+    def set_delay(self, delay):
+        self._delay = delay
+
+    def invalidate_area(self, x, y, width, height):
+        if self._delay:
+            return
+        self._widget.queue_draw_area(x, y, width, height)
+
+    def draw_all(self):
+        self._delay = False
+        self._widget.queue_draw()
+
 
 class Sprite:
     ''' A class for the individual sprites '''
@@ -173,7 +186,7 @@ class Sprite:
         self._margins = [0, 0, 0, 0]
         self.layer = 100
         self.labels = []
-        self.images = []
+        self.cached_surfaces = []
         self._dx = []  # image offsets
         self._dy = []
         self.type = None
@@ -182,18 +195,17 @@ class Sprite:
 
     def set_image(self, image, i=0, dx=0, dy=0):
         ''' Add an image to the sprite. '''
-        while len(self.images) < i + 1:
-            self.images.append(None)
+        while len(self.cached_surfaces) < i + 1:
+            self.cached_surfaces.append(None)
             self._dx.append(0)
             self._dy.append(0)
-        self.images[i] = image
         self._dx[i] = dx
         self._dy[i] = dy
-        if hasattr(self.images[i], 'get_width'):
-            w = self.images[i].get_width()
-            h = self.images[i].get_height()
+        if hasattr(image, 'get_width'):
+            w = image.get_width()
+            h = image.get_height()
         else:
-            w, h = self.images[i].get_size()
+            w, h = image.get_size()
         if i == 0:  # Always reset width and height when base image changes.
             self.rect[2] = w + dx
             self.rect[3] = h + dy
@@ -202,6 +214,16 @@ class Sprite:
                 self.rect[2] = w + dx
             if h + dy > self.rect[3]:
                 self.rect[3] = h + dy
+        if isinstance(image, cairo.ImageSurface):
+            self.cached_surfaces[i] = image
+        else:
+            surface = cairo.ImageSurface(
+                cairo.FORMAT_ARGB32, self.rect[2], self.rect[3])
+            context = cairo.Context(surface)
+            Gdk.cairo_set_source_pixbuf(context, image, 0, 0)
+            context.rectangle(0, 0, self.rect[2], self.rect[3])
+            context.fill()
+            self.cached_surfaces[i] = surface
 
     def move(self, pos):
         ''' Move to new (x, y) position '''
@@ -317,11 +339,8 @@ class Sprite:
 
     def inval(self):
         ''' Invalidate a region for gtk '''
-        # self._sprites.window.invalidate_rect(self.rect, False)
-        self._sprites.widget.queue_draw_area(self.rect[0],
-                                             self.rect[1],
-                                             self.rect[2],
-                                             self.rect[3])
+        self._sprites.invalidate_area(self.rect[0], self.rect[1],
+                                      self.rect[2], self.rect[3])
 
     def draw(self, cr=None):
         ''' Draw the sprite (and label) '''
@@ -330,26 +349,15 @@ class Sprite:
         if cr is None:
             print 'sprite.draw: no Cairo context.'
             return
-        for i, img in enumerate(self.images):
-            if isinstance(img, GdkPixbuf.Pixbuf):
-                Gdk.cairo_set_source_pixbuf(cr, img,
-                                            self.rect[0] + self._dx[i],
-                                            self.rect[1] + self._dy[i])
-                cr.rectangle(self.rect[0] + self._dx[i],
-                             self.rect[1] + self._dy[i],
-                             self.rect[2],
-                             self.rect[3])
-                cr.fill()
-            elif type(img) == cairo.ImageSurface:
-                cr.set_source_surface(img, self.rect[0] + self._dx[i],
-                                      self.rect[1] + self._dy[i])
-                cr.rectangle(self.rect[0] + self._dx[i],
-                             self.rect[1] + self._dy[i],
-                             self.rect[2],
-                             self.rect[3])
-                cr.fill()
-            else:
-                print 'sprite.draw: source not a pixbuf (%s)' % (type(img))
+        for i, img in enumerate(self.cached_surfaces):
+            cr.set_source_surface(img, self.rect[0] + self._dx[i],
+                                  self.rect[1] + self._dy[i])
+            cr.rectangle(self.rect[0] + self._dx[i],
+                         self.rect[1] + self._dy[i],
+                         self.rect[2],
+                         self.rect[3])
+            cr.fill()
+
         if len(self.labels) > 0:
             self.draw_label(cr)
 
