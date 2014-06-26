@@ -1,4 +1,4 @@
-#Copyright (c) 2012 Walter Bender
+#Copyright (c) 2012-14 Walter Bender
 #Copyright (c) 2012 Ignacio Rodriguez
 #Copyright (c) 2012 Aneesh Dogra <lionaneesh@gmail.com>
 
@@ -96,7 +96,26 @@ class GNUChessActivity(activity.Activity):
                                   parent=self,
                                   path=activity.get_bundle_path(),
                                   colors=self.colors)
+
+
+        if self.shared_activity:
+            # We're joining
+            if not self.get_shared():
+                xocolors = XoColor(profile.get_color().to_string())
+                share_icon = Icon(icon_name='zoom-neighborhood',
+                                  xo_color=xocolors)
+                self._joined_alert = NotifyAlert()
+                self._joined_alert.props.icon = share_icon
+                self._joined_alert.props.title = _('Please wait')
+                self._joined_alert.props.msg = _('Starting connection...')
+                self._joined_alert.connect('response', self._alert_cancel_cb)
+                self.add_alert(self._joined_alert)
+
+                # Wait for joined signal
+                self.connect("joined", self._joined_cb)
+
         self._setup_presence_service()
+
         self.stopwatch_running = False
         self.time_interval = None
 
@@ -105,6 +124,9 @@ class GNUChessActivity(activity.Activity):
         else:
             self._gnuchess.new_game()
         self._restoring = False
+
+    def _alert_cancel_cb(self, alert, response_id):
+        self.remove_alert(alert)
 
     def restore_cursor(self):
         ''' No longer thinking, so restore standard cursor. '''
