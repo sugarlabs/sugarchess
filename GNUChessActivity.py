@@ -33,7 +33,6 @@ from toolbar_utils import button_factory, label_factory, separator_factory, \
 from utils import json_load, json_dump, get_hardware, \
     pixbuf_to_base64, base64_to_pixbuf
 
-import copy
 import telepathy
 import dbus
 from dbus.service import signal
@@ -143,7 +142,7 @@ class GNUChessActivity(activity.Activity):
     def set_thinking_cursor(self):
         ''' Thinking, so set watch cursor. '''
         self.old_cursor = self.get_window().get_cursor()
-	Watch = Gdk.Cursor(Gdk.CursorType.WATCH)
+        Watch = Gdk.Cursor(Gdk.CursorType.WATCH)
         self.get_window().set_cursor(Watch)
 
     def _setup_toolbars(self):
@@ -242,16 +241,16 @@ class GNUChessActivity(activity.Activity):
         separator_factory(self.view_toolbar, False, True)
 
         skin_button1 = radio_factory('white-knight',
-                                    self.view_toolbar,
-                                    self.do_default_skin_cb,
-                                    tooltip=_('Default pieces'),
-                                    group=None)
+                                     self.view_toolbar,
+                                     self.do_default_skin_cb,
+                                     tooltip=_('Default pieces'),
+                                     group=None)
 
         skin_button2 = radio_factory('white-knight-sugar',
-                                    self.view_toolbar,
-                                    self.do_sugar_skin_cb,
-                                    tooltip=_('Sugar-style pieces'),
-                                    group=skin_button1)
+                                     self.view_toolbar,
+                                     self.do_sugar_skin_cb,
+                                     tooltip=_('Sugar-style pieces'),
+                                     group=skin_button1)
         xocolors = XoColor(self.colors)
         icon = Icon(icon_name='white-knight-sugar', xo_color=xocolors)
         icon.show()
@@ -301,7 +300,7 @@ class GNUChessActivity(activity.Activity):
                                           self._robot_cb,
                                           group=None,
                                           tooltip=_(
-                'Play against the computer'))
+                                              'Play against the computer'))
 
         self.human_button = radio_factory('human',
                                           self.adjust_toolbar,
@@ -430,14 +429,14 @@ class GNUChessActivity(activity.Activity):
     def _setup_timer_palette(self):
         self.timer_values = [None, 30, 180, 600]
         self.timer_tooltips = ['', _('30 seconds'), _('3 minutes'),
-                              _('10 minutes')]
+                               _('10 minutes')]
         self.timer_labels = [_('Disabled'),
-                            #TRANS: Lightning chess 30 seconds between moves
-                            _('Lightning: %d seconds') % (30),
-                            #TRANS: Blitz chess 3 minutes between moves
-                            _('Blitz: %d minutes') % (3),
-                            #TRANS: Tournament chess 10 minutes between moves
-                            _('Tournament: %d minutes') % (10)]
+                             #TRANS: Lightning chess 30 seconds between moves
+                             _('Lightning: %d seconds') % (30),
+                             #TRANS: Blitz chess 3 minutes between moves
+                             _('Blitz: %d minutes') % (3),
+                             #TRANS: Tournament chess 10 minutes between moves
+                             _('Tournament: %d minutes') % (10)]
         self.timer_palette = self.timer_button.get_palette()
 
         for i, label in enumerate(self.timer_labels):
@@ -449,7 +448,7 @@ class GNUChessActivity(activity.Activity):
 
     def _timer_selected_cb(self, button, index):
         game_already_started = 0
-        if self.time_interval != None:
+        if self.time_interval is not None:
             game_already_started = 1
 
         self.time_interval = self.timer_values[index]
@@ -678,7 +677,8 @@ class GNUChessActivity(activity.Activity):
             try:
                 chooser = ObjectChooser(parent=self, what_filter=None)
             except TypeError:
-                chooser = ObjectChooser(None, activity,
+                chooser = ObjectChooser(
+                    None, activity,
                     Gtk.DialogType.MODAL | Gtk.DialogType.DESTROY_WITH_PARENT)
         if chooser is not None:
             try:
@@ -687,7 +687,6 @@ class GNUChessActivity(activity.Activity):
                     jobject = chooser.get_selected_object()
                     if jobject and jobject.file_path:
                         name = jobject.metadata['title']
-                        mime_type = jobject.metadata['mime_type']
             finally:
                 jobject.destroy()
                 chooser.destroy()
@@ -802,7 +801,7 @@ class GNUChessActivity(activity.Activity):
 
         if sharer:
             _logger.debug('This is my activity: making a tube...')
-            id = self.tubes_chan[telepathy.CHANNEL_TYPE_TUBES].OfferDBusTube(
+            self.tubes_chan[telepathy.CHANNEL_TYPE_TUBES].OfferDBusTube(
                 SERVICE, {})
         else:
             _logger.debug('I am joining an activity: waiting for a tube...')
@@ -831,20 +830,21 @@ class GNUChessActivity(activity.Activity):
 
     def _new_tube_cb(self, id, initiator, type, service, params, state):
         ''' Create a new tube. '''
-        _logger.debug('New tube: ID=%d initator=%d type=%d service=%s \
-params=%r state=%d' % (id, initiator, type, service, params, state))
+        _logger.debug('New tube: ID=%d initator=%d type=%d service=%s '
+                      'params=%r state=%d' %
+                      (id, initiator, type, service, params, state))
 
         if (type == telepathy.TUBE_TYPE_DBUS and service == SERVICE):
             if state == telepathy.TUBE_STATE_LOCAL_PENDING:
-                self.tubes_chan[ \
-                              telepathy.CHANNEL_TYPE_TUBES].AcceptDBusTube(id)
+                self.tubes_chan[
+                    telepathy.CHANNEL_TYPE_TUBES].AcceptDBusTube(id)
 
-            tube_conn = TubeConnection(self.conn,
-                self.tubes_chan[telepathy.CHANNEL_TYPE_TUBES], id, \
+            tube_conn = TubeConnection(
+                self.conn, self.tubes_chan[telepathy.CHANNEL_TYPE_TUBES], id,
                 group_iface=self.text_chan[telepathy.CHANNEL_INTERFACE_GROUP])
 
-            self.chattube = ChatTube(tube_conn, self.initiating, \
-                self.event_received_cb)
+            self.chattube = ChatTube(tube_conn, self.initiating,
+                                     self.event_received_cb)
 
         # Now that we have a tube, send the nick to our opponent
         if not self.initiating:
