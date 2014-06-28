@@ -611,6 +611,13 @@ class Gnuchess():
             GObject.timeout_add(200, self._flasher, tiles, flash_color)
         else:
             self._flashing = False
+            self._reset_board_colors(tiles)  # Just in case
+
+    def _reset_board_colors(self, tiles):
+        for tile in tiles:
+            i = self._file_and_rank_to_index(tile)
+            self._board[i].set_image(self._squares[black_or_white(i)])
+            self._board[i].set_layer(BOT)
 
     def _parse_move(self, move):
         tiles = []
