@@ -96,6 +96,8 @@ class Gnuchess():
 
         self._thinking = False
         self._flashing = False
+        self._defer_flash = [None, 0]
+        self._queue_check = False
         self._move = 0
         self._counter = 0
         self.check = False
@@ -246,16 +248,7 @@ class Gnuchess():
             self._load_board(output)
 
         if self.checkmate or self.check:
-            if self.check:
-                self._activity.status.set_label(_('Check'))
-            else:
-                self._activity.status.set_label(_('Checkmate'))
-            if len(self.move_list) % 2 == 0:
-                self._flash_tile([self._xy_to_file_and_rank(
-                    self.white[4].get_xy())])
-            else:
-                self._flash_tile([self._xy_to_file_and_rank(
-                    self.black[4].get_xy())])
+            self._flash_check()
         else:
             if self._activity.time_interval and \
                (self._activity.time_interval >= 0):
@@ -300,6 +293,7 @@ class Gnuchess():
                     self._activity.status.set_label(_('Black wins.'))
                 else:
                     self._activity.status.set_label(_('White wins.'))
+                self._show_checkmate()
             elif '+' in self.move_list[-1]:
                 if len(self.move_list) % 2 == 0:
                     self._activity.status.set_label(
@@ -307,6 +301,7 @@ class Gnuchess():
                 else:
                     self._activity.status.set_label(
                         _("Black's King is in check."))
+                self._show_check()
 
         if self.we_are_sharing and self._activity.initiating:
             self._activity.send_restore()
@@ -365,7 +360,13 @@ class Gnuchess():
         if spr is None or spr.type is None:
             return
 
-        if self._thinking or self._flashing:
+        if spr.type == 'check':
+            self._hide_check()
+            return
+        elif spr.type == 'checkmate':
+            self._hide_checkmate()
+            return
+        elif self._thinking or self._flashing:
             # Robot is thinking or conjuring up a hint
             self._wait_your_turn()
             return
@@ -484,18 +485,8 @@ class Gnuchess():
         if '#' in last_move or '++' in last_move:
             self.checkmate = True
             self._activity.status.set_label(_('Checkmate'))
-
         if self.checkmate or self.check:
-            if self.check:
-                self._activity.status.set_label(_('Check'))
-            else:
-                self._activity.status.set_label(_('Checkmate'))
-            if len(self.move_list) % 2 == 0:
-                self._flash_tile([self._xy_to_file_and_rank(
-                    self.white[4].get_xy())])
-            else:
-                self._flash_tile([self._xy_to_file_and_rank(
-                    self.black[4].get_xy())])
+            self._flash_check()
 
         # Check to see if it is the robot's turn
         if self._activity.playing_robot and \
@@ -512,15 +503,18 @@ class Gnuchess():
             self._activity.set_thinking_cursor()
             self._activity.status.set_label(_('Thinking...'))
             self._thinking = True
-            self._get_before()
             GObject.timeout_add(500, self._robot_move)
 
         return True
 
     def _robot_move(self):
+        self._get_before()
         self.move(ROBOT)
         # Flash the squares of any piece that robot has moved
         self._get_after()
+        if len(self._after) < 64:
+            # Game is over
+            return
         pieces = []  # Array, since if could be a castling move
         before = []
         after = []
@@ -590,14 +584,34 @@ class Gnuchess():
         self._thinking = True
         GObject.timeout_add(500, self.move, HINT)
 
+    def _flash_check(self):
+        if self.check:
+            self._activity.status.set_label(_('Check'))
+            self._show_check()
+        else:
+            self._activity.status.set_label(_('Checkmate'))
+            self._show_checkmate()
+        self._queue_check = True
+        if len(self.move_list) % 2 == 0:
+            self._flash_tile([self._xy_to_file_and_rank(
+                self.white[4].get_xy())])
+        else:
+            self._flash_tile([self._xy_to_file_and_rank(
+                self.black[4].get_xy())])
+
     def _flash_tile(self, tiles, flash_color=2):
+        # Queue the flashing check for after the flashing of the move
+        if self._queue_check or self._flashing:
+            self._defer_flash = [tiles, flash_color]
+            self._queue_check = False
+            return
         self._counter = 0
         self._flashing = True
         GObject.timeout_add(100, self._flasher, tiles, flash_color)
         return
 
     def _flasher(self, tiles, flash_color):
-        # flash length (must be odd in order to guarentee that the
+        # Flash length (must be odd in order to guarentee that the
         # original color is restored)
         if self._counter < 13:
             self._counter += 1
@@ -610,8 +624,27 @@ class Gnuchess():
                 self._board[i].set_layer(BOT)
             GObject.timeout_add(200, self._flasher, tiles, flash_color)
         else:
-            self._flashing = False
             self._reset_board_colors(tiles)  # Just in case
+            self._flashing = False
+            if self._defer_flash[0] is not None:
+                tiles = self._defer_flash[0]
+                flash_color = self._defer_flash[1]
+                self._defer_flash[0] = None
+                self._flash_tile(tiles, flash_color)
+
+    def _show_check(self):
+        self._check_sprite.set_layer(100)
+        GObject.timeout_add(4000, self._hide_check)
+
+    def _hide_check(self):
+        self._check_sprite.hide()
+
+    def _show_checkmate(self):
+        self._checkmate_sprite.set_layer(100)
+        GObject.timeout_add(8000, self._hide_checkmate)
+
+    def _hide_checkmate(self):
+        self._checkmate_sprite.hide()
 
     def _reset_board_colors(self, tiles):
         for tile in tiles:
@@ -1796,6 +1829,26 @@ class Gnuchess():
                                '%s/images/file.svg' % (self._bundle_path),
                                8 * self.scale, self.scale))
         self.file.set_layer(0)
+
+        x = int((Gdk.Screen.width() - 4 * self.scale) / 2.)
+        y = int((Gdk.Screen.height() - 3 * self.scale) / 2.)
+        self._check_sprite = Sprite(
+            self._sprites, x, y,
+            self._box(self.scale * 4, self.scale, color='none'))
+        self._check_sprite.set_label_attributes(fontsize * 2)
+        self._check_sprite.set_label_color(colors[0])
+        self._check_sprite.set_label(_('Check'))
+        self._check_sprite.type = 'check'
+        self._check_sprite.hide()
+
+        self._checkmate_sprite = Sprite(
+            self._sprites, x, y,
+            self._box(self.scale * 4, self.scale, color='none'))
+        self._checkmate_sprite.set_label_attributes(fontsize * 2)
+        self._checkmate_sprite.set_label_color(colors[0])
+        self._checkmate_sprite.set_label(_('Checkmate'))
+        self._checkmate_sprite.type = 'checkmate'
+        self._checkmate_sprite.hide()
 
         w = h = self.scale
         self._squares.append(self._box(w, h, color='black'))
