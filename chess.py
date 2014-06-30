@@ -53,6 +53,12 @@ BK = 11
 FILES = 'abcdefgh'
 RANKS = '12345678'
 BIN = {'i686': 'i686', 'i586': 'i686', 'armv7l': 'armv7l', 'x86_64': 'x86_64'}
+PATHS = {WP: 'white-pawn', WR: 'white-rook', WN: 'white-knight',
+         WB: 'white-bishop', WQ: 'white-queen', WK: 'white-king',
+         BP: 'black-pawn', BR: 'black-rook', BN: 'black-knight',
+         BB: 'black-bishop', BQ: 'black-queen', BK: 'black-king'}
+TYPES = {WP: 'P', WR: 'R', WN: 'N', WB: 'B', WQ: 'Q', WK: 'K',
+         BP: 'p', BR: 'r', BN: 'n', BB: 'b', BQ: 'q', BK: 'k'}
 
 
 class Gnuchess():
@@ -111,7 +117,7 @@ class Gnuchess():
         self._before = []
         self._after = []
 
-        self.skins = []
+        self.skins = {}
 
         # Generate the sprites we'll need...
         self._sprites = Sprites(self._canvas)
@@ -268,7 +274,9 @@ class Gnuchess():
         self.move_list = []
         self.game = ''
         self.check = False
+        self._hide_check()
         self.checkmate = False
+        self._hide_checkmate()
 
     def new_game(self):
         self._all_clear()
@@ -1830,23 +1838,23 @@ class Gnuchess():
                                8 * self.scale, self.scale))
         self.file.set_layer(0)
 
-        x = int((Gdk.Screen.width() - 4 * self.scale) / 2.)
-        y = int((Gdk.Screen.height() - 3 * self.scale) / 2.)
+        x = int((Gdk.Screen.width() - 6 * self.scale) / 2.)
+        y = int((Gdk.Screen.height() - 4 * self.scale) / 2.)
         self._check_sprite = Sprite(
             self._sprites, x, y,
-            self._box(self.scale * 4, self.scale, color='none'))
+            self._box(self.scale * 6, self.scale, color='none'))
         self._check_sprite.set_label_attributes(fontsize * 2)
         self._check_sprite.set_label_color(colors[0])
-        self._check_sprite.set_label(_('Check'))
+        self._check_sprite.set_label('♚ ' + _('Check') + ' ♚')
         self._check_sprite.type = 'check'
         self._check_sprite.hide()
 
         self._checkmate_sprite = Sprite(
             self._sprites, x, y,
-            self._box(self.scale * 4, self.scale, color='none'))
+            self._box(self.scale * 6, self.scale, color='none'))
         self._checkmate_sprite.set_label_attributes(fontsize * 2)
         self._checkmate_sprite.set_label_color(colors[0])
-        self._checkmate_sprite.set_label(_('Checkmate'))
+        self._checkmate_sprite.set_label('♚ ' + _('Checkmate') + ' ♚')
         self._checkmate_sprite.type = 'checkmate'
         self._checkmate_sprite.hide()
 
@@ -1870,94 +1878,39 @@ class Gnuchess():
                 x += self.scale
             y += self.scale
 
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/white-pawn.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/black-pawn.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/white-rook.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/black-rook.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/white-knight.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/black-knight.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/white-bishop.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/black-bishop.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/white-queen.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/black-queen.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/white-king.svg' % (self._bundle_path), w, h))
-        self.skins.append(GdkPixbuf.Pixbuf.new_from_file_at_size(
-            '%s/icons/black-king.svg' % (self._bundle_path), w, h))
+        for piece in PATHS.keys():
+            self.skins[piece] = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                '%s/icons/%s.svg' % (self._bundle_path, PATHS[piece]), w, h)
 
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WR]))
-        self.white[-1].type = 'R'
-        self.white[-1].set_layer(MID)
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WN]))
-        self.white[-1].type = 'N'
-        self.white[-1].set_layer(MID)
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WB]))
-        self.white[-1].type = 'B'
-        self.white[-1].set_layer(MID)
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WQ]))
-        self.white[-1].type = 'Q'
-        self.white[-1].set_layer(MID)
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WK]))
-        self.white[-1].type = 'K'
-        self.white[-1].set_layer(MID)
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WB]))
-        self.white[-1].type = 'B'
-        self.white[-1].set_layer(MID)
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WN]))
-        self.white[-1].type = 'N'
-        self.white[-1].set_layer(MID)
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WR]))
-        self.white[-1].type = 'R'
-        self.white[-1].set_layer(MID)
+        for piece in [WR, WN, WB, WQ, WK, WB, WN, WR]:
+            self.white.append(Sprite(self._sprites, 0, 0, self.skins[piece]))
+            self.white[-1].type = TYPES[piece]
+            self.white[-1].set_layer(MID)
+
         for i in range(8):
             self.white.append(Sprite(self._sprites, 0, 0, self.skins[WP]))
-            self.white[-1].type = 'P'
+            self.white[-1].type = TYPES[WP]
             self.white[-1].set_layer(MID)
-        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WQ]))
-        self.white[-1].type = 'Q'
-        self.white[-1].hide()  # extra queen for pawn
 
-        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BR]))
-        self.black[-1].type = 'r'
-        self.black[-1].set_layer(MID)
-        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BN]))
-        self.black[-1].type = 'n'
-        self.black[-1].set_layer(MID)
-        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BB]))
-        self.black[-1].type = 'b'
-        self.black[-1].set_layer(MID)
-        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BQ]))
-        self.black[-1].type = 'q'
-        self.black[-1].set_layer(MID)
-        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BK]))
-        self.black[-1].type = 'k'
-        self.black[-1].set_layer(MID)
-        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BB]))
-        self.black[-1].type = 'b'
-        self.black[-1].set_layer(MID)
-        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BN]))
-        self.black[-1].type = 'n'
-        self.black[-1].set_layer(MID)
-        self.black.append(Sprite(self._sprites, 0, 0, self.skins[BR]))
-        self.black[-1].type = 'r'
-        self.black[-1].set_layer(MID)
+        # extra queen for pawn
+        self.white.append(Sprite(self._sprites, 0, 0, self.skins[WQ]))
+        self.white[-1].type = TYPES[WQ]
+        self.white[-1].hide()
+
+        for piece in [BR, BN, BB, BQ, BK, BB, BN, BR]:
+            self.black.append(Sprite(self._sprites, 0, 0, self.skins[piece]))
+            self.black[-1].type = TYPES[piece]
+            self.black[-1].set_layer(MID)
+
         for i in range(8):
             self.black.append(Sprite(self._sprites, 0, 0, self.skins[BP]))
-            self.black[-1].type = 'p'
+            self.black[-1].type = TYPES[BP]
             self.black[-1].set_layer(MID)
+
+        # extra queen for pawn
         self.black.append(Sprite(self._sprites, 0, 0, self.skins[BQ]))
-        self.black[-1].type = 'q'
-        self.black[-1].hide()  # extra queen for pawn
+        self.black[-1].type = TYPES[BQ]
+        self.black[-1].hide()
 
     def _box(self, w, h, color='black'):
         ''' Generate a box '''
