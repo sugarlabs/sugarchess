@@ -1,6 +1,6 @@
 [Activity]
 name = SimpleGNUChess
-activity_version = 14
+activity_version = 15
 license = GPLv3
 bundle_id = org.sugarlabs.GNUChessActivity
 exec = sugar-activity GNUChessActivity.GNUChessActivity

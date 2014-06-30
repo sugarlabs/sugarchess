@@ -1,9 +1,16 @@
+15
+
+ENHANCEMENTS:
+* Clear checkmate when starting new game
+* Improvement to check and checkmate graphics
+
 14
 
-ENHANCEMENT:
+ENHANCEMENTS:
 * New translations
 * Better handling of activity joining behavior
 * Replace combo box with palette
+* Better handling of check and checkmate
 
 12
 
