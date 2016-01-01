@@ -110,9 +110,6 @@ class GNUChessActivity(activity.Activity):
                 share_icon = Icon(icon_name='zoom-neighborhood',
                                   xo_color=xocolors)
 
-                def _alert_cancel_cb(self, alert, response_id):
-                    self.remove_alert(alert)
-
                 self._joined_alert = NotifyAlert()
                 self._joined_alert.props.icon = share_icon
                 self._joined_alert.props.title = _('Please wait')
@@ -134,7 +131,10 @@ class GNUChessActivity(activity.Activity):
         else:
             self._gnuchess.new_game()
         self._restoring = False
-
+ 
+    def _alert_cancel_cb(self, alert, response_id):
+        self.remove_alert(alert)
+    
     def restore_cursor(self):
         ''' No longer thinking, so restore standard cursor. '''
         self.get_window().set_cursor(self.old_cursor)
