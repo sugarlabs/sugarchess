@@ -191,6 +191,7 @@ class Gnuchess():
         ''' process output from gnuchess command '''
         self.check = False
         self.checkmate = False
+        self.valid_move = False
         if my_move == STATUS:  # Just reading board state
             self._output = output
             return
@@ -218,6 +219,7 @@ class Gnuchess():
             output = output[find(output, ROBOT_MOVE):]
             robot_move = output[len(ROBOT_MOVE):find(output, '\n')]
             self.move_list.append(robot_move)
+            self.valid_move = True
             if '+' in robot_move:
                 self.check = True
             if '#' in robot_move or '++' in robot_move:
@@ -234,6 +236,7 @@ class Gnuchess():
             if 'wins' in output or 'loses' in output:
                 self.checkmate = True
             self.move_list.append(my_move)
+            self.valid_move = True
             if self._activity.playing_white:
                 self._activity.white_entry.set_text(my_move)
                 self._activity.black_entry.set_text('')
@@ -257,7 +260,8 @@ class Gnuchess():
             self._flash_check()
         else:
             if self._activity.time_interval and \
-               (self._activity.time_interval >= 0):
+               (self._activity.time_interval >= 0) and \
+               self.valid_move == True:
                 self._activity.stopwatch(self._activity.time_interval,
                                          self._activity.alert_time)
 
