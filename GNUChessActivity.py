@@ -38,7 +38,12 @@ import dbus
 from dbus.service import signal
 from dbus.gobject_service import ExportedGObject
 from sugar3.presence import presenceservice
-from sugar3.presence.tubeconn import TubeConnection
+
+try:
+    from sugar3.presence.wrapper import CollabWrapper
+except ImportError:
+    from textchannelwrapper import CollabWrapper
+
 
 from gettext import gettext as _
 
@@ -839,12 +844,9 @@ class GNUChessActivity(activity.Activity):
                 self.tubes_chan[
                     telepathy.CHANNEL_TYPE_TUBES].AcceptDBusTube(id)
 
-            tube_conn = TubeConnection(
-                self.conn, self.tubes_chan[telepathy.CHANNEL_TYPE_TUBES], id,
-                group_iface=self.text_chan[telepathy.CHANNEL_INTERFACE_GROUP])
-
-            self.chattube = ChatTube(tube_conn, self.initiating,
-                                     self.event_received_cb)
+            self.collab = CollabWrapper(self)
+            self.collab.message.connect(self.event_received_cb)
+            self.collab.setup()
 
         # Now that we have a tube, send the nick to our opponent
         if not self.initiating:
@@ -864,15 +866,13 @@ class GNUChessActivity(activity.Activity):
             'p': [self._receive_piece, 'receive new piece'],
             }
 
-    def event_received_cb(self, event_message):
+    def event_received_cb(self, collab, buddy, msg):
         ''' Data from a tube has arrived. '''
-        if len(event_message) == 0:
+        command = msg.get("command")
+        if action is None:
             return
-        try:
-            command, payload = event_message.split('|', 2)
-        except ValueError:
-            _logger.debug('Could not split event message %s' % (event_message))
-            return
+
+        payload = msg.get("payload")
         self._processing_methods[command][0](payload)
 
     def send_new_game(self):
@@ -882,26 +882,26 @@ class GNUChessActivity(activity.Activity):
         self.send_nick()
         if self.playing_white:
             _logger.debug('send_new_game: B')
-            self.send_event('n|B')
+            self.send_event("n", "B")
         else:
             _logger.debug('send_new_game: W')
-            self.send_event('n|W')
+            self.send_event("n", "W")
 
     def send_restore(self):
         ''' Send a new game to joiner. '''
         if not self.initiating:
             return
         _logger.debug('send_restore')
-        self.send_event('r|%s' % (self._gnuchess.copy_game()))
+        self.send_event("r", self._gnuchess.copy_game())
 
     def send_join(self):
         _logger.debug('send_join')
-        self.send_event('j|%s' % (self.nick))
+        self.send_event("j", self.nick)
 
     def send_nick(self):
         _logger.debug('send_nick')
-        self.send_event('N|%s' % (self.nick))
-        self.send_event('C|%s,%s' % (self.colors[0], self.colors[1]))
+        self.send_event("N", self.nick)
+        self.send_event("C", "%s,%s" % (self.colors[0], self.colors[1]))
 
     def alert_time(self):
         def _alert_response_cb(alert, response_id):
@@ -993,16 +993,19 @@ class GNUChessActivity(activity.Activity):
         self._gnuchess.set_sharing(True)
         self._gnuchess.new_game()
 
-    def send_event(self, entry):
+    def send_event(self, command, payload):
         ''' Send event through the tube. '''
-        if hasattr(self, 'chattube') and self.chattube is not None:
-            self.chattube.SendText(entry)
+        if hasattr(self, 'collab') and self.collab is not None:
+            self.collab.post(dict(
+                command=command,
+                payload=payload
+            ))
 
     # sharing pieces
 
     def send_piece(self, piece, pixbuf):
         _logger.debug('send_piece %s' % (piece))
-        GObject.idle_add(self.send_event, 'p|%s' % (self._dump(piece, pixbuf)))
+        GObject.idle_add(self.send_event, ("p", self._dump(piece, pixbuf)))
 
     def _receive_piece(self, payload):
         piece, pixbuf = self._load(payload)
@@ -1024,26 +1027,3 @@ class GNUChessActivity(activity.Activity):
                                   height=self._gnuchess.scale)
         return piece, pixbuf
 
-
-class ChatTube(ExportedGObject):
-    ''' Class for setting up tube for sharing '''
-
-    def __init__(self, tube, is_initiator, stack_received_cb):
-        super(ChatTube, self).__init__(tube, PATH)
-        self.tube = tube
-        self.is_initiator = is_initiator  # Are we sharing or joining activity?
-        self.stack_received_cb = stack_received_cb
-        self.stack = ''
-
-        self.tube.add_signal_receiver(self.send_stack_cb, 'SendText', IFACE,
-                                      path=PATH, sender_keyword='sender')
-
-    def send_stack_cb(self, text, sender=None):
-        if sender == self.tube.get_unique_name():
-            return
-        self.stack = text
-        self.stack_received_cb(text)
-
-    @signal(dbus_interface=IFACE, signature='s')
-    def SendText(self, text):
-        self.stack = text
