@@ -688,7 +688,7 @@ class GNUChessActivity(activity.Activity):
         if chooser is not None:
             try:
                 result = chooser.run()
-                if result == Gtk.Responsetype.ACCEPT:
+                if result == Gtk.ResponseType.ACCEPT:
                     jobject = chooser.get_selected_object()
                     if jobject and jobject.file_path:
                         name = jobject.metadata['title']
