@@ -1,3 +1,7 @@
+17
+
+* Fix typo that broke custom piece loader
+
 16
 
 * Port to new collaboration wrapper (cristian99garcia)
