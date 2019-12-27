@@ -256,7 +256,7 @@ class GNUChessActivity(activity.Activity):
                                      self.do_sugar_skin_cb,
                                      tooltip=_('Sugar-style pieces'),
                                      group=skin_button1)
-        xocolors = XoColor(self.colors)
+        xocolors = XoColor(','.join(self.colors))
         icon = Icon(icon_name='white-knight-sugar', xo_color=xocolors)
         icon.show()
         skin_button2.set_icon_widget(icon)
