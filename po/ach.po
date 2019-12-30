@@ -7,279 +7,278 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-12-22 09:59-0500\n"
-"PO-Revision-Date: 2015-02-19 13:53+0000\n"
-"Last-Translator: Tymon <dwgipk@gmail.com>\n"
+"PO-Revision-Date: 2017-05-19 18:44+0000\n"
+"Last-Translator: chanchumgpa <chanchumgpa@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: pl\n"
+"Language: ach\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1424353992.000000\n"
+"X-POOTLE-MTIME: 1495219487.000000\n"
 
 #. TRANS: "name" option from activity.info file
 msgid "SimpleGNUChess"
-msgstr "ProsteSzachyGNU"
+msgstr "SimpleGNUChess"
 
 #. TRANS: "summary" option from activity.info file
 #. TRANS: "description" option from activity.info file
 msgid "a Sugar interface to the gnuchess program"
-msgstr "Interfejs Sugar do GNUSzachów"
+msgstr "Nyim Sugar dwoko i purugram me gnuchess"
 
 #: GNUChessActivity.py:134
 msgid "Edit"
-msgstr "Edytuj"
+msgstr "Yub"
 
 #: GNUChessActivity.py:141
 msgid "View"
-msgstr "Widok"
+msgstr "Nen"
 
 #: GNUChessActivity.py:148
 msgid "Adjust"
-msgstr "Dostosuj"
+msgstr "Nen"
 
 #: GNUChessActivity.py:155
 msgid "Custom"
-msgstr "Niestandardowy"
+msgstr "Pirken"
 
 #: GNUChessActivity.py:171
 msgid "Copy"
-msgstr "Kopiuj"
+msgstr "Lok"
 
 #: GNUChessActivity.py:177
 msgid "Paste"
-msgstr "Wklej"
+msgstr "Dan"
 
 #: GNUChessActivity.py:183
 msgid "Fullscreen"
-msgstr "Pełny ekran"
+msgstr "Wang kio lung"
 
 #: GNUChessActivity.py:189
 msgid "Play game history"
-msgstr "Graj w grę historyczną"
+msgstr "Tuk tuku me Istori"
 
 #: GNUChessActivity.py:194 GNUChessActivity.py:537
 msgid "Show game history"
-msgstr "Pokaż historię gry"
+msgstr "Nyut Istori me tuku"
 
 #: GNUChessActivity.py:199
 msgid "White: "
-msgstr "Białe: "
+msgstr "Tar: "
 
 #: GNUChessActivity.py:202
 msgid "White's move"
-msgstr "Ruch Białych"
+msgstr "Diro matar"
 
 #: GNUChessActivity.py:207
 msgid "Black: "
-msgstr "Czarne: "
+msgstr "Col: "
 
 #: GNUChessActivity.py:210
 msgid "Black's move"
-msgstr "Ruch Czarnych"
+msgstr "Dir macol"
 
 #: GNUChessActivity.py:217
 msgid "Default pieces"
-msgstr "Piony podstawowe"
+msgstr "Ngidongido mapol matye"
 
 #: GNUChessActivity.py:223
 msgid "Sugar-style pieces"
-msgstr "Piony sugar-style"
+msgstr "Sugar-kit ngidongido mapol"
 
 #: GNUChessActivity.py:233
 msgid "Custom pieces"
-msgstr "Niestandardowe figury"
+msgstr "Ngidongido pirken"
 
 #: GNUChessActivity.py:241
 msgid "Play White"
-msgstr "Graj białymi"
+msgstr "Tuk Tar"
 
 #: GNUChessActivity.py:247
 msgid "Play Black"
-msgstr "Graj czarnymi"
+msgstr "Tuk Col"
 
 #: GNUChessActivity.py:257
 msgid "Beginner"
-msgstr "Początkujący"
+msgstr "Dano mucako acaka"
 
 #: GNUChessActivity.py:263
 msgid "Expert"
-msgstr "Ekspert"
+msgstr "Won ngec"
 
 #: GNUChessActivity.py:274
 msgid "Play against the computer"
-msgstr "Graj przeciwko komputerowi"
+msgstr "Tuk i kom kompiuta"
 
 #: GNUChessActivity.py:280
 msgid "Play against a person"
-msgstr "Graj przeciwko człowiekowi"
+msgstr "Tuk i kom dano acel"
 
 #: GNUChessActivity.py:288
 msgid "Disabled"
-msgstr "Wyłączony"
+msgstr "Kijuko woko"
 
 #: GNUChessActivity.py:289 GNUChessActivity.py:498
 #, python-format
 msgid "Lightning: %d seconds"
-msgstr "Oświetlenie: %d sekund"
+msgstr "Lutkot: %d ceken mapol"
 
 #: GNUChessActivity.py:290 GNUChessActivity.py:500
 #, python-format
 msgid "Blitz: %d minutes"
-msgstr "Nalot: %d minut"
+msgstr "Blitz: %d dakika"
 
 #: GNUChessActivity.py:291 GNUChessActivity.py:502
 #, python-format
 msgid "Tournament: %d minutes"
-msgstr "Turniej: %d minut"
+msgstr "Tuku me rwom malamal: %d dakika"
 
 #: GNUChessActivity.py:295
 msgid "Timer"
-msgstr "Czasomierz"
+msgstr "Lagwok caa"
 
 #: GNUChessActivity.py:311
 msgid "New game"
-msgstr "Nowa gra"
+msgstr "Tuku manyen"
 
 #: GNUChessActivity.py:316
 msgid "Undo"
-msgstr "Cofnij"
+msgstr "Pe itim"
 
 #: GNUChessActivity.py:321
 msgid "Hint"
-msgstr "Podpowiedź"
+msgstr "Ngec moo"
 
 #: GNUChessActivity.py:325 chess.py:269
 msgid "It is White's move."
-msgstr "Ruch białych"
+msgstr "Obedo diro Tar."
 
 #: GNUChessActivity.py:337
 msgid "White Pawn"
-msgstr "Biały pionek"
+msgstr "Paun Matar"
 
 #: GNUChessActivity.py:343
 msgid "Black Pawn"
-msgstr "Czarny pionek"
+msgstr "Paun Macol"
 
 #: GNUChessActivity.py:349
 msgid "White Rook"
-msgstr "Biała wieża"
+msgstr "Ruk Matar"
 
 #: GNUChessActivity.py:355
 msgid "Black Rook"
-msgstr "Czarna wieża"
+msgstr "Ruk Macol"
 
 #: GNUChessActivity.py:361
 msgid "White Knight"
-msgstr "Biały skoczek"
+msgstr "Niti Matar"
 
 #: GNUChessActivity.py:367
 msgid "Black Knight"
-msgstr "Czarny skoczek"
+msgstr "Niti Macol"
 
 #: GNUChessActivity.py:373
 msgid "White Bishop"
-msgstr "Biały goniec"
+msgstr "Bicop Matar"
 
 #: GNUChessActivity.py:379
 msgid "Black Bishop"
-msgstr "Czarny goniec"
+msgstr "Bicop Macol"
 
 #: GNUChessActivity.py:385
 msgid "White Queen"
-msgstr "Biała królowa"
+msgstr "Kwin Matar"
 
 #: GNUChessActivity.py:391
 msgid "Black Queen"
-msgstr "Czarna królowa"
+msgstr "Kwin Macol"
 
 #: GNUChessActivity.py:397
 msgid "White King"
-msgstr "Biały król"
+msgstr "Abaka Matar"
 
 #: GNUChessActivity.py:403
 msgid "Black King"
-msgstr "Czarny król"
+msgstr "Abaka Macol"
 
 #: GNUChessActivity.py:534
 msgid "Show game board"
-msgstr "Pokaż szachownicę"
+msgstr "Nyut bao me tuku"
 
 #: GNUChessActivity.py:794
 msgid "Game in progress."
-msgstr "Gra w toku"
+msgstr "Tuku tye kawot anyim."
 
 #: GNUChessActivity.py:795
 msgid "Do you want to start a new game?"
-msgstr "Czy chcesz rozpocząć nową grę?"
+msgstr "I mito cako tuku manyen?"
 
 #: GNUChessActivity.py:950
 msgid "Time Up!"
-msgstr "Pospiesz się!"
+msgstr "Kare Okato woko!"
 
 #: GNUChessActivity.py:951
 msgid "Your time is up."
-msgstr "Twój czas się skończył"
+msgstr "Kare ni dong okato."
 
 #: GNUChessActivity.py:961
 msgid "Time Reset"
-msgstr "Reset czasu"
+msgstr "Tero Cawa odoco"
 
 #: GNUChessActivity.py:962
 #, python-format
 msgid "The timer mode was reset to %s"
-msgstr "Tryb czasomierza został zresetowany do %s"
+msgstr "Kityeko tero odoco kit caa ma onongo tye con i %s"
 
 #: chess.py:206
 msgid "Illegal move"
-msgstr "Zły ruch"
+msgstr "Wot ma cik pe yee"
 
 #: chess.py:253 chess.py:485 chess.py:492
 msgid "Check"
-msgstr "Sprawdź"
+msgstr "Rot"
 
 #: chess.py:255 chess.py:488 chess.py:494
 msgid "Checkmate"
-msgstr "Szach mat"
+msgstr "Checkmate"
 
 #: chess.py:271
 msgid "It is Black's move."
-msgstr "Ruch czarnych"
+msgstr "Obedo dire Macol."
 
 #: chess.py:303
 msgid "Black wins."
-msgstr "Czarne wygrywają"
+msgstr "Lanye mapol Macol."
 
 #: chess.py:305
 msgid "White wins."
-msgstr "Białe wygrywają"
+msgstr "Lanye Matar."
 
 #: chess.py:309
 msgid "White's King is in check."
-msgstr "Biały król jest w szachu"
+msgstr "Abaka Matar bene tye ii i kweda"
 
 #: chess.py:312
 msgid "Black's King is in check."
-msgstr "Czarny król jest w szachu"
+msgstr "Abaka Macol bene tye ii i kweda."
 
 #: chess.py:410 chess.py:413 chess.py:588
 msgid "Please wait for your turn."
-msgstr "Proszę czekać na swój ruch"
+msgstr "Tim ber i kur kare ni."
 
 #: chess.py:417
 msgid "Please play White."
-msgstr "Proszę grać, biały"
+msgstr "Tim ber i tuk Tar."
 
 #: chess.py:419
 msgid "Please play Black."
-msgstr "Proszę grać, czarny"
+msgstr "Tim ber i tuk Col."
 
 #: chess.py:515
 msgid "Thinking..."
-msgstr "Myślę..."
+msgstr "Tamo..."
 
 #: chess.py:591
 msgid "Thinking"
-msgstr "Myślę"
+msgstr "Tamo"

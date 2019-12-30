@@ -2,284 +2,284 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-12-22 09:59-0500\n"
-"PO-Revision-Date: 2015-02-19 13:53+0000\n"
-"Last-Translator: Tymon <dwgipk@gmail.com>\n"
+"PO-Revision-Date: 2017-09-04 21:05+0000\n"
+"Last-Translator: MartínOesterreich <martin.otte80@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: pl\n"
+"Language: gug\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1424353992.000000\n"
+"X-POOTLE-MTIME: 1504559141.000000\n"
 
 #. TRANS: "name" option from activity.info file
 msgid "SimpleGNUChess"
-msgstr "ProsteSzachyGNU"
+msgstr "Ajedrez"
 
 #. TRANS: "summary" option from activity.info file
 #. TRANS: "description" option from activity.info file
 msgid "a Sugar interface to the gnuchess program"
-msgstr "Interfejs Sugar do GNUSzachów"
+msgstr "peteĩ interfaz sugar opyta pe jejaporã gnuche kuera kuera "
 
 #: GNUChessActivity.py:134
 msgid "Edit"
-msgstr "Edytuj"
+msgstr "KUATIA ÑE ẽ NOHẽ"
 
 #: GNUChessActivity.py:141
 msgid "View"
-msgstr "Widok"
+msgstr "HECHA"
 
 #: GNUChessActivity.py:148
 msgid "Adjust"
-msgstr "Dostosuj"
+msgstr "MBOJOJAPA"
 
 #: GNUChessActivity.py:155
 msgid "Custom"
-msgstr "Niestandardowy"
+msgstr "personalizado "
 
 #: GNUChessActivity.py:171
 msgid "Copy"
-msgstr "Kopiuj"
+msgstr "Copiar"
 
 #: GNUChessActivity.py:177
 msgid "Paste"
-msgstr "Wklej"
+msgstr "nupã "
 
 #: GNUChessActivity.py:183
 msgid "Fullscreen"
-msgstr "Pełny ekran"
+msgstr "tenda jepyso ohechaukáva ta'anga ojapopa "
 
 #: GNUChessActivity.py:189
 msgid "Play game history"
-msgstr "Graj w grę historyczną"
+msgstr "reproducir pe tembiasakue juegogua"
 
 #: GNUChessActivity.py:194 GNUChessActivity.py:537
 msgid "Show game history"
-msgstr "Pokaż historię gry"
+msgstr "ehechaka pe tembiasakue juegogua"
 
 #: GNUChessActivity.py:199
 msgid "White: "
-msgstr "Białe: "
+msgstr "morõtĩ:"
 
 #: GNUChessActivity.py:202
 msgid "White's move"
-msgstr "Ruch Białych"
+msgstr "mýi mba'e blanca kuera"
 
 #: GNUChessActivity.py:207
 msgid "Black: "
-msgstr "Czarne: "
+msgstr "kamba kuera:"
 
 #: GNUChessActivity.py:210
 msgid "Black's move"
-msgstr "Ruch Czarnych"
+msgstr "mýi mba'e kamba kuera"
 
 #: GNUChessActivity.py:217
 msgid "Default pieces"
-msgstr "Piony podstawowe"
+msgstr "akytã kuera rehe porãmba'ỹ"
 
 #: GNUChessActivity.py:223
 msgid "Sugar-style pieces"
-msgstr "Piony sugar-style"
+msgstr "akytã kuera háicha sugar"
 
 #: GNUChessActivity.py:233
 msgid "Custom pieces"
-msgstr "Niestandardowe figury"
+msgstr "akytã kuera personalizada kuera"
 
 #: GNUChessActivity.py:241
 msgid "Play White"
-msgstr "Graj białymi"
+msgstr "juegan blanca kuera"
 
 #: GNUChessActivity.py:247
 msgid "Play Black"
-msgstr "Graj czarnymi"
+msgstr "juegan kamba kuera"
 
 #: GNUChessActivity.py:257
 msgid "Beginner"
-msgstr "Początkujący"
+msgstr "oñepyrũrãmóva"
 
 #: GNUChessActivity.py:263
 msgid "Expert"
-msgstr "Ekspert"
+msgstr "ikatupyrýva"
 
 #: GNUChessActivity.py:274
 msgid "Play against the computer"
-msgstr "Graj przeciwko komputerowi"
+msgstr "ñembosarái rehe pe kombutadóra"
 
 #: GNUChessActivity.py:280
 msgid "Play against a person"
-msgstr "Graj przeciwko człowiekowi"
+msgstr "ñembosarái rehe otra máva"
 
 #: GNUChessActivity.py:288
 msgid "Disabled"
-msgstr "Wyłączony"
+msgstr "deshabilitado"
 
 #: GNUChessActivity.py:289 GNUChessActivity.py:498
 #, python-format
 msgid "Lightning: %d seconds"
-msgstr "Oświetlenie: %d sekund"
+msgstr "Ágil: %d mokõiha-2-/aravo'ive kuera"
 
 #: GNUChessActivity.py:290 GNUChessActivity.py:500
 #, python-format
 msgid "Blitz: %d minutes"
-msgstr "Nalot: %d minut"
+msgstr "relámpago: %d aravo'i kuera"
 
 #: GNUChessActivity.py:291 GNUChessActivity.py:502
 #, python-format
 msgid "Tournament: %d minutes"
-msgstr "Turniej: %d minut"
+msgstr "torneo: %d aravo'i kuera"
 
 #: GNUChessActivity.py:295
 msgid "Timer"
-msgstr "Czasomierz"
+msgstr "ara ra'ãha"
 
 #: GNUChessActivity.py:311
 msgid "New game"
-msgstr "Nowa gra"
+msgstr "juego pyahu"
 
 #: GNUChessActivity.py:316
 msgid "Undo"
-msgstr "Cofnij"
+msgstr "mosarambi"
 
 #: GNUChessActivity.py:321
 msgid "Hint"
-msgstr "Podpowiedź"
+msgstr "tekombo'e"
 
 #: GNUChessActivity.py:325 chess.py:269
 msgid "It is White's move."
-msgstr "Ruch białych"
+msgstr "ko ha'e pe mýi mba'e blanca kuera"
 
 #: GNUChessActivity.py:337
 msgid "White Pawn"
-msgstr "Biały pionek"
+msgstr "mba'apohára morotĩ"
 
 #: GNUChessActivity.py:343
 msgid "Black Pawn"
-msgstr "Czarny pionek"
+msgstr "mba'apohára kamba"
 
 #: GNUChessActivity.py:349
 msgid "White Rook"
-msgstr "Biała wieża"
+msgstr "Torre Blanca"
 
 #: GNUChessActivity.py:355
 msgid "Black Rook"
-msgstr "Czarna wieża"
+msgstr "Torre Negra"
 
 #: GNUChessActivity.py:361
 msgid "White Knight"
-msgstr "Biały skoczek"
+msgstr "kkavaju morõtĩ"
 
 #: GNUChessActivity.py:367
 msgid "Black Knight"
-msgstr "Czarny skoczek"
+msgstr "cabaju hũ"
 
 #: GNUChessActivity.py:373
 msgid "White Bishop"
-msgstr "Biały goniec"
+msgstr "alfil morotĩ"
 
 #: GNUChessActivity.py:379
 msgid "Black Bishop"
-msgstr "Czarny goniec"
+msgstr " Alfil hũ"
 
 #: GNUChessActivity.py:385
 msgid "White Queen"
-msgstr "Biała królowa"
+msgstr "alfil morotĩ"
 
 #: GNUChessActivity.py:391
 msgid "Black Queen"
-msgstr "Czarna królowa"
+msgstr "Reina Negra"
 
 #: GNUChessActivity.py:397
 msgid "White King"
-msgstr "Biały król"
+msgstr "rey morotĩ"
 
 #: GNUChessActivity.py:403
 msgid "Black King"
-msgstr "Czarny król"
+msgstr "Rey hũ"
 
 #: GNUChessActivity.py:534
 msgid "Show game board"
-msgstr "Pokaż szachownicę"
+msgstr "hechauka tablero"
 
 #: GNUChessActivity.py:794
 msgid "Game in progress."
-msgstr "Gra w toku"
+msgstr "juego ñemotenonde . me/pe"
 
 #: GNUChessActivity.py:795
 msgid "Do you want to start a new game?"
-msgstr "Czy chcesz rozpocząć nową grę?"
+msgstr "oipota kuera iniciar peteĩ juego pyahu ?"
 
 #: GNUChessActivity.py:950
 msgid "Time Up!"
-msgstr "Pospiesz się!"
+msgstr " ára terminado !"
 
 #: GNUChessActivity.py:951
 msgid "Your time is up."
-msgstr "Twój czas się skończył"
+msgstr "nde ára jaopama"
 
 #: GNUChessActivity.py:961
 msgid "Time Reset"
-msgstr "Reset czasu"
+msgstr "emoñepyrũjey pe ára"
 
 #: GNUChessActivity.py:962
 #, python-format
 msgid "The timer mode was reset to %s"
-msgstr "Tryb czasomierza został zresetowany do %s"
+msgstr "pe kokatu ara ra'ãha mba'e ojeha restablecido %spe"
 
 #: chess.py:206
 msgid "Illegal move"
-msgstr "Zły ruch"
+msgstr "mýi kañy"
 
 #: chess.py:253 chess.py:485 chess.py:492
 msgid "Check"
-msgstr "Sprawdź"
+msgstr "Jaque"
 
 #: chess.py:255 chess.py:488 chess.py:494
 msgid "Checkmate"
-msgstr "Szach mat"
+msgstr "jaque ka'ay"
 
 #: chess.py:271
 msgid "It is Black's move."
-msgstr "Ruch czarnych"
+msgstr "ko ha'e pe mýi mba'e kamba kuera."
 
 #: chess.py:303
 msgid "Black wins."
-msgstr "Czarne wygrywają"
+msgstr "omono'õ kamba kuera. "
 
 #: chess.py:305
 msgid "White wins."
-msgstr "Białe wygrywają"
+msgstr "omono'õ blanca kuera. "
 
 #: chess.py:309
 msgid "White's King is in check."
-msgstr "Biały król jest w szachu"
+msgstr "rey morotĩ oĩ jaque me/pe "
 
 #: chess.py:312
 msgid "Black's King is in check."
-msgstr "Czarny król jest w szachu"
+msgstr " rey kamba oĩ jaque. me/pe "
 
 #: chess.py:410 chess.py:413 chess.py:588
 msgid "Please wait for your turn."
-msgstr "Proszę czekać na swój ruch"
+msgstr " rehe pytyvõ , oha'arõ nde ha . "
 
 #: chess.py:417
 msgid "Please play White."
-msgstr "Proszę grać, biały"
+msgstr "rehe pytyvõ , juega blanca kuera. "
 
 #: chess.py:419
 msgid "Please play Black."
-msgstr "Proszę grać, czarny"
+msgstr "rehe pytyvõ , juega kamba kuera. "
 
 #: chess.py:515
 msgid "Thinking..."
-msgstr "Myślę..."
+msgstr "Pensando..."
 
 #: chess.py:591
 msgid "Thinking"
-msgstr "Myślę"
+msgstr "Pensando"

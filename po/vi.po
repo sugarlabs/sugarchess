@@ -2,281 +2,283 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-12-22 09:59-0500\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2017-02-20 01:45+0000\n"
+"Last-Translator: Quân <vnwildman@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Translate Toolkit 1.7.0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1487555147.000000\n"
 
 #. TRANS: "name" option from activity.info file
 msgid "SimpleGNUChess"
-msgstr ""
+msgstr "SimpleGNUChess"
 
 #. TRANS: "summary" option from activity.info file
 #. TRANS: "description" option from activity.info file
 msgid "a Sugar interface to the gnuchess program"
-msgstr ""
+msgstr "một giao diện Sugar cho phần mềm gnuchess"
 
 #: GNUChessActivity.py:134
 msgid "Edit"
-msgstr ""
+msgstr "Sửa"
 
 #: GNUChessActivity.py:141
 msgid "View"
-msgstr ""
+msgstr "Trình bày"
 
 #: GNUChessActivity.py:148
 msgid "Adjust"
-msgstr ""
+msgstr "Điều chỉnh"
 
 #: GNUChessActivity.py:155
 msgid "Custom"
-msgstr ""
+msgstr "Tự chọn"
 
 #: GNUChessActivity.py:171
 msgid "Copy"
-msgstr ""
+msgstr "Chép"
 
 #: GNUChessActivity.py:177
 msgid "Paste"
-msgstr ""
+msgstr "Dán"
 
 #: GNUChessActivity.py:183
 msgid "Fullscreen"
-msgstr ""
+msgstr "Toàn màn hình"
 
 #: GNUChessActivity.py:189
 msgid "Play game history"
-msgstr ""
+msgstr "Lịch sử ván cờ"
 
 #: GNUChessActivity.py:194 GNUChessActivity.py:537
 msgid "Show game history"
-msgstr ""
+msgstr "Hiện lịch sử ván cờ"
 
 #: GNUChessActivity.py:199
 msgid "White: "
-msgstr ""
+msgstr "Trắng:"
 
 #: GNUChessActivity.py:202
 msgid "White's move"
-msgstr ""
+msgstr "Nước đi bên đen"
 
 #: GNUChessActivity.py:207
 msgid "Black: "
-msgstr ""
+msgstr "Đen:"
 
 #: GNUChessActivity.py:210
 msgid "Black's move"
-msgstr ""
+msgstr "Nước đi bên trắng"
 
 #: GNUChessActivity.py:217
 msgid "Default pieces"
-msgstr ""
+msgstr "Quân cờ mặc định"
 
 #: GNUChessActivity.py:223
 msgid "Sugar-style pieces"
-msgstr ""
+msgstr "Quân cờ kiểu Sugar"
 
 #: GNUChessActivity.py:233
 msgid "Custom pieces"
-msgstr ""
+msgstr "Quân cờ tự chọn"
 
 #: GNUChessActivity.py:241
 msgid "Play White"
-msgstr ""
+msgstr "Chơi bên trắng"
 
 #: GNUChessActivity.py:247
 msgid "Play Black"
-msgstr ""
+msgstr "Chơi bên đen"
 
 #: GNUChessActivity.py:257
 msgid "Beginner"
-msgstr ""
+msgstr "Mới chơi"
 
 #: GNUChessActivity.py:263
 msgid "Expert"
-msgstr ""
+msgstr "Chuyên gia"
 
 #: GNUChessActivity.py:274
 msgid "Play against the computer"
-msgstr ""
+msgstr "Chơi cờ với máy tính"
 
 #: GNUChessActivity.py:280
 msgid "Play against a person"
-msgstr ""
+msgstr "Chơi với người"
 
 #: GNUChessActivity.py:288
 msgid "Disabled"
-msgstr ""
+msgstr "Bị tắt"
 
 #: GNUChessActivity.py:289 GNUChessActivity.py:498
 #, python-format
 msgid "Lightning: %d seconds"
-msgstr ""
+msgstr "Chớp: %d giây"
 
 #: GNUChessActivity.py:290 GNUChessActivity.py:500
 #, python-format
 msgid "Blitz: %d minutes"
-msgstr ""
+msgstr "Blitz: %d phút"
 
 #: GNUChessActivity.py:291 GNUChessActivity.py:502
 #, python-format
 msgid "Tournament: %d minutes"
-msgstr ""
+msgstr "Cuộc đấu: %d phút"
 
 #: GNUChessActivity.py:295
 msgid "Timer"
-msgstr ""
+msgstr "Đồng hồ hẹn giờ"
 
 #: GNUChessActivity.py:311
 msgid "New game"
-msgstr ""
+msgstr "Lượt chơi mới"
 
 #: GNUChessActivity.py:316
 msgid "Undo"
-msgstr ""
+msgstr "Hoàn tác"
 
 #: GNUChessActivity.py:321
 msgid "Hint"
-msgstr ""
+msgstr "Gợi ý"
 
 #: GNUChessActivity.py:325 chess.py:269
 msgid "It is White's move."
-msgstr ""
+msgstr "Nó là nước đi của quân trắng."
 
 #: GNUChessActivity.py:337
 msgid "White Pawn"
-msgstr ""
+msgstr "Tốt trắng"
 
 #: GNUChessActivity.py:343
 msgid "Black Pawn"
-msgstr ""
+msgstr "Tốt đen"
 
 #: GNUChessActivity.py:349
 msgid "White Rook"
-msgstr ""
+msgstr "Xe trắng"
 
 #: GNUChessActivity.py:355
 msgid "Black Rook"
-msgstr ""
+msgstr "Xe đen"
 
 #: GNUChessActivity.py:361
 msgid "White Knight"
-msgstr ""
+msgstr "Mã trắng"
 
 #: GNUChessActivity.py:367
 msgid "Black Knight"
-msgstr ""
+msgstr "Mã đen"
 
 #: GNUChessActivity.py:373
 msgid "White Bishop"
-msgstr ""
+msgstr "Tượng trắng"
 
 #: GNUChessActivity.py:379
 msgid "Black Bishop"
-msgstr ""
+msgstr "Tượng đen"
 
 #: GNUChessActivity.py:385
 msgid "White Queen"
-msgstr ""
+msgstr "Hậu trắng"
 
 #: GNUChessActivity.py:391
 msgid "Black Queen"
-msgstr ""
+msgstr "Hậu đen"
 
 #: GNUChessActivity.py:397
 msgid "White King"
-msgstr ""
+msgstr "Vua trắng"
 
 #: GNUChessActivity.py:403
 msgid "Black King"
-msgstr ""
+msgstr "Vua đen"
 
 #: GNUChessActivity.py:534
 msgid "Show game board"
-msgstr ""
+msgstr "Hiện bàn chơi cờ"
 
 #: GNUChessActivity.py:794
 msgid "Game in progress."
-msgstr ""
+msgstr "Ván đấu đang tiến hành."
 
 #: GNUChessActivity.py:795
 msgid "Do you want to start a new game?"
-msgstr ""
+msgstr "Bạn có muốn bắt đầu một lượt chơi mới không?"
 
 #: GNUChessActivity.py:950
 msgid "Time Up!"
-msgstr ""
+msgstr "Hết giờ!"
 
 #: GNUChessActivity.py:951
 msgid "Your time is up."
-msgstr ""
+msgstr "Thời gian của bạn đã hết."
 
 #: GNUChessActivity.py:961
 msgid "Time Reset"
-msgstr ""
+msgstr "Đặt lại thời gian"
 
 #: GNUChessActivity.py:962
 #, python-format
 msgid "The timer mode was reset to %s"
-msgstr ""
+msgstr "Chế độ thời gian đã được đặt thành %s"
 
 #: chess.py:206
 msgid "Illegal move"
-msgstr ""
+msgstr "Nước đi phạm luật"
 
 #: chess.py:253 chess.py:485 chess.py:492
 msgid "Check"
-msgstr ""
+msgstr "Chiếu"
 
 #: chess.py:255 chess.py:488 chess.py:494
 msgid "Checkmate"
-msgstr ""
+msgstr "Chiếu hết"
 
 #: chess.py:271
 msgid "It is Black's move."
-msgstr ""
+msgstr "Đây là nước đi của quân đen."
 
 #: chess.py:303
 msgid "Black wins."
-msgstr ""
+msgstr "Bên đen thắng."
 
 #: chess.py:305
 msgid "White wins."
-msgstr ""
+msgstr "Bên trắng thắng."
 
 #: chess.py:309
 msgid "White's King is in check."
-msgstr ""
+msgstr "Vua bên trắng bị chiếu."
 
 #: chess.py:312
 msgid "Black's King is in check."
-msgstr ""
+msgstr "Vua bên đen đang bị chiếu."
 
 #: chess.py:410 chess.py:413 chess.py:588
 msgid "Please wait for your turn."
-msgstr ""
+msgstr "Vui lòng chờ đến lượt bạn."
 
 #: chess.py:417
 msgid "Please play White."
-msgstr ""
+msgstr "Vui lòng chơi bên Trắng."
 
 #: chess.py:419
 msgid "Please play Black."
-msgstr ""
+msgstr "Vui lòng chơi bên Đen."
 
 #: chess.py:515
 msgid "Thinking..."
-msgstr ""
+msgstr "Đang nghĩ…"
 
 #: chess.py:591
 msgid "Thinking"
-msgstr ""
+msgstr "Đang nghĩ"
