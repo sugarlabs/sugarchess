@@ -11,7 +11,7 @@
 # along with this library; if not, write to the Free Software
 # Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
-from gi.repository import Gtk, Gdk, GObject
+from gi.repository import Gtk, Gdk, GLib
 
 from sugar3.activity import activity
 from sugar3.graphics.toolbarbox import ToolbarBox
@@ -467,7 +467,7 @@ class GNUChessActivity(activity.Activity):
                 if self.time_interval and self.time_interval is not None:
                     self.stopwatch(self.time_interval, self.alert_time)
                 else:
-                    GObject.source_remove(self.stopwatch_timer)
+                    GLib.source_remove(self.stopwatch_timer)
             else:
                 self._gnuchess.new_game()
 
@@ -927,9 +927,9 @@ class GNUChessActivity(activity.Activity):
 
     def stopwatch(self, time, alert_callback):
         if self.stopwatch_running:
-            GObject.source_remove(self.stopwatch_timer)
+            GLib.source_remove(self.stopwatch_timer)
             time = self.time_interval
-        self.stopwatch_timer = GObject.timeout_add(time * 1000, alert_callback)
+        self.stopwatch_timer = GLib.timeout_add(time * 1000, alert_callback)
         self.stopwatch_running = True
 
     def _receive_join(self, payload):
@@ -1005,7 +1005,7 @@ class GNUChessActivity(activity.Activity):
 
     def send_piece(self, piece, pixbuf):
         _logger.debug('send_piece %s' % (piece))
-        GObject.idle_add(self.send_event, ("p", self._dump(piece, pixbuf)))
+        GLib.idle_add(self.send_event, ("p", self._dump(piece, pixbuf)))
 
     def _receive_piece(self, payload):
         piece, pixbuf = self._load(payload)
