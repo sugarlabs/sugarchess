@@ -13,7 +13,7 @@
 import os
 from gi.repository import GdkPixbuf
 import subprocess
-from StringIO import StringIO
+from io import StringIO
 import json
 json.dumps
 from json import load as jload

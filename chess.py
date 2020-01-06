@@ -14,12 +14,11 @@
 from gi.repository import Gtk, Gdk, GdkPixbuf, GObject
 import os
 import subprocess
-from string import find
 
 from gettext import gettext as _
 
 import logging
-_logger = logging.getLogger('gnuchess-activity')
+_logger = logging.getLogger('GNUChessActivity')
 
 from sprites import Sprites, Sprite
 from piece import svg_header, svg_footer, svg_king, svg_queen, svg_bishop, \
@@ -123,19 +122,20 @@ class Gnuchess():
         self._sprites = Sprites(self._canvas)
         self._generate_sprites(colors)
 
-        p = subprocess.Popen(['uname', '-p'],
+        p = subprocess.Popen(['uname', '-m'], # in my virtual machine, -p returns unknown
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
-        self._bin_path = 'bin/%s' % (BIN[p.communicate()[0].replace('\n', '')])
+        tmp_p = p.communicate()
+        self._bin_path = 'bin/%s' % (BIN[tmp_p[0].decode().replace('\n', '')])
         self._all_clear()
+        os.system('chmod -R 755 bin -f')
 
     def move(self, my_move):
         ''' Send a command to gnuchess. '''
-        # Permisos para jugar
-        os.system('chmod -R 755 bin')
-        p = subprocess.Popen(['%s/%s/gnuchess' % (self._bundle_path,
-                                                  self._bin_path)],
+        # Permission to play
+        p = subprocess.Popen(['{}/{}/gnuchess'.format(self._bundle_path,
+                                                      self._bin_path)],
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
@@ -162,21 +162,21 @@ class Gnuchess():
                 cmd += 'show game\nquit\n'
             else:
                 cmd += 'show board\nquit\n'
-            output = p.communicate(input=cmd)
+            output = p.communicate(input=cmd.encode())
             self._process_output(output[0], my_move=None, hint=hint)
         elif my_move == ROBOT:  # Ask the computer to play
             cmd = 'force manual\n'
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             cmd += '%sgo\nshow board\nquit\n' % (level)
-            output = p.communicate(input=cmd)
+            output = p.communicate(input=cmd.encode())
             self._process_output(output[0], my_move='robot')
         elif my_move == STATUS:  # reading board state
             cmd = 'force manual\n'
             for move in self.move_list:
                 cmd += '%s\n' % (move)
             cmd += 'show board\nquit\n'
-            output = p.communicate(input=cmd)
+            output = p.communicate(input=cmd.encode())
             self._process_output(output[0], my_move=STATUS)
         elif my_move is not None:  # human's move
             cmd = 'force manual\n'
@@ -184,7 +184,7 @@ class Gnuchess():
                 cmd += '%s\n' % (move)
             cmd += '%s\n' % (my_move)
             cmd += 'show board\nquit\n'
-            output = p.communicate(input=cmd)
+            output = p.communicate(input=cmd.encode())
             self._process_output(output[0], my_move=my_move)
 
     def _process_output(self, output, my_move=None, hint=False):
@@ -192,17 +192,18 @@ class Gnuchess():
         self.check = False
         self.checkmate = False
         self.valid_move = False
+        output = output.decode()
         if my_move == STATUS:  # Just reading board state
             self._output = output
             return
         elif 'White   Black' in output:  # processing show game
             target = 'White   Black'
-            output = output[find(output, target):]
-            self.game = output[:find(output, '\n\n')]
+            output = output[output.find(target):]
+            self.game = output[:output.find('\n\n')]
             return
         elif hint:  # What would the robot do?
-            output = output[find(output, ROBOT_MOVE):]
-            hint = output[len(ROBOT_MOVE):find(output, '\n')]
+            output = output[output.find(ROBOT_MOVE):]
+            hint = output[len(ROBOT_MOVE):output.find('\n')]
             self._activity.status.set_label(hint)
             self._parse_move(hint)
             self._thinking = False
@@ -216,8 +217,8 @@ class Gnuchess():
         elif my_move == ROBOT:
             if 'wins' in output or 'loses' in output:
                 self.checkmate = True
-            output = output[find(output, ROBOT_MOVE):]
-            robot_move = output[len(ROBOT_MOVE):find(output, '\n')]
+            output = output[output.find(ROBOT_MOVE):]
+            robot_move = output[len(ROBOT_MOVE):output.find('\n')]
             self.move_list.append(robot_move)
             self.valid_move = True
             if '+' in robot_move:
@@ -248,9 +249,9 @@ class Gnuchess():
             target = 'white  '
         else:
             target = 'black  '
-        while find(output, target) > 0:
-            output = output[find(output, target):]
-            output = output[find(output, '\n'):]
+        while output.find(target) > 0:
+            output = output[output.find(target):]
+            output = output[output.find('\n'):]
         if len(output) < 136 or output[0:3] == 'GNU':
             self._activity.status.set_label('???')
         else:
@@ -288,7 +289,7 @@ class Gnuchess():
         if self._activity.playing_robot and not self._activity.playing_white:
             self.move(ROBOT)
 
-        if self.we_are_sharing and self._activity.initiating:
+        if self.we_are_sharing and self._activity.collab.props.leader:
             self._activity.send_new_game()
 
     def restore_game(self, move_list):
@@ -315,7 +316,7 @@ class Gnuchess():
                         _("Black's King is in check."))
                 self._show_check()
 
-        if self.we_are_sharing and self._activity.initiating:
+        if self.we_are_sharing and self._activity.collab.props.leader:
             self._activity.send_restore()
 
     def copy_game(self):
@@ -363,7 +364,7 @@ class Gnuchess():
 
     def _button_press_cb(self, win, event):
         win.grab_focus()
-        x, y = map(int, event.get_coords())
+        x, y = list(map(int, event.get_coords()))
 
         self._dragpos = [x, y]
         self._total_drag = [0, 0]
@@ -435,7 +436,7 @@ class Gnuchess():
             self._dragpos = [0, 0]
             return True
         win.grab_focus()
-        x, y = map(int, event.get_coords())
+        x, y = list(map(int, event.get_coords()))
         dx = x - self._dragpos[0]
         dy = y - self._dragpos[1]
         spr.move_relative([dx, dy])
@@ -452,7 +453,7 @@ class Gnuchess():
         if self._press is None:
             return
 
-        x, y = map(int, event.get_coords())
+        x, y = list(map(int, event.get_coords()))
         spr = self._sprites.find_sprite((x, y))
 
         self._release = spr
@@ -490,7 +491,7 @@ class Gnuchess():
             return True
         last_move = self.game.split()[-1]
         if self.we_are_sharing:
-            self._activity.send_event('m|%s' % (last_move))
+            self._activity.send_event('m', last_move)
         if '+' in last_move:
             self.check = True
             self._activity.status.set_label(_('Check'))
@@ -735,7 +736,7 @@ class Gnuchess():
                             if move[3] in RANKS:
                                 capture_rank = move[3]
         if capture:
-            move = move[find(move, 'x') + 1:]
+            move = move[move.find('x') + 1:]
             if white:
                 if move[0] in 'KQBNR':
                     # capture_piece = move[0]
@@ -1607,7 +1608,7 @@ class Gnuchess():
         if x < 0 or x > 7:
             return None  # off the board
         else:
-            return ('%s%d' % (FILES[x], y))
+            return ('{}{}'.format(FILES[x], y))
 
     def __draw_cb(self, canvas, cr):
         self._sprites.redraw_sprites(cr=cr)
@@ -1882,7 +1883,7 @@ class Gnuchess():
                 x += self.scale
             y += self.scale
 
-        for piece in PATHS.keys():
+        for piece in list(PATHS.keys()):
             self.skins[piece] = GdkPixbuf.Pixbuf.new_from_file_at_size(
                 '%s/icons/%s.svg' % (self._bundle_path, PATHS[piece]), w, h)
 
@@ -1958,7 +1959,7 @@ def svg_str_to_pixbuf(svg_string, w=None, h=None):
     pl = GdkPixbuf.PixbufLoader.new_with_type('svg')
     if w is not None:
         pl.set_size(w, h)
-    pl.write(svg_string)
+    pl.write(svg_string.encode())
     pl.close()
     pixbuf = pl.get_pixbuf()
     return pixbuf
