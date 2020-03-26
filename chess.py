@@ -11,7 +11,7 @@
 # along with this library; if not, write to the Free Software
 # Foundation, 51 Franklin Street, Suite 500 Boston, MA 02110-1335 USA
 
-from gi.repository import Gtk, Gdk, GdkPixbuf, GObject
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 import os
 import subprocess
 
@@ -360,7 +360,7 @@ class Gnuchess():
         if self._counter < len(self._copy_of_move_list):
             self.move(self._copy_of_move_list[self._counter])
             self._counter += 1
-            GObject.timeout_add(2000, self._stepper)
+            GLib.timeout_add(2000, self._stepper)
 
     def _button_press_cb(self, win, event):
         win.grab_focus()
@@ -516,7 +516,7 @@ class Gnuchess():
             self._activity.set_thinking_cursor()
             self._activity.status.set_label(_('Thinking...'))
             self._thinking = True
-            GObject.timeout_add(500, self._robot_move)
+            GLib.timeout_add(500, self._robot_move)
 
         return True
 
@@ -595,7 +595,7 @@ class Gnuchess():
         self._activity.set_thinking_cursor()
         self._activity.status.set_label(_('Thinking'))
         self._thinking = True
-        GObject.timeout_add(500, self.move, HINT)
+        GLib.timeout_add(500, self.move, HINT)
 
     def _flash_check(self):
         if self.check:
@@ -620,7 +620,7 @@ class Gnuchess():
             return
         self._counter = 0
         self._flashing = True
-        GObject.timeout_add(100, self._flasher, tiles, flash_color)
+        GLib.timeout_add(100, self._flasher, tiles, flash_color)
         return
 
     def _flasher(self, tiles, flash_color):
@@ -635,7 +635,7 @@ class Gnuchess():
                 else:
                     self._board[i].set_image(self._squares[black_or_white(i)])
                 self._board[i].set_layer(BOT)
-            GObject.timeout_add(200, self._flasher, tiles, flash_color)
+            GLib.timeout_add(200, self._flasher, tiles, flash_color)
         else:
             self._reset_board_colors(tiles)  # Just in case
             self._flashing = False
@@ -647,14 +647,14 @@ class Gnuchess():
 
     def _show_check(self):
         self._check_sprite.set_layer(100)
-        GObject.timeout_add(4000, self._hide_check)
+        GLib.timeout_add(4000, self._hide_check)
 
     def _hide_check(self):
         self._check_sprite.hide()
 
     def _show_checkmate(self):
         self._checkmate_sprite.set_layer(100)
-        GObject.timeout_add(8000, self._hide_checkmate)
+        GLib.timeout_add(8000, self._hide_checkmate)
 
     def _hide_checkmate(self):
         self._checkmate_sprite.hide()
