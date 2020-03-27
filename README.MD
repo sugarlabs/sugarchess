@@ -1,6 +1,7 @@
 Sugarchess Activity
 ===============
-This is a Sugar front end to the gnuchess program. Some of the artwork comes from the Gcompris chess program.
+This is a Sugar front end to the gnuchess program. Some of the artwork comes from the Gcompris chess program. Other artwork was inspired by part from- https://web.archive.org/web/20130310093700/http://lovesexandthermonuclearwar.wordpress.com/2012/04/04/assorted-chess-tools/
+
 More details on gnuchess can be found at:
 
 http://www.gnu.org/software/chess/    and    http://www.gnu.org/software/chess/manual/
