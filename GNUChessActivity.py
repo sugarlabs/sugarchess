@@ -529,7 +529,7 @@ class GNUChessActivity(activity.Activity):
 
     def _undo_cb(self, *args):
         # No undo while sharing
-        if self.collab.props.leader is None:
+        if self.playing_robot:
             self._gnuchess.undo()
 
     def _hint_cb(self, *args):
