@@ -1,3 +1,15 @@
+18
+
+* Regenerate POT file (Jui Pradhan)
+* Added New Translation (Jui Pradhan)
+* Fixed Undo Button for Robot and Friend Modes (Saumya Mishra)
+* Update README (Jui Pradhan)
+* Port from GObject to GLib (Srevin Saju, Jui Pradhan)
+* Port to Python 3 (Zeet)
+* Port to TelepathyGLib and CollabWrapper (Zeet)
+* Removed Empty translations (James Cameron)
+* Fix Invalid color string error (Zeet, James Cameron)
+
 17
 
 * Fix typo that broke custom piece loader
