@@ -489,12 +489,12 @@ class GNUChessActivity(activity.Activity):
         return
 
     def _copy_cb(self, *args):
-        clipboard = Gtk.Clipboard()
-        clipboard.set_text(self.tag_pairs() + self._gnuchess.copy_game())
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(self.tag_pairs() + self._gnuchess.copy_game(), -1)
 
     def _paste_cb(self, *args):
         ''' Pasting '''
-        clipboard = Gtk.Clipboard()
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         move_list = self._parse_move_list(clipboard.wait_for_text())
         if move_list is not None:
             self._gnuchess.restore_game(move_list)
